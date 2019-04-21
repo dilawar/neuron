@@ -7,6 +7,7 @@ add_definitions(-std=c++14 -Wall)
 # SystemC
 find_package(SystemC REQUIRED)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${SystemC_LIBRARY_DIRS}")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 find_package(Boost COMPONENTS log)
 set(LIBS_TO_LINKS  ${Boost_LIBRARIES} ${SystemC_LIBRARIES})

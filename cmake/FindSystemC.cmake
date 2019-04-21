@@ -84,7 +84,7 @@ FIND_PATH(SystemC_INCLUDE_DIRS
     PATHS ${_SYSTEMC_PATHS}
     )
 FIND_PATH(SystemC_LIBRARY_DIRS
-    NAMES libsystemc.so libsystemc.a 
+    NAMES libsystemc.a  libsystemc.so
     HINTS ${_SYSTEMC_HINTS}
     PATHS ${_SYSTEMC_PATHS}
     )
