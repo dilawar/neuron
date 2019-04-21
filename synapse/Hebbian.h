@@ -1,16 +1,7 @@
 /***
- *       Filename:  simple_synapse.h
- *
  *    Description:  Model of syanpse.
- *
- *        Version:  0.0.1
- *        Created:  2015-03-07
- *       Revision:  none
- *
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
  *   Organization:  NCBS Bangalore
- *
- *        License:  GNU GPL2
  */
 
 #ifndef SIMPLE_SYNAPSE_H
@@ -147,9 +138,7 @@ SC_MODULE (SimpleSynapse)
 #ifdef VERBOSE
         // Tests on synaptic weight.
         if(weight_ > max_weight_ || weight_ < min_weight_)
-        {
-            LOG("WARN", "Holy synapse. Weight is outside bound: weight: " << weight_);
-        }
+            BOOST_LOG_TRIVIAL(warn) << "Holy synapse. Weight is outside bound: weight: " << weight_;
 #endif
 
         /* The syaptic efficacy must decay at each step */
@@ -172,7 +161,7 @@ SC_MODULE (SimpleSynapse)
             //cerr << "Current Time: " << currTime << endl;
             for(auto t : postActs)
             {
-                assert(currTime - t > 0.0);
+                assert(currTime - t >= 0.0);
                 // ltd 
                 weight_ -= delta_ltd_ * exp(-(currTime - t)/ tau_ltd_);
             }
@@ -190,7 +179,7 @@ SC_MODULE (SimpleSynapse)
             for(auto t : preActs)
             {
                 // ltp
-                assert(currTime - t > 0.0);
+                assert(currTime - t >= 0.0);
                 weight_ += delta_ltp_ * exp(-(currTime - t)/ tau_ltp_);
             }
         }
@@ -198,8 +187,6 @@ SC_MODULE (SimpleSynapse)
         return;
 
     }
-
-
 
     /* This is default constructor */
     SC_CTOR (SimpleSynapse) 

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
-# add_library(synapse test_simple_synapse.cc)
 
-add_executable(test_synapse  test_simple_synapse.cc)
-target_link_libraries(test_synapse ${LIBS_TO_LINKS})
+foreach(_test test_hebbian test_exp_syn)
+    add_executable(${_test}  ${_test}.cpp)
+    target_link_libraries(${_test} ${LIBS_TO_LINKS})
+endforeach()
