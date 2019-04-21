@@ -22,24 +22,37 @@
 #include <random>
 #include <chrono>
 
-int testExpSyn()
+SC_MODULE(TestExpSyn) 
 {
+    sc_in<bool> clock;
+
     // Calcium pulse into syanpse.
     sc_signal<bool> in, out;
-    sc_clock clock("clock", 1, SC_MS);
 
-    ExpSynapse syn1("ExpSynapse");
+    void do_test() 
+    {
+        cout << "Test " << endl;
+    }
 
-    syn1.clock(clock);
-    syn1.pre_synaptic_event(in);
-    syn1.post_synaptic_event(out);
+    SC_CTOR(TestExpSyn) {
+        SC_METHOD(do_test);
+        sensitive << clock.neg();
 
-    sc_start(10, SC_MS);
-
-    return(0);
-}
+        // dut
+        // ExpSynapse dut("ExpSynapse");
+        // dut.pre_synaptic_event(in);
+        // dut.post_synaptic_event(out);
+    }
+};
 
 int sc_main(int argc, char *argv[])
 {
-    return testExpSyn();
+    sc_clock clock("clock", 1, SC_MS);
+
+    TestExpSyn tb("TestBench");
+    tb.clock(clock);
+
+    sc_start(20, SC_MS);
+
+    return 0;
 }

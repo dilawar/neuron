@@ -29,7 +29,7 @@ SC_MODULE(ExpSynapse)
 
     void process() 
     {
-        cout << "process " << endl;
+        cout << "process " << pre_synaptic_event << endl;
     }
 
     SC_CTOR(ExpSynapse) 
