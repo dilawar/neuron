@@ -17,7 +17,7 @@
 #define SIMPLE_SYNAPSE_H
 
 #include "systemc.h"
-#include "input_types.h"
+
 #include <cmath>
 #include <algorithm>
 
@@ -28,7 +28,6 @@
 #define MAX_SYNAPTIC_EFFICACY 100.0
 
 #include <algorithm>
-#include "print_function.hpp"
 
 using namespace std;
 
@@ -137,8 +136,8 @@ SC_MODULE (SimpleSynapse)
     void hebbian()
     {
 
-        sc_time t =  sc_get_time_resolution();
-        double dt = t.to_seconds();
+        // sc_time t =  sc_get_time_resolution();
+        // double dt = t.to_seconds();
 
         sc_time st = sc_time_stamp();
         double currTime = st.to_seconds();
@@ -222,8 +221,6 @@ SC_MODULE (SimpleSynapse)
 
         synaptic_efficacy_ = 50.0;
 
-
-        log2term("Constructing a synapse");
 
         SC_METHOD(hebbian);
         sensitive << pre_synaptic_event << post_synaptic_event;

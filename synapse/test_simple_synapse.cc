@@ -17,8 +17,6 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "simple_synapse.h"
-#include "input_types.h"
-
 #include <random>
 #include <chrono>
 
@@ -58,7 +56,10 @@ int test_simple_synapse()
         sc_start(1, SC_MS);
     }
 
-    LOG("INFO", "Ran for " << sc_time_stamp());
     return(0);
 }
 
+int sc_main(int argc, char *argv[])
+{
+    return test_simple_synapse();
+}
