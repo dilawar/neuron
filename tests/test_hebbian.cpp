@@ -8,7 +8,7 @@
  *        License:  MIT License
  */
 
-#include "Hebbian.h"
+#include "../synapse/Hebbian.h"
 #include <random>
 #include <chrono>
 

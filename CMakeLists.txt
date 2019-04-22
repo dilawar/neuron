@@ -21,24 +21,21 @@ ExternalProject_Add(libsystemc
     )
 set(SystemC_INCLUDE_DIR ${LIBSYSTEMC_ROOT}/install/include)
 set(SystemC_LIBRARY ${LIBSYSTEMC_ROOT}/install/lib64/libsystemc.a)
-
 add_definitions(-Wall -std=c++14)
 
-# to disable the copyright message. See 
-# http://forums.accellera.org/topic/5117-how-to-disable-kernel-version-output-on-stderr/
-add_definitions(-DSC_COPYRIGHT_MESSAGE=DISABLE)
-
-find_package(Boost COMPONENTS log system filesystem)
-set(LIBS_TO_LINKS  ${Boost_LIBRARIES} ${SystemC_LIBRARY})
-
+find_package(Boost COMPONENTS log system filesystem iostreams)
 # Configuration macros.
 add_definitions( -DBOOST_LOG_DYN_LINK )
 
 include_directories( ${SystemC_INCLUDE_DIR} )
 
 # subdirectories.
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/synapse)
+add_subdirectory(utility)
 
+set(LIBS_TO_LINKS utility ${Boost_LIBRARIES} ${SystemC_LIBRARY})
+
+# Add test directory at the end
+add_subdirectory(tests)
 
 # Add main executable.
 add_executable(tantrika exp/experiment1.cpp)

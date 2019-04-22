@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
+file(GLOB SRCS *.cpp)
+add_library(synapse STATIC  ${SRCS})
 
-foreach(_test test_hebbian test_exp_syn)
-    add_executable(${_test}  ${_test}.cpp)
-    target_link_libraries(${_test} ${LIBS_TO_LINKS})
-endforeach()

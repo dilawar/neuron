@@ -4,11 +4,14 @@
 
 #include "systemc.h"
 
-#include "ExpSynapse.h"
 #include <random>
 #include <chrono>
 #include <random>
 #include <memory>
+#include <map>
+
+#include "../synapse/ExpSynapse.h"
+#include "../utility/plot_util.h"
 
 using namespace std;
 
@@ -42,6 +45,12 @@ SC_MODULE(TestExpSyn)
     void process()
     {
         cout << sc_time_stamp().to_seconds() << ' ' << pre << ' ' << post << ' ' << inject << endl;
+
+        // Store to plot later.
+        data["time"].push_back(sc_time_stamp().to_seconds());
+        data["pre"].push_back(pre);
+        data["post"].push_back(post);
+        data["inject"].push_back(inject);
     }
 
     SC_CTOR(TestExpSyn) 
@@ -63,6 +72,10 @@ SC_MODULE(TestExpSyn)
     }
 
     // Methods
+    void plot_data( )
+    {
+        map2csv(data, "exp_syn1.csv");
+    }
 
     // Data members.
     std::random_device rd_;
@@ -70,6 +83,8 @@ SC_MODULE(TestExpSyn)
     std::poisson_distribution<> dist_;
 
     unique_ptr<ExpSynapse> dut_;
+
+    std::map<string, vector<double> > data;
 
 };
 
@@ -82,6 +97,8 @@ int sc_main(int argc, char *argv[])
     tb.clock(clock);
 
     sc_start(20, SC_MS);
+
+    tb.plot_data();
 
     return 0;
 }
