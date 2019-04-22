@@ -11,7 +11,7 @@
 #include <map>
 #include <cmath>
 
-#include "../synapse/SynapseBase.h"
+#include "../synapse/Synapse.h"
 #include "../utility/plot_util.h"
 
 using namespace std;
@@ -60,7 +60,7 @@ SC_MODULE(TestExpSyn)
         sensitive << clock.neg();
 
         // dut from 
-        dut_ = make_unique<SynapseBase>("tb", 0.8e-9, 1e-3, 0.0);
+        dut_ = make_unique<Synapse>("tb", 0.8e-9, 1e-3, 0.0);
         dut_->clock(clock);
         dut_->pre(pre);
         dut_->post(post);
@@ -81,7 +81,7 @@ SC_MODULE(TestExpSyn)
     std::mt19937 gen_;
     std::poisson_distribution<> dist_;
 
-    unique_ptr<SynapseBase> dut_;
+    unique_ptr<Synapse> dut_;
 
     std::map<string, vector<double> > data;
 

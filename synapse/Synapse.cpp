@@ -1,17 +1,15 @@
 /*
- *       Filename:  SynapseBase.c
- *
  *    Description:  
  *
  *         Author:  Dilawar Singh (), dilawars@ncbs.res.in
  *   Organization:  NCBS Bangalore
  */
 
-#include "SynapseBase.h"
+#include "Synapse.h"
 #include "../engine/engine.h"
 
 
-SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double Esyn): 
+Synapse::Synapse(sc_module_name name, double gbar, double tau1, double Esyn): 
     name_(name) 
     , gbar_(gbar*si::siemens)
     , tau1_(tau1*si::second)
@@ -23,7 +21,7 @@ SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double E
 }
 
 
-void SynapseBase::process() 
+void Synapse::process() 
 {
     currTime_ = sc_time_stamp().to_seconds() * si::second;
 

@@ -15,8 +15,6 @@
 #define SYNAPSEBASE_H
 
 
-
-
 #include "systemc.h"
 #include <boost/units/systems/si.hpp>
 #include <boost/units/systems/si/io.hpp>
@@ -25,11 +23,11 @@
 using namespace boost::units;
 namespace si = boost::units::si;
 
-class SynapseBase: public sc_module
+class Synapse: public sc_module
 {
 
     public:
-        SC_HAS_PROCESS(SynapseBase);
+        SC_HAS_PROCESS(Synapse);
         sc_in_clk clock;
 
         // Can't force units here. Since it is based on SC_port. 
@@ -40,8 +38,8 @@ class SynapseBase: public sc_module
 
         void process();
 
-        // SynapseBase(sc_module_name name);
-        SynapseBase(sc_module_name name, double gbar, double tau1=1e-3, double Esyn=0.0);
+        // Synapse(sc_module_name name);
+        Synapse(sc_module_name name, double gbar, double tau1=1e-3, double Esyn=0.0);
 
         sc_module_name name_;
         quantity<si::conductance> g_, gbar_;
