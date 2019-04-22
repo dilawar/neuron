@@ -55,14 +55,14 @@ struct ExpSynapse: public sc_module
     }
 
     ExpSynapse(sc_module_name name
-            , double Esyn=0.0                   /* ~0.0 mV */
             , double gbar=200e-12               /* 200 pS */
-            , double tau1=3e-3
+            , double tau1=1e-3
+            , double Esyn=0.0                   /* ~0.0 mV */
             ): 
         name_(name)
-        , Esyn_(Esyn*si::volt)
         , gbar_(gbar*si::siemens)
         , tau1_(tau1*si::second)
+        , Esyn_(Esyn*si::volt)
     {
         SC_METHOD(process);
         sensitive << clock.pos();
@@ -70,11 +70,11 @@ struct ExpSynapse: public sc_module
     }
 
     sc_module_name name_;
-    quantity<si::electric_potential> Esyn_;
     quantity<si::conductance> g_, gbar_;
+    quantity<si::time> tau1_, tau2_;            /* Decay contants. */
+    quantity<si::electric_potential> Esyn_;
     quantity<si::electric_potential> vPre_, vPost_;
 
-    quantity<si::time> tau1_, tau2_;            /* Decay contants. */
     quantity<si::time> currTime_;               /* Current Time. */
     quantity<si::time> ts_;                     /* Previous firing. */
 };

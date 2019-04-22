@@ -30,13 +30,13 @@ SC_MODULE(TestExpSyn)
     {
         pre.write(-65e-3);
         post.write(-65e-3);
+        // Generate a 100Hz stimulation i.e. 10ms is the gap.
         while(true)
         {
-            wait(dist_(gen_), SC_MS);
+            wait(10, SC_MS);
             pre = 1e-3;
             wait(1, SC_MS);
             pre = -65e-3;
-
             // Post is always at Erest.
             post = -65e-3;
         }
@@ -60,8 +60,8 @@ SC_MODULE(TestExpSyn)
         SC_METHOD(process);
         sensitive << clock.neg();
 
-        // dut
-        dut_ = make_unique<ExpSynapse>("tb");
+        // dut from 
+        dut_ = make_unique<ExpSynapse>("tb", 0.8e-9);
         dut_->clock(clock);
         dut_->pre(pre);
         dut_->post(post);
@@ -96,7 +96,7 @@ int sc_main(int argc, char *argv[])
     TestExpSyn tb("TestBench");
     tb.clock(clock);
 
-    sc_start(1, SC_SEC);
+    sc_start(100, SC_MS);
 
     tb.plot_data();
 
