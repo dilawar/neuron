@@ -11,8 +11,11 @@
  *      current.
  */
 
-#ifndef EXPSYNAPSE_H
-#define EXPSYNAPSE_H
+#ifndef SYNAPSEBASE_H
+#define SYNAPSEBASE_H
+
+
+
 
 #include "systemc.h"
 #include <boost/units/systems/si.hpp>
@@ -22,11 +25,11 @@
 using namespace boost::units;
 namespace si = boost::units::si;
 
-class ExpSynapse: public sc_module
+class SynapseBase: public sc_module
 {
 
     public:
-        SC_HAS_PROCESS(ExpSynapse);
+        SC_HAS_PROCESS(SynapseBase);
         sc_in_clk clock;
 
         // Can't force units here. Since it is based on SC_port. 
@@ -37,8 +40,8 @@ class ExpSynapse: public sc_module
 
         void process();
 
-        // ExpSynapse(sc_module_name name);
-        ExpSynapse(sc_module_name name, double gbar, double tau1=1e-3, double Esyn=0.0);
+        // SynapseBase(sc_module_name name);
+        SynapseBase(sc_module_name name, double gbar, double tau1=1e-3, double Esyn=0.0);
 
         sc_module_name name_;
         quantity<si::conductance> g_, gbar_;
@@ -50,4 +53,4 @@ class ExpSynapse: public sc_module
         quantity<si::time> ts_;                     /* Previous firing. */
 };
 
-#endif /* end of include guard: EXPSYNAPSE_H */
+#endif /* end of include guard: SYNAPSEBASE_H */

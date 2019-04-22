@@ -1,5 +1,5 @@
 /*
- *       Filename:  ExpSynapse.c
+ *       Filename:  SynapseBase.c
  *
  *    Description:  
  *
@@ -7,11 +7,11 @@
  *   Organization:  NCBS Bangalore
  */
 
-#include "ExpSynapse.h"
+#include "SynapseBase.h"
 #include "../engine/engine.h"
 
 
-ExpSynapse::ExpSynapse(sc_module_name name, double gbar, double tau1, double Esyn): 
+SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double Esyn): 
     name_(name) 
     , gbar_(gbar*si::siemens)
     , tau1_(tau1*si::second)
@@ -23,7 +23,7 @@ ExpSynapse::ExpSynapse(sc_module_name name, double gbar, double tau1, double Esy
 }
 
 
-void ExpSynapse::process() 
+void SynapseBase::process() 
 {
     currTime_ = sc_time_stamp().to_seconds() * si::second;
 
