@@ -46,7 +46,7 @@ SC_MODULE(TestExpSyn)
 
     void process()
     {
-        std::cout << "ticking..." << in << std::endl;
+        std::cout << in <<  ' ' << std::endl;
 
     }
 
