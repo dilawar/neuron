@@ -1,4 +1,4 @@
-foreach(_test test_hebbian test_exp_syn)
+foreach(_test test_hebbian test_synapses)
     add_executable(${_test}  ${_test}.cpp)
     target_link_libraries(${_test} ${LIBS_TO_LINKS})
     add_test(NAME run_${_test} 

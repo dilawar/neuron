@@ -32,14 +32,17 @@ class Synapse: public sc_module
 
         // Can't force units here. Since it is based on SC_port. 
         // TODO: It can be done but may be later. See https://www.doulos.com/knowhow/systemc/faq/#q1 
-        sc_in<double> pre;
+        sc_in<bool> pre;
         sc_in<double> post;
         sc_out<double> inject;
 
-        void process();
+        void processAlpha();
+        void processTwoExp();
 
         // Synapse(sc_module_name name);
-        Synapse(sc_module_name name, double gbar, double tau1=1e-3, double Esyn=0.0);
+        Synapse(sc_module_name name);
+        Synapse(sc_module_name name, double gbar, double tau, double Esyn);
+        Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn);
 
         sc_module_name name_;
         quantity<si::conductance> g_, gbar_;

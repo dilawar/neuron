@@ -1,6 +1,4 @@
-/* 
- * Create a DUT.
- */
+/* Test synapses.  */
 
 #include "systemc.h"
 
@@ -21,23 +19,24 @@ SC_MODULE(TestExpSyn)
     sc_in<bool> clock;
 
     // Spike goes into synapse.
-    sc_signal<double> pre;
+    sc_signal<bool> spike;
     sc_signal<double> post;
 
     // A voltage comes out of synapse.
-    sc_signal<double> inject;
+    sc_signal<double> injectExc;
+    sc_signal<double> injectInh;
 
     void do_test() 
     {
-        pre.write(-65e-3);
+        spike.write(false);
         post.write(-65e-3);
         // Generate a 100Hz stimulation i.e. 10ms is the gap.
         while(true)
         {
             wait(10, SC_MS);
-            pre = 1e-3;
+            spike = true;
             wait(1, SC_MS);
-            pre = -65e-3;
+            spike = false;
             // Post is always at Erest.
             post = -65e-3;
         }
@@ -47,9 +46,10 @@ SC_MODULE(TestExpSyn)
     {
         // Store to plot later.
         data["time"].push_back(sc_time_stamp().to_seconds());
-        data["pre"].push_back(pre);
+        data["spike"].push_back(spike);
         data["post"].push_back(post);
-        data["inject"].push_back(inject);
+        data["exc"].push_back(injectExc);
+        data["inh"].push_back(injectInh);
     }
 
     SC_CTOR(TestExpSyn) 
@@ -59,12 +59,18 @@ SC_MODULE(TestExpSyn)
         SC_METHOD(process);
         sensitive << clock.neg();
 
-        // dut from 
-        dut_ = make_unique<Synapse>("tb", 0.8e-9, 1e-3, 0.0);
-        dut_->clock(clock);
-        dut_->pre(pre);
-        dut_->post(post);
-        dut_->inject(inject);
+        // Excitatory and inhibitory synapses.
+        dutExc_ = make_unique<Synapse>("exc", 0.8e-9, 1e-3, 0.0);
+        dutExc_->clock(clock);
+        dutExc_->pre(spike);
+        dutExc_->post(post);
+        dutExc_->inject(injectExc);
+
+        dutInh_ = make_unique<Synapse>("inh", 0.1e-8, 3e-3, -90e-3);
+        dutInh_->clock(clock);
+        dutInh_->pre(spike);
+        dutInh_->post(post);
+        dutInh_->inject(injectInh);
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
@@ -81,7 +87,8 @@ SC_MODULE(TestExpSyn)
     std::mt19937 gen_;
     std::poisson_distribution<> dist_;
 
-    unique_ptr<Synapse> dut_;
+    unique_ptr<Synapse> dutExc_;
+    unique_ptr<Synapse> dutInh_;
 
     std::map<string, vector<double> > data;
 
