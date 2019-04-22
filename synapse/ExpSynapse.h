@@ -35,17 +35,33 @@ struct ExpSynapse: public sc_module
 
     void process() 
     {
-        vPre_ = pre.read() * si::volt;
-        vPost_ = post.read() * si::volt;
-        cout << engineering_prefix << "vPre:" << vPre_ << " vPost:" << vPost_ << endl;
+        currTime_ = sc_time_stamp().to_seconds() * si::second;
 
-        inject.write( quantity_cast<double>(vPost_)/ 10.0 );
+        vPre_ = pre.read() * si::volt;
+        vPost_ = post.read()*si::volt;
+
+        if(vPre_ >= Esyn_)
+            ts_ = currTime_;
+
+        if(ts_ == 0.0*si::second)
+            return;
+
+        // Now compute gsyn.
+        auto dt = (currTime_ - ts_);
+        assert(tau1_ > 0.0*si::second);
+        g_ = gbar_ * (dt/tau1_)*exp(-dt/tau1_);
+        // cout << '\t' << g_ << " " << dt << " " << tau1_ << " " << endl;
+        inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
     }
 
-    ExpSynapse(sc_module_name name, double Esyn = 0.0, double tau1=3e-3) : 
+    ExpSynapse(sc_module_name name
+            , double Esyn=0.0                   /* ~ 0.0 mV */
+            , double gbar=40*1e-12              /* 40 pS */
+            , double tau1=3e-3 ) : 
         name_(name)
-        , Esyn_( Esyn*si::volt )
-        , tau1_(sc_time(tau1, SC_SEC))
+        , Esyn_(Esyn*si::volt)
+        , gbar_(gbar*si::siemens)
+        , tau1_(tau1*si::second)
     {
         SC_METHOD(process);
         sensitive << clock.pos();
@@ -54,13 +70,12 @@ struct ExpSynapse: public sc_module
 
     sc_module_name name_;
     quantity<si::electric_potential> Esyn_;
-
-    quantity<si::conductance> g_;
+    quantity<si::conductance> g_, gbar_;
     quantity<si::electric_potential> vPre_, vPost_;
-    quantity<si::current> inject_;
 
-    sc_time tau1_, tau2_;
-    std::vector<sc_time> spikeTimes;
+    quantity<si::time> tau1_, tau2_;            /* Decay contants. */
+    quantity<si::time> currTime_;               /* Current Time. */
+    quantity<si::time> ts_;                     /* Previous firing. */
 };
 
 #endif /* end of include guard: EXPSYNAPSE_H */

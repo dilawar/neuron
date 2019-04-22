@@ -19,11 +19,14 @@ SC_MODULE(TestExpSyn)
     // Spike goes into synapse.
     sc_signal<double> pre;
     sc_signal<double> post;
+
     // A voltage comes out of synapse.
     sc_signal<double> inject;
 
     void do_test() 
     {
+        pre.write(-65e-3);
+        post.write(-65e-3);
         while(true)
         {
             wait(dist_(gen_), SC_MS);
@@ -38,7 +41,7 @@ SC_MODULE(TestExpSyn)
 
     void process()
     {
-        //
+        cout << sc_time_stamp().to_seconds() << ' ' << pre << ' ' << post << ' ' << inject << endl;
     }
 
     SC_CTOR(TestExpSyn) 
@@ -56,7 +59,7 @@ SC_MODULE(TestExpSyn)
         dut_->inject(inject);
 
         gen_.seed(rd_());
-        dist_.param(std::poisson_distribution<int>::param_type {5});
+        dist_.param(std::poisson_distribution<int>::param_type {10});
     }
 
     // Methods
@@ -72,7 +75,8 @@ SC_MODULE(TestExpSyn)
 
 int sc_main(int argc, char *argv[])
 {
-    sc_clock clock("clock", 1, SC_MS);
+    // global clock is 0.1 ms.
+    sc_clock clock("clock", 0.1, SC_MS);
 
     TestExpSyn tb("TestBench");
     tb.clock(clock);

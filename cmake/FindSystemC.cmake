@@ -27,6 +27,7 @@ SET(_SYSTEMC_HINTS
     ${CMAKE_INSTALL_PREFIX}/lib-linux64
     ${CMAKE_INSTALL_PREFIX}/lib-macos
     )
+
 SET(_SYSTEMC_PATHS
     ${CONAN_INCLUDE_DIRS_SYSTEMC}
     ${CONAN_LIB_DIRS_SYSTEMC}
@@ -45,6 +46,7 @@ SET(_SYSTEMC_PATHS
     /usr/local/lib-linux64
     /usr/local/lib-macos
     )
+
 FIND_FILE(_SYSTEMC_HEADER_FILE
     NAMES systemc
     HINTS ${_SYSTEMC_HINTS}
