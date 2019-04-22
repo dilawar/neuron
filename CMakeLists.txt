@@ -30,10 +30,15 @@ add_definitions( -DBOOST_LOG_DYN_LINK )
 include_directories( ${SystemC_INCLUDE_DIR} )
 
 # subdirectories.
+add_subdirectory(synapse)
 add_subdirectory(utility)
 add_subdirectory(engine)
 
-set(LIBS_TO_LINKS utility ${Boost_LIBRARIES} ${SystemC_LIBRARY})
+set(LIBS_TO_LINKS utility 
+    synapse
+    ${Boost_LIBRARIES} 
+    ${SystemC_LIBRARY}
+    )
 
 
 # Add test directory at the end

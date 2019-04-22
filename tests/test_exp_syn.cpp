@@ -45,8 +45,6 @@ SC_MODULE(TestExpSyn)
 
     void process()
     {
-        //cout << sc_time_stamp().to_seconds() << ' ' << pre << ' ' << post << ' ' << inject << endl;
-
         // Store to plot later.
         data["time"].push_back(sc_time_stamp().to_seconds());
         data["pre"].push_back(pre);
@@ -62,7 +60,7 @@ SC_MODULE(TestExpSyn)
         sensitive << clock.neg();
 
         // dut from 
-        dut_ = make_unique<ExpSynapse>("tb", 0.8e-9);
+        dut_ = new ExpSynapse("tb", 0.8e-9, 1e-3, 0.0);
         dut_->clock(clock);
         dut_->pre(pre);
         dut_->post(post);
@@ -83,7 +81,8 @@ SC_MODULE(TestExpSyn)
     std::mt19937 gen_;
     std::poisson_distribution<> dist_;
 
-    unique_ptr<ExpSynapse> dut_;
+    // unique_ptr<ExpSynapse> dut_;
+    ExpSynapse* dut_;
 
     std::map<string, vector<double> > data;
 

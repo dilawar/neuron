@@ -15,7 +15,6 @@
 #define EXPSYNAPSE_H
 
 #include "systemc.h"
-#include "../engine/engine.h"
 #include <boost/units/systems/si.hpp>
 #include <boost/units/systems/si/io.hpp>
 #include <vector>
@@ -23,65 +22,32 @@
 using namespace boost::units;
 namespace si = boost::units::si;
 
-struct ExpSynapse: public sc_module
+class ExpSynapse: public sc_module
 {
-    SC_HAS_PROCESS(ExpSynapse);
-    sc_in_clk clock;
 
-    // Can't force units here. Since it is based on SC_port. 
-    // TODO: It can be done but may be later. See https://www.doulos.com/knowhow/systemc/faq/#q1 
-    sc_in<double> pre;
-    sc_in<double> post;
-    sc_out<double> inject;
+    public:
+        SC_HAS_PROCESS(ExpSynapse);
+        sc_in_clk clock;
 
-    void process() 
-    {
-        currTime_ = sc_time_stamp().to_seconds() * si::second;
+        // Can't force units here. Since it is based on SC_port. 
+        // TODO: It can be done but may be later. See https://www.doulos.com/knowhow/systemc/faq/#q1 
+        sc_in<double> pre;
+        sc_in<double> post;
+        sc_out<double> inject;
 
-        vPre_ = pre.read() * si::volt;
-        vPost_ = post.read()*si::volt;
+        void process();
 
-        if(vPre_ >= Esyn_)
-            ts_ = currTime_;
+        // ExpSynapse(sc_module_name name);
+        ExpSynapse(sc_module_name name, double gbar, double tau1=1e-3, double Esyn=0.0);
 
-        if(ts_ == 0.0*si::second)
-            return;
+        sc_module_name name_;
+        quantity<si::conductance> g_, gbar_;
+        quantity<si::time> tau1_, tau2_;            /* Decay contants. */
+        quantity<si::electric_potential> Esyn_;
+        quantity<si::electric_potential> vPre_, vPost_;
 
-        // Now compute gsyn.
-        auto dt = (currTime_ - ts_);
-        assert(tau1_ > 0.0*si::second);
-
-        g_ = gbar_ * tantrika::alpha(quantity_cast<double>(dt)
-                , quantity_cast<double>(tau1_)
-                );
-
-        // cout << '\t' << g_ << " " << dt << " " << tau1_ << " " << endl;
-        inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
-    }
-
-    ExpSynapse(sc_module_name name
-            , double gbar=200e-12               /* 200 pS */
-            , double tau1=1e-3
-            , double Esyn=0.0                   /* ~0.0 mV */
-            ): 
-        name_(name)
-        , gbar_(gbar*si::siemens)
-        , tau1_(tau1*si::second)
-        , Esyn_(Esyn*si::volt)
-    {
-        SC_METHOD(process);
-        sensitive << clock.pos();
-        g_ = 0.0*si::siemens;
-    }
-
-    sc_module_name name_;
-    quantity<si::conductance> g_, gbar_;
-    quantity<si::time> tau1_, tau2_;            /* Decay contants. */
-    quantity<si::electric_potential> Esyn_;
-    quantity<si::electric_potential> vPre_, vPost_;
-
-    quantity<si::time> currTime_;               /* Current Time. */
-    quantity<si::time> ts_;                     /* Previous firing. */
+        quantity<si::time> currTime_;               /* Current Time. */
+        quantity<si::time> ts_;                     /* Previous firing. */
 };
 
 #endif /* end of include guard: EXPSYNAPSE_H */
