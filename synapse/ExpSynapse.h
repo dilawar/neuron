@@ -55,9 +55,10 @@ struct ExpSynapse: public sc_module
     }
 
     ExpSynapse(sc_module_name name
-            , double Esyn=0.0                   /* ~ 0.0 mV */
-            , double gbar=40*1e-12              /* 40 pS */
-            , double tau1=3e-3 ) : 
+            , double Esyn=0.0                   /* ~0.0 mV */
+            , double gbar=200e-12               /* 200 pS */
+            , double tau1=3e-3
+            ): 
         name_(name)
         , Esyn_(Esyn*si::volt)
         , gbar_(gbar*si::siemens)

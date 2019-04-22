@@ -39,7 +39,7 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
         nVals = min(v.second.size(), nVals);
     }
 
-    csvF << boost::algorithm::join(header, delim) << delim << Endl;
+    csvF << boost::algorithm::join(header, delim) << delim << endl;
 
     for (size_t i = 0; i < nVals; i++) 
     {

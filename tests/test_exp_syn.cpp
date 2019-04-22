@@ -44,7 +44,7 @@ SC_MODULE(TestExpSyn)
 
     void process()
     {
-        cout << sc_time_stamp().to_seconds() << ' ' << pre << ' ' << post << ' ' << inject << endl;
+        //cout << sc_time_stamp().to_seconds() << ' ' << pre << ' ' << post << ' ' << inject << endl;
 
         // Store to plot later.
         data["time"].push_back(sc_time_stamp().to_seconds());
@@ -68,7 +68,7 @@ SC_MODULE(TestExpSyn)
         dut_->inject(inject);
 
         gen_.seed(rd_());
-        dist_.param(std::poisson_distribution<int>::param_type {10});
+        dist_.param(std::poisson_distribution<int>::param_type {50});
     }
 
     // Methods
@@ -96,7 +96,7 @@ int sc_main(int argc, char *argv[])
     TestExpSyn tb("TestBench");
     tb.clock(clock);
 
-    sc_start(20, SC_MS);
+    sc_start(1, SC_SEC);
 
     tb.plot_data();
 

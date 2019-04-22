@@ -34,7 +34,9 @@ add_subdirectory(utility)
 
 set(LIBS_TO_LINKS utility ${Boost_LIBRARIES} ${SystemC_LIBRARY})
 
+
 # Add test directory at the end
+enable_testing()
 add_subdirectory(tests)
 
 # Add main executable.
