@@ -1,19 +1,5 @@
-/*
- * =====================================================================================
- *
- *       Filename:  test_exp_syn.cpp
- *
- *    Description:  test synapse.
- *
- *        Version:  1.0
- *        Created:  Sunday 21 April 2019 04:35:29  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Dilawar Singh (), dilawars@ncbs.res.in
- *   Organization:  NCBS Bangalore
- *
- * =====================================================================================
+/* 
+ * Create a DUT.
  */
 
 #include "systemc.h"
@@ -22,32 +8,37 @@
 #include <random>
 #include <chrono>
 #include <random>
+#include <memory>
+
+using namespace std;
 
 SC_MODULE(TestExpSyn) 
 {
     sc_in<bool> clock;
 
     // Spike goes into synapse.
-    sc_signal<bool> in;
-
+    sc_signal<double> pre;
+    sc_signal<double> post;
     // A voltage comes out of synapse.
-    sc_signal<double> out;
+    sc_signal<double> inject;
 
     void do_test() 
     {
         while(true)
         {
             wait(dist_(gen_), SC_MS);
-            in = true;
+            pre = 1e-3;
             wait(1, SC_MS);
-            in = false;
+            pre = -65e-3;
+
+            // Post is always at Erest.
+            post = -65e-3;
         }
     }
 
     void process()
     {
-        std::cout << in <<  ' ' << std::endl;
-
+        //
     }
 
     SC_CTOR(TestExpSyn) 
@@ -58,20 +49,24 @@ SC_MODULE(TestExpSyn)
         sensitive << clock.neg();
 
         // dut
-        // ExpSynapse dut("ExpSynapse");
-        // dut.pre_synaptic_event(in);
-        // dut.post_synaptic_event(out);
+        dut_ = make_unique<ExpSynapse>("tb");
+        dut_->clock(clock);
+        dut_->pre(pre);
+        dut_->post(post);
+        dut_->inject(inject);
+
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {5});
     }
 
     // Methods
 
-
     // Data members.
     std::random_device rd_;
     std::mt19937 gen_;
     std::poisson_distribution<> dist_;
+
+    unique_ptr<ExpSynapse> dut_;
 
 };
 
