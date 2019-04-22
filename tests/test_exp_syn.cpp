@@ -9,6 +9,7 @@
 #include <random>
 #include <memory>
 #include <map>
+#include <cmath>
 
 #include "../synapse/ExpSynapse.h"
 #include "../utility/plot_util.h"

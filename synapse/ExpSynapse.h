@@ -15,6 +15,7 @@
 #define EXPSYNAPSE_H
 
 #include "systemc.h"
+#include "../engine/engine.h"
 #include <boost/units/systems/si.hpp>
 #include <boost/units/systems/si/io.hpp>
 #include <vector>
@@ -49,7 +50,11 @@ struct ExpSynapse: public sc_module
         // Now compute gsyn.
         auto dt = (currTime_ - ts_);
         assert(tau1_ > 0.0*si::second);
-        g_ = gbar_ * (dt/tau1_)*exp(-dt/tau1_);
+
+        g_ = gbar_ * tantrika::alpha(quantity_cast<double>(dt)
+                , quantity_cast<double>(tau1_)
+                );
+
         // cout << '\t' << g_ << " " << dt << " " << tau1_ << " " << endl;
         inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
     }

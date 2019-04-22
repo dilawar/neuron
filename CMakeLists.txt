@@ -31,6 +31,7 @@ include_directories( ${SystemC_INCLUDE_DIR} )
 
 # subdirectories.
 add_subdirectory(utility)
+add_subdirectory(engine)
 
 set(LIBS_TO_LINKS utility ${Boost_LIBRARIES} ${SystemC_LIBRARY})
 
