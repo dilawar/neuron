@@ -14,11 +14,14 @@
 #ifndef SYNAPSEBASE_H
 #define SYNAPSEBASE_H
 
-
-#include "systemc.h"
+#include <systemc.h>
 #include <boost/units/systems/si.hpp>
 #include <boost/units/systems/si/io.hpp>
 #include <vector>
+#include <array>
+#include <memory>
+
+#include "OdeSystem.h"
 
 using namespace boost::units;
 namespace si = boost::units::si;
@@ -52,15 +55,16 @@ class Synapse: public sc_module
         /*-----------------------------------------------------------------------------
          *  At each tick, these process function computes the model.
          *-----------------------------------------------------------------------------*/
-        void beforeProcess();                   /* Single exp synapse. */
         void processSingleExp();                /* Single exp synapse. */
         void processAlpha();                    /* Alpha synapse */
-        void processTwoExp();                   /* Dual exponential synapse. */
+        void processODE();                      /* Use odeint to solve. */
+
 
         //-----------------------------------------------------------------------------
         //  Helper function.
         //-----------------------------------------------------------------------------
         void injectCurrent();
+        void beforeProcess();                   /* Single exp synapse. */
 
         // Synapse(sc_module_name name);
         Synapse(sc_module_name name);
@@ -81,6 +85,11 @@ class Synapse: public sc_module
         
         // Keep the spike timings.
         std::vector<quantity<si::time>> t_spikes_;
+        
+        // Ode System
+        std::unique_ptr<SynapseODESystem> odeSys_;
+        // std::array<quantity<si::conductance>, 2> state_;
+        std::array<double, 2> state_;
 };
 
 #endif /* end of include guard: SYNAPSEBASE_H */

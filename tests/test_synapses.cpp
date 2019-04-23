@@ -25,6 +25,7 @@ SC_MODULE(TestExpSyn)
     // A voltage comes out of synapse.
     sc_signal<double> injectExc;
     sc_signal<double> injectInh;
+    sc_signal<double> injectOde;
 
     void do_test() 
     {
@@ -50,6 +51,7 @@ SC_MODULE(TestExpSyn)
         data["post"].push_back(post);
         data["exc"].push_back(injectExc);
         data["inh"].push_back(injectInh);
+        data["ode"].push_back(injectOde);
     }
 
     SC_CTOR(TestExpSyn) 
@@ -72,6 +74,12 @@ SC_MODULE(TestExpSyn)
         dutInh_->post(post);
         dutInh_->inject(injectInh);
 
+        expInh_ = make_unique<Synapse>("ode", 0.1e-8, 1e-3, 10e-3, -90e-3);
+        expInh_->clock(clock);
+        expInh_->pre(spike);
+        expInh_->post(post);
+        expInh_->inject(injectOde);
+
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
     }
@@ -89,6 +97,7 @@ SC_MODULE(TestExpSyn)
 
     unique_ptr<Synapse> dutExc_;
     unique_ptr<Synapse> dutInh_;
+    unique_ptr<Synapse> expInh_;
 
     std::map<string, vector<double> > data;
 
@@ -102,7 +111,7 @@ int sc_main(int argc, char *argv[])
     TestExpSyn tb("TestBench");
     tb.clock(clock);
 
-    sc_start(100, SC_MS);
+    sc_start(20, SC_MS);
 
     tb.plot_data();
 
