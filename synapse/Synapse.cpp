@@ -14,14 +14,17 @@ Synapse::Synapse(sc_module_name name) : name_(name)
 }
 
 
-Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn): 
+Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool isalpha): 
     name_(name) 
     , gbar_(gbar*si::siemens)
     , tau1_(tau*si::second)
     , Esyn_(Esyn*si::volt)
 {
-    SC_METHOD(processSingleExp);
-    sensitive << clock.pos();
+    if(isalpha)
+        SC_METHOD(processAlpha)
+    else
+        SC_METHOD(processSingleExp);
+    sensitive << clock.neg();
     g_ = 0.0*si::siemens;
 }
 
@@ -33,35 +36,54 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2, dou
     , Esyn_(Esyn*si::volt)
 {
     SC_METHOD(processTwoExp);
-    sensitive << clock.pos();
+    sensitive << clock.neg();
     g_ = 0.0*si::siemens;
 }
 
-void Synapse::processSingleExp() 
+void Synapse::beforeProcess( )
 {
-    static quantity<si::conductance> leftover = 0*si::siemens;
-
     t_ = sc_time_stamp().to_seconds() * si::second;
     vPost_ = post.read()*si::volt;
 
     // Time of previous spike.
-    if(pre.read() == true)
+    if(pre.read())
     {
         ts_ = t_;
-        leftover = g_;
+        leftover_ = g_;
+        t_spikes_.push_back(t_);
     }
+}
+
+void Synapse::injectCurrent( )
+{
+    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+}
+
+void Synapse::processSingleExp() 
+{
+    beforeProcess();
 
     // Now compute gsyn.
     assert(tau1_ > 0.0*si::second);
     auto dt = (t_-ts_);
     double T = dt/tau1_;
-    g_ = (gbar_ + leftover) * exp(-T);
-    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    g_ = (gbar_ + leftover_) * exp(-T);
+    injectCurrent();
 }
 
 void Synapse::processAlpha() 
 {
-
+    beforeProcess();
+    g_ = 0.0*si::siemens;
+    for (auto tSpike : t_spikes_)
+    {
+        if(tSpike < t_)
+        {
+            auto T = (t_-tSpike)/tau1_;
+            g_ += gbar_ * T * exp(-T);
+        }
+    }
+    injectCurrent();
 }
 
 void Synapse::processTwoExp() 

@@ -52,26 +52,35 @@ class Synapse: public sc_module
         /*-----------------------------------------------------------------------------
          *  At each tick, these process function computes the model.
          *-----------------------------------------------------------------------------*/
+        void beforeProcess();                   /* Single exp synapse. */
         void processSingleExp();                /* Single exp synapse. */
         void processAlpha();                    /* Alpha synapse */
         void processTwoExp();                   /* Dual exponential synapse. */
+
+        //-----------------------------------------------------------------------------
+        //  Helper function.
+        //-----------------------------------------------------------------------------
+        void injectCurrent();
 
         // Synapse(sc_module_name name);
         Synapse(sc_module_name name);
 
         /* Alpha synapse */
-        Synapse(sc_module_name name, double gbar, double tau, double Esyn);
+        Synapse(sc_module_name name, double gbar, double tau, double Esynl, bool isalpha=true);
         /* Dual exp synapse */
         Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn);
 
         sc_module_name name_;
-        quantity<si::conductance> g_, gbar_;
+        quantity<si::conductance> g_, gbar_, leftover_;
         quantity<si::time> tau1_, tau2_;            /* Decay contants. */
         quantity<si::electric_potential> Esyn_;
         quantity<si::electric_potential> vPre_, vPost_;
 
         quantity<si::time> t_;               /* Current Time. */
         quantity<si::time> ts_;                     /* Previous firing. */
+        
+        // Keep the spike timings.
+        std::vector<quantity<si::time>> t_spikes_;
 };
 
 #endif /* end of include guard: SYNAPSEBASE_H */
