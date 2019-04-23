@@ -66,7 +66,7 @@ SC_MODULE(TestExpSyn)
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
-        dutInh_ = make_unique<Synapse>("inh", 0.1e-8, 3e-3, -90e-3);
+        dutInh_ = make_unique<Synapse>("inh", 0.1e-8, 5e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->pre(spike);
         dutInh_->post(post);
