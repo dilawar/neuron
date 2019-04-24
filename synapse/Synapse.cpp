@@ -5,17 +5,29 @@
  *   Organization:  NCBS Bangalore
  */
 
-#include <boost/numeric/odeint.hpp>
 #include <memory>
+#include <sstream>
+#include <boost/numeric/odeint.hpp>
+#include <boost/format.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "Synapse.h"
 #include "../engine/engine.h"
 
-
+using namespace std;
+using namespace boost;
 
 Synapse::Synapse(sc_module_name name) : name_(name)
 {
     g_ = 0.0*si::siemens;
+}
+
+std::string Synapse::repr()
+{
+    std::stringstream ss;
+    ss << boost::format("SYNAPSE:%1%, gbar=%2%, Esyn=%3% tau1=%4% tau2=%5%\n") 
+        % name_ % gbar_ % Esyn_ % tau1_ % tau2_;
+    return ss.str();
 }
 
 
@@ -31,6 +43,7 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
         SC_METHOD(processSingleExp);
     sensitive << clock.neg();
     g_ = 0.0*si::siemens;
+    BOOST_LOG_TRIVIAL(debug) << repr();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -57,28 +70,14 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     , dt_(odedt)
 {
     SC_METHOD(processODE);
-    sensitive << pre << ode_clock;
-
-    // Generate slow clock.
-    SC_THREAD(generateODEClock);
+    sensitive << pre.pos();
 
     g_ = 0.0*si::siemens;
     state_[0] = g_/(1*si::siemens);
     state_[1] = g_/(1*si::siemens);
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
-
+    BOOST_LOG_TRIVIAL(debug) << repr();
 }
-
-void Synapse::generateODEClock( )
-{
-    // Generate ODE clock.
-    while(true)
-    {
-        ode_clock = ! ode_clock;
-        wait(dt_, SC_SEC);
-    }
-}
-
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -111,13 +110,13 @@ bool Synapse::beforeProcess( )
 
 void Synapse::injectCurrent( )
 {
-    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    // inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    inject.write(quantity_cast<double>(g_));
 }
 
 void Synapse::processSingleExp() 
 {
     beforeProcess();
-
     assert(tau1_ > 0.0*si::second);
     double T = (t_-ts_)/tau1_;
     g_ = (gbar_ + leftover_) * exp(-T);
@@ -152,36 +151,35 @@ void Synapse::start_of_simulation(void)
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Solve the simple using ODE solver. To make computation faster,
- * tick the solver when there is spike.
+ * @Synopsis  Solve the simple using ODE solver. 
+ * To make computation faster, tick the solver when there is spike (positive edge).
  */
 /* ----------------------------------------------------------------------------*/
 void Synapse::processODE() 
 {
+    // Call to this function will put the spike in the vector.
     beforeProcess();
-    static double last_tick_ = 0.0;
+    if(t_spikes_.size() < 1)
+        return;
 
     // Now solve the ODE system.
-    double curT = sc_time_stamp().to_seconds();
+    double curT = t_spikes_[t_spikes_.size()-1]/si::second;
+    double lastT = 0.0;
+    if(t_spikes_.size() > 1)
+        lastT = t_spikes_[t_spikes_.size()-2]/si::second;
 
     // Check the results.
-    //BOOST_LOG_TRIVIAL(debug) << state_[0] << ' ' << state_[1] << ' ' << last_tick_ 
+    //BOOST_LOG_TRIVIAL(debug) << state_[0] << ' ' << state_[1] << ' ' 
     //    << ' ' << curT <<  ' ' << dt_ << endl;
 
-    //boost::numeric::odeint::integrate_adaptive(rk_karp_stepper_type_()
-    //        //rk_dopri_stepper_type_()
-    //        , [this](const state_type &dy, state_type &dydt, double t) {
-    //                this->odeSys_->step(dy, dydt, t); 
-    //        }, state_, last_tick_, curT, dt_/100.0 );
-
-    boost::numeric::odeint::integrate([this](const state_type &dy, state_type &dydt, double t) {
+    boost::numeric::odeint::integrate_adaptive(rk_karp_stepper_type_()
+            //rk_dopri_stepper_type_()
+            , [this](const state_type &dy, state_type &dydt, double t) {
                     this->odeSys_->step(dy, dydt, t); 
-            }, state_, last_tick_, curT, dt_ );
-
-    last_tick_ = curT;
+            }, state_, lastT, curT, curT - lastT
+            );
 
     g_ = state_[0]*si::siemens;
-    // cout << g_ << endl;
     injectCurrent();
 }
 

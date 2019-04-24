@@ -50,8 +50,6 @@ struct SynapseODESystem
         : gbar(gbar), tau1(tau1), tau2(tau2)
     {
         spikes.clear();
-
-        BOOST_LOG_TRIVIAL(info) << "gbar " << gbar << " tau1 " << tau1 << " tau2 " << tau2 << endl;
     }
 
     double spike(const quantity<si::time> t)

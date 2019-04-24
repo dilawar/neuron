@@ -18,6 +18,7 @@
 #include <boost/units/systems/si.hpp>
 #include <boost/units/systems/si/io.hpp>
 #include <vector>
+#include <tuple>
 #include <array>
 #include <memory>
 
@@ -69,6 +70,7 @@ class Synapse: public sc_module
         //-----------------------------------------------------------------------------
         void injectCurrent();
         bool beforeProcess();                   
+        std::string repr();
 
         // Synapse(sc_module_name name);
         Synapse(sc_module_name name);
@@ -98,7 +100,10 @@ class Synapse: public sc_module
 
         // std::array<quantity<si::conductance>, 2> state_;
         std::array<double, 2> state_;
-    
+
+        // Collect all data.
+        //std::vector<std::tuple<quantity<si::time>, quantity<si::conductance>> gVec_;
+        //std::vector<std::tuple<quantity<si::time>, quantity<si::current>> injectVec_;
 };
 
 #endif /* end of include guard: SYNAPSEBASE_H */

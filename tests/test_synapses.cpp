@@ -27,16 +27,16 @@ SC_MODULE(TestExpSyn)
     sc_signal<double> injectInh;
     sc_signal<double> injectOde;
 
-    void do_test() 
+    void gen_stim() 
     {
         spike.write(false);
-        post.write(-65e-3);
+        //post.write(-65e-3);
         // Generate a 100Hz stimulation i.e. 10ms is the gap.
         while(true)
         {
             wait(10, SC_MS);
             spike = true;
-            wait(1, SC_MS);
+            wait(0.1, SC_MS);
             spike = false;
             // Post is always at Erest.
             post = -65e-3;
@@ -56,25 +56,25 @@ SC_MODULE(TestExpSyn)
 
     SC_CTOR(TestExpSyn) 
     {
-        SC_THREAD(do_test);
+        SC_THREAD(gen_stim);
 
         SC_METHOD(process);
         sensitive << clock.neg();
 
         // Excitatory and inhibitory synapses.
-        dutExc_ = make_unique<Synapse>("exc", 0.8e-9, 1e-3, 0.0);
+        dutExc_ = make_unique<Synapse>("exc", 1e-9, 1e-3, 0.0);
         dutExc_->clock(clock);
         dutExc_->pre(spike);
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
-        dutInh_ = make_unique<Synapse>("inh", 0.1e-8, 5e-3, -90e-3);
+        dutInh_ = make_unique<Synapse>("inh", 1e-9, 5e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->pre(spike);
         dutInh_->post(post);
         dutInh_->inject(injectInh);
 
-        odeInh_ = make_unique<Synapse>("ode", 0.1e-8, 5e-3, 5e-3, -90e-3);
+        odeInh_ = make_unique<Synapse>("ode", 1e-9, 5e-3, 5e-3, -90e-3);
         odeInh_->clock(clock);
         odeInh_->pre(spike);
         odeInh_->post(post);
