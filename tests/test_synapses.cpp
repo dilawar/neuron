@@ -24,8 +24,9 @@ SC_MODULE(TestExpSyn)
 
     // A voltage comes out of synapse.
     sc_signal<double> injectExc;
+    sc_signal<double> odeExc;
     sc_signal<double> injectInh;
-    sc_signal<double> injectOde;
+    sc_signal<double> odeInh;
 
     void gen_stim() 
     {
@@ -51,7 +52,8 @@ SC_MODULE(TestExpSyn)
         data["post"].push_back(post);
         data["exc"].push_back(injectExc);
         data["inh"].push_back(injectInh);
-        data["ode"].push_back(injectOde);
+        data["odeinh"].push_back(odeInh);
+        data["odeexc"].push_back(odeExc);
     }
 
     SC_CTOR(TestExpSyn) 
@@ -68,17 +70,23 @@ SC_MODULE(TestExpSyn)
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
+        odeExc_ = make_unique<Synapse>("odeexc", 1e-9, 1e-3, 1e-3, 0.0);
+        odeExc_->clock(clock);
+        odeExc_->pre(spike);
+        odeExc_->post(post);
+        odeExc_->inject(odeExc);
+
         dutInh_ = make_unique<Synapse>("inh", 1e-9, 5e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->pre(spike);
         dutInh_->post(post);
         dutInh_->inject(injectInh);
 
-        odeInh_ = make_unique<Synapse>("ode", 1e-9, 5e-3, 5e-3, -90e-3);
+        odeInh_ = make_unique<Synapse>("odeinh", 1e-9, 5e-3, 5e-3, -90e-3);
         odeInh_->clock(clock);
         odeInh_->pre(spike);
         odeInh_->post(post);
-        odeInh_->inject(injectOde);
+        odeInh_->inject(odeInh);
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
@@ -96,6 +104,7 @@ SC_MODULE(TestExpSyn)
     std::poisson_distribution<> dist_;
 
     unique_ptr<Synapse> dutExc_;
+    unique_ptr<Synapse> odeExc_;
     unique_ptr<Synapse> dutInh_;
     unique_ptr<Synapse> odeInh_;
 
@@ -111,7 +120,7 @@ int sc_main(int argc, char *argv[])
     TestExpSyn tb("TestBench");
     tb.clock(clock);
 
-    sc_start(100, SC_MS);
+    sc_start(40, SC_MS);
 
     tb.plot_data();
 

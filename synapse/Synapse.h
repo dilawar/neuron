@@ -57,13 +57,17 @@ class Synapse: public sc_module
         /*-----------------------------------------------------------------------------
          *  At each tick, these process function computes the model.
          *-----------------------------------------------------------------------------*/
-        void processSingleExp();                /* Single exp synapse. */
         void processAlpha();                    /* Alpha synapse */
         void processODE();                      /* Use odeint to solve. */
 
         void generateODEClock( );
         void start_of_simulation();
 
+
+        //-----------------------------------------------------------------------------
+        //  Generate clocks.
+        //-----------------------------------------------------------------------------
+        void tickOdeClock();
 
         //-----------------------------------------------------------------------------
         //  Helper function.
@@ -95,6 +99,7 @@ class Synapse: public sc_module
         
         // Ode System
         std::unique_ptr<SynapseODESystem> odeSys_;
+
         double dt_;
         sc_signal<bool> ode_clock;              // A slower clock of ODE solver.
 
@@ -103,7 +108,9 @@ class Synapse: public sc_module
 
         // Collect all data.
         //std::vector<std::tuple<quantity<si::time>, quantity<si::conductance>> gVec_;
-        //std::vector<std::tuple<quantity<si::time>, quantity<si::current>> injectVec_;
+        std::vector<std::tuple<quantity<si::time>, quantity<si::current> > > injectVec_;
+
+        std::vector<std::tuple<double, double>>  data_;
 };
 
 #endif /* end of include guard: SYNAPSEBASE_H */

@@ -21,6 +21,7 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <tuple>
 
 #include <boost/units/systems/si.hpp>
 #include <boost/units/systems/si/io.hpp>
@@ -43,6 +44,20 @@ typedef boost::numeric::odeint::modified_midpoint< state_type > rk_midpoint_step
  *-----------------------------------------------------------------------------*/
 typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > rk_karp_stepper_type_;
 typedef boost::numeric::odeint::runge_kutta_fehlberg78< state_type > rk_felhberg_stepper_type_;
+
+
+struct synapse_observer
+{
+    std::vector< std::tuple<double, double> >& m_data;
+
+    synapse_observer( std::vector<std::tuple<double, double> >& states): m_data( states ) 
+    { }
+
+    void operator()( const state_type &x , double t )
+    {
+        m_data.push_back( std::make_pair(t, x[0]));
+    }
+};
 
 struct SynapseODESystem
 {
@@ -86,6 +101,9 @@ struct SynapseODESystem
     quantity<si::conductance> gbar;
     quantity<si::time> tau1, tau2;
     std::vector<quantity<si::time>> spikes;
+
+    double epsRel = 1e-5;
+    double epsAbs = 1e-5;
 
 };
 

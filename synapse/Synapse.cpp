@@ -7,9 +7,9 @@
 
 #include <memory>
 #include <sstream>
-#include <boost/numeric/odeint.hpp>
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/numeric/odeint.hpp>
 
 #include "Synapse.h"
 #include "../engine/engine.h"
@@ -37,10 +37,7 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
     , tau1_(tau*si::second)
     , Esyn_(Esyn*si::volt)
 {
-    if(isalpha)
-        SC_METHOD(processAlpha)
-    else
-        SC_METHOD(processSingleExp);
+    SC_METHOD(processAlpha)
     sensitive << clock.neg();
     g_ = 0.0*si::siemens;
     BOOST_LOG_TRIVIAL(debug) << repr();
@@ -70,13 +67,22 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     , dt_(odedt)
 {
     SC_METHOD(processODE);
-    sensitive << pre.pos();
+    sensitive << pre.pos();  //<< ode_clock;
+
+    SC_THREAD( tickOdeClock );
 
     g_ = 0.0*si::siemens;
     state_[0] = g_/(1*si::siemens);
     state_[1] = g_/(1*si::siemens);
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
     BOOST_LOG_TRIVIAL(debug) << repr();
+}
+
+void Synapse::tickOdeClock(void)
+{
+    double dt_ = 1e-3;
+    ode_clock.write(! ode_clock.read());
+    wait(dt_, SC_SEC);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -110,17 +116,7 @@ bool Synapse::beforeProcess( )
 
 void Synapse::injectCurrent( )
 {
-    // inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
-    inject.write(quantity_cast<double>(g_));
-}
-
-void Synapse::processSingleExp() 
-{
-    beforeProcess();
-    assert(tau1_ > 0.0*si::second);
-    double T = (t_-ts_)/tau1_;
-    g_ = (gbar_ + leftover_) * exp(-T);
-    injectCurrent();
+    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
 }
 
 void Synapse::processAlpha() 
@@ -168,17 +164,16 @@ void Synapse::processODE()
     if(t_spikes_.size() > 1)
         lastT = t_spikes_[t_spikes_.size()-2]/si::second;
 
-    // Check the results.
-    //BOOST_LOG_TRIVIAL(debug) << state_[0] << ' ' << state_[1] << ' ' 
-    //    << ' ' << curT <<  ' ' << dt_ << endl;
+    cout << name_ << ": " << curT << " " << lastT << endl;
 
-    boost::numeric::odeint::integrate_adaptive(rk_karp_stepper_type_()
-            //rk_dopri_stepper_type_()
+    boost::numeric::odeint::integrate_adaptive(
+            boost::numeric::odeint::make_dense_output(odeSys_->epsAbs, odeSys_->epsRel
+                , boost::numeric::odeint::runge_kutta_dopri5<state_type>() ) 
             , [this](const state_type &dy, state_type &dydt, double t) {
-                    this->odeSys_->step(dy, dydt, t); 
+                this->odeSys_->step(dy, dydt, t); 
             }, state_, lastT, curT, curT - lastT
+            //, synapse_observer(data_)
             );
-
     g_ = state_[0]*si::siemens;
     injectCurrent();
 }
