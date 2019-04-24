@@ -25,12 +25,12 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
     , tau1_(tau*si::second)
     , Esyn_(Esyn*si::volt)
 {
-    if(isalpha)
-        SC_METHOD(processAlpha)
-    else
-        SC_METHOD(processSingleExp);
+    SC_METHOD(processAlpha)
     sensitive << clock.neg();
     g_ = 0.0*si::siemens;
+
+    BOOST_LOG_TRIVIAL(info) << name << " created: gbar " << gbar 
+        << " tau " << tau << endl;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -67,6 +67,9 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     state_[1] = g_/(1*si::siemens);
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
 
+    BOOST_LOG_TRIVIAL(info) << name << " created: gbar " << gbar 
+        << " tau1 " << tau1 << " tau2 " << tau2 << endl;
+
 }
 
 void Synapse::generateODEClock( )
@@ -97,10 +100,9 @@ bool Synapse::beforeProcess( )
     vPost_ = post.read()*si::volt;
 
     // Time of previous spike.
-    if(pre.read())
+    if(pre.read() == true)
     {
         ts_ = t_;
-        leftover_ = g_;
         t_spikes_.push_back(t_);
         spiked = true;
         if(odeSys_)
@@ -111,16 +113,18 @@ bool Synapse::beforeProcess( )
 
 void Synapse::injectCurrent( )
 {
-    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    // inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    inject.write(g_/si::siemens);
 }
 
 void Synapse::processSingleExp() 
 {
     beforeProcess();
-
     assert(tau1_ > 0.0*si::second);
     double T = (t_-ts_)/tau1_;
-    g_ = (gbar_ + leftover_) * exp(-T);
+    // cout << g_ << ' ' << t_ << ' ' << ts_ << ' ' << tau1_ <<  ' ' << T << endl;
+    auto dgdt = - (g_+gbar_) * exp(-T) / tau1_;
+    g_ += (dgdt * 1e-3*si::second);
     injectCurrent();
 }
 
@@ -148,6 +152,7 @@ void Synapse::start_of_simulation(void)
 {
     // sc_clock *channel = dynamic_cast<sc_clock *>(clock.get_interface());
     // cout << (channel ? channel->period() : SC_ZERO_TIME).to_seconds()*si::second;
+    // dt_ = (channel ? channel->period() : SC_ZERO_TIME).to_seconds()*si::second;
 } 
 
 /* --------------------------------------------------------------------------*/
@@ -179,7 +184,6 @@ void Synapse::processODE()
             }, state_, last_tick_, curT, dt_ );
 
     last_tick_ = curT;
-
     g_ = state_[0]*si::siemens;
     // cout << g_ << endl;
     injectCurrent();
