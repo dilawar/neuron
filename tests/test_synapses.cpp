@@ -74,11 +74,11 @@ SC_MODULE(TestExpSyn)
         dutInh_->post(post);
         dutInh_->inject(injectInh);
 
-        expInh_ = make_unique<Synapse>("ode", 0.1e-8, 1e-3, 10e-3, -90e-3);
-        expInh_->clock(clock);
-        expInh_->pre(spike);
-        expInh_->post(post);
-        expInh_->inject(injectOde);
+        odeInh_ = make_unique<Synapse>("ode", 0.1e-8, 5e-3, 5e-3, -90e-3);
+        odeInh_->clock(clock);
+        odeInh_->pre(spike);
+        odeInh_->post(post);
+        odeInh_->inject(injectOde);
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
@@ -97,7 +97,7 @@ SC_MODULE(TestExpSyn)
 
     unique_ptr<Synapse> dutExc_;
     unique_ptr<Synapse> dutInh_;
-    unique_ptr<Synapse> expInh_;
+    unique_ptr<Synapse> odeInh_;
 
     std::map<string, vector<double> > data;
 
@@ -111,7 +111,7 @@ int sc_main(int argc, char *argv[])
     TestExpSyn tb("TestBench");
     tb.clock(clock);
 
-    sc_start(20, SC_MS);
+    sc_start(100, SC_MS);
 
     tb.plot_data();
 

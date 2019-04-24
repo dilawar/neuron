@@ -77,7 +77,7 @@ class Synapse: public sc_module
         Synapse(sc_module_name name, double gbar, double tau, double Esynl, bool isalpha=true);
 
         /* Dual exp synapse (use ode solver) */
-        Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn, double dt=1e-3);
+        Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn);
 
         sc_module_name name_;
         quantity<si::conductance> g_, gbar_, leftover_;
@@ -93,6 +93,7 @@ class Synapse: public sc_module
         
         // Ode System
         std::unique_ptr<SynapseODESystem> odeSys_;
+        double dt_;
         sc_signal<bool> ode_clock;              // A slower clock of ODE solver.
 
         // std::array<quantity<si::conductance>, 2> state_;

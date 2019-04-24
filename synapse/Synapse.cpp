@@ -46,7 +46,7 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
  * @Param dt
  */
 /* ----------------------------------------------------------------------------*/
-Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn, double odedt): 
+Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn):
     name_(name) 
     , gbar_(gbar*si::siemens)
     , tau1_(tau1*si::second)
@@ -63,15 +63,17 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2, dou
     state_[0] = g_/(1*si::siemens);
     state_[1] = g_/(1*si::siemens);
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
+
 }
 
 void Synapse::generateODEClock( )
 {
     // Generate ODE clock.
+    dt_ = 1e-3;
     while(true)
     {
         ode_clock = ! ode_clock;
-        wait(0.1, SC_MS);
+        wait(dt_, SC_SEC);
     }
 }
 
@@ -88,6 +90,7 @@ void Synapse::generateODEClock( )
 bool Synapse::beforeProcess( )
 {
     bool spiked = false;
+
     t_ = sc_time_stamp().to_seconds() * si::second;
     vPost_ = post.read()*si::volt;
 
@@ -156,18 +159,27 @@ void Synapse::processODE()
 {
     beforeProcess();
     static double last_tick_ = 0.0;
+
     // Now solve the ODE system.
     double curT = sc_time_stamp().to_seconds();
     if(curT == 0)
         return;
 
     // Check the results.
-    // cout << "x " << state_[0] << ' ' << state_[1] << ' ' << last_tick_ << ' ' << curT << endl;
-    boost::numeric::odeint::integrate_adaptive( rk_karp_stepper_type_()
-            , [this](const state_type &dy, state_type &dydt, double t) {
-                this->odeSys_->step(dy, dydt, t);
-                }, state_, last_tick_, curT, std::min(1e-3,curT-last_tick_)
-            );
+    //BOOST_LOG_TRIVIAL(debug) << state_[0] << ' ' << state_[1] << ' ' << last_tick_ 
+    //    << ' ' << curT <<  ' ' << dt_ << endl;
+
+    //boost::numeric::odeint::integrate_adaptive(rk_karp_stepper_type_()
+    //        //rk_dopri_stepper_type_()
+    //        , [this](const state_type &dy, state_type &dydt, double t) {
+    //                this->odeSys_->step(dy, dydt, t); 
+    //        }, state_, last_tick_, curT, dt_/100.0 );
+
+    boost::numeric::odeint::integrate([this](const state_type &dy, state_type &dydt, double t) {
+                    this->odeSys_->step(dy, dydt, t); 
+            }, state_, last_tick_, curT, 100*dt_ );
+
+
     last_tick_ = curT;
     g_ = state_[0]*si::siemens;
     // cout << g_ << endl;

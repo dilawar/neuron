@@ -26,6 +26,8 @@
 #include <boost/units/systems/si/io.hpp>
 #include <boost/numeric/odeint.hpp>
 
+#include <boost/log/trivial.hpp>
+
 using namespace boost::units;
 
 typedef std::array<double, 2> state_type;
@@ -48,7 +50,8 @@ struct SynapseODESystem
         : gbar(gbar), tau1(tau1), tau2(tau2)
     {
         spikes.clear();
-        // cout << "gbar " << gbar << " tau1 " << tau1 << " tau2 " << tau2 << endl;
+
+        BOOST_LOG_TRIVIAL(info) << "gbar " << gbar << " tau1 " << tau1 << " tau2 " << tau2 << endl;
     }
 
     double spike(const quantity<si::time> t)
@@ -73,12 +76,12 @@ struct SynapseODESystem
     // This is for ODE system.
     void step(const state_type &x, state_type& dxdt, const double t)
     {
-        double gb = gbar/(1*si::siemens);
-        double _tau1 = tau1/(1*si::second);
-        double _tau2 = tau2/(1*si::second);
+        double gb = gbar/si::siemens;
+        double _tau1 = tau1/si::second;
+        double _tau2 = tau2/si::second;
 
         dxdt[0] = x[1];
-        dxdt[1] = 1/(_tau1*_tau2) * (-(_tau1+_tau2)*x[1] - x[0] + gb*spike(t*1*si::second));
+        dxdt[1] = 1.0/(_tau1*_tau2) * (-x[0]-(_tau1+_tau2)*x[1] + gb*spike(t*1*si::second));
         // std::cout << "y " << dxdt[0] << ' ' << dxdt[1] << "; ";
     }
 
