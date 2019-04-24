@@ -46,12 +46,15 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
  * @Param dt
  */
 /* ----------------------------------------------------------------------------*/
-Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn):
+Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
+        , double Esyn, double odedt
+        ): 
     name_(name) 
     , gbar_(gbar*si::siemens)
     , tau1_(tau1*si::second)
     , tau2_(tau2*si::second)
     , Esyn_(Esyn*si::volt)
+    , dt_(odedt)
 {
     SC_METHOD(processODE);
     sensitive << pre << ode_clock;
@@ -69,7 +72,6 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2, dou
 void Synapse::generateODEClock( )
 {
     // Generate ODE clock.
-    dt_ = 1e-3;
     while(true)
     {
         ode_clock = ! ode_clock;
@@ -117,8 +119,7 @@ void Synapse::processSingleExp()
     beforeProcess();
 
     assert(tau1_ > 0.0*si::second);
-    auto dt = (t_-ts_);
-    double T = dt/tau1_;
+    double T = (t_-ts_)/tau1_;
     g_ = (gbar_ + leftover_) * exp(-T);
     injectCurrent();
 }
@@ -162,8 +163,6 @@ void Synapse::processODE()
 
     // Now solve the ODE system.
     double curT = sc_time_stamp().to_seconds();
-    if(curT == 0)
-        return;
 
     // Check the results.
     //BOOST_LOG_TRIVIAL(debug) << state_[0] << ' ' << state_[1] << ' ' << last_tick_ 
@@ -177,10 +176,10 @@ void Synapse::processODE()
 
     boost::numeric::odeint::integrate([this](const state_type &dy, state_type &dydt, double t) {
                     this->odeSys_->step(dy, dydt, t); 
-            }, state_, last_tick_, curT, 100*dt_ );
-
+            }, state_, last_tick_, curT, dt_ );
 
     last_tick_ = curT;
+
     g_ = state_[0]*si::siemens;
     // cout << g_ << endl;
     injectCurrent();

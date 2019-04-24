@@ -77,7 +77,7 @@ class Synapse: public sc_module
         Synapse(sc_module_name name, double gbar, double tau, double Esynl, bool isalpha=true);
 
         /* Dual exp synapse (use ode solver) */
-        Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn);
+        Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn, double odedt=0.5e-3);
 
         sc_module_name name_;
         quantity<si::conductance> g_, gbar_, leftover_;
