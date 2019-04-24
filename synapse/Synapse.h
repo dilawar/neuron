@@ -41,6 +41,7 @@ class Synapse: public sc_module
         SC_HAS_PROCESS(Synapse);
         sc_in_clk clock;
 
+
         // NOTE: Can't force units here. Since it is based on SC_port. 
         // TODO: It can be done but may be later. See https://www.doulos.com/knowhow/systemc/faq/#q1 
 
@@ -59,20 +60,24 @@ class Synapse: public sc_module
         void processAlpha();                    /* Alpha synapse */
         void processODE();                      /* Use odeint to solve. */
 
+        void generateODEClock( );
+        void start_of_simulation();
+
 
         //-----------------------------------------------------------------------------
         //  Helper function.
         //-----------------------------------------------------------------------------
         void injectCurrent();
-        void beforeProcess();                   /* Single exp synapse. */
+        bool beforeProcess();                   
 
         // Synapse(sc_module_name name);
         Synapse(sc_module_name name);
 
         /* Alpha synapse */
         Synapse(sc_module_name name, double gbar, double tau, double Esynl, bool isalpha=true);
-        /* Dual exp synapse */
-        Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn);
+
+        /* Dual exp synapse (use ode solver) */
+        Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn, double dt=1e-3);
 
         sc_module_name name_;
         quantity<si::conductance> g_, gbar_, leftover_;
@@ -88,8 +93,11 @@ class Synapse: public sc_module
         
         // Ode System
         std::unique_ptr<SynapseODESystem> odeSys_;
+        sc_signal<bool> ode_clock;              // A slower clock of ODE solver.
+
         // std::array<quantity<si::conductance>, 2> state_;
         std::array<double, 2> state_;
+    
 };
 
 #endif /* end of include guard: SYNAPSEBASE_H */

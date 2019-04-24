@@ -24,10 +24,23 @@
 
 #include <boost/units/systems/si.hpp>
 #include <boost/units/systems/si/io.hpp>
+#include <boost/numeric/odeint.hpp>
 
 using namespace boost::units;
 
 typedef std::array<double, 2> state_type;
+
+// state_type is in OdeSystem.h
+typedef boost::numeric::odeint::runge_kutta4< state_type > rk4_stepper_type_;
+typedef boost::numeric::odeint::runge_kutta_dopri5< state_type > rk_dopri_stepper_type_;
+typedef boost::numeric::odeint::modified_midpoint< state_type > rk_midpoint_stepper_type_;
+
+/*-----------------------------------------------------------------------------
+ *  This stepper type found to be most suitable for adaptive solver. The gsl
+ *  implementation has runge_kutta_fehlberg78 solver.
+ *-----------------------------------------------------------------------------*/
+typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > rk_karp_stepper_type_;
+typedef boost::numeric::odeint::runge_kutta_fehlberg78< state_type > rk_felhberg_stepper_type_;
 
 struct SynapseODESystem
 {
@@ -65,9 +78,8 @@ struct SynapseODESystem
         double _tau2 = tau2/(1*si::second);
 
         dxdt[0] = x[1];
-        dxdt[1] = (-(_tau1+_tau2)/x[1] - x[0] + gb*spike(t*1*si::second))/(_tau1*_tau2);
-        std::cout << "y " << dxdt[0] << ' ' << dxdt[1] << std::endl;
-        return;
+        dxdt[1] = 1/(_tau1*_tau2) * (-(_tau1+_tau2)*x[1] - x[0] + gb*spike(t*1*si::second));
+        // std::cout << "y " << dxdt[0] << ' ' << dxdt[1] << "; ";
     }
 
     quantity<si::conductance> gbar;
