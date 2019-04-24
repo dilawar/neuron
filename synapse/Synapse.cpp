@@ -16,6 +16,7 @@
 
 using namespace std;
 using namespace boost;
+namespace odeint = boost::numeric::odeint;
 
 Synapse::Synapse(sc_module_name name) : name_(name)
 {
@@ -64,25 +65,28 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     , tau1_(tau1*si::second)
     , tau2_(tau2*si::second)
     , Esyn_(Esyn*si::volt)
-    , dt_(odedt)
+    , ode_tick_(odedt)
 {
-    SC_METHOD(processODE);
-    sensitive << pre.pos();  //<< ode_clock;
-
-    SC_THREAD( tickOdeClock );
 
     g_ = 0.0*si::siemens;
     state_[0] = g_/(1*si::siemens);
     state_[1] = g_/(1*si::siemens);
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
     BOOST_LOG_TRIVIAL(debug) << repr();
+
+    SC_THREAD( tickOdeClock );
+
+    SC_METHOD(processODE);
+    sensitive << ode_clock;
 }
 
 void Synapse::tickOdeClock(void)
 {
-    double dt_ = 1e-3;
-    ode_clock.write(! ode_clock.read());
-    wait(dt_, SC_SEC);
+    while(true)
+    {
+        ode_clock.write(! ode_clock.read());
+        wait(ode_tick_, SC_SEC);
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -155,23 +159,28 @@ void Synapse::processODE()
 {
     // Call to this function will put the spike in the vector.
     beforeProcess();
-    if(t_spikes_.size() < 1)
+
+    // if(t_spikes_.size() < 1)
+        // return;
+
+    //// Now solve the ODE system.
+    //double curT = t_spikes_[t_spikes_.size()-1]/si::second;
+    //double lastT = 0.0;
+    //if(t_spikes_.size() > 1)
+    //    lastT = t_spikes_[t_spikes_.size()-2]/si::second;
+
+    double curT = sc_time_stamp().to_seconds();
+    if(curT < ode_tick_)
         return;
+    double lastT = curT-ode_tick_;
 
-    // Now solve the ODE system.
-    double curT = t_spikes_[t_spikes_.size()-1]/si::second;
-    double lastT = 0.0;
-    if(t_spikes_.size() > 1)
-        lastT = t_spikes_[t_spikes_.size()-2]/si::second;
+    cout << name_ << ": " << curT << " " << lastT << ' ' << state_[0] << endl;
 
-    cout << name_ << ": " << curT << " " << lastT << endl;
-
-    boost::numeric::odeint::integrate_adaptive(
-            boost::numeric::odeint::make_dense_output(odeSys_->epsAbs, odeSys_->epsRel
-                , boost::numeric::odeint::runge_kutta_dopri5<state_type>() ) 
+   odeint::integrate_adaptive(
+            rk_dopri_stepper_type_()
             , [this](const state_type &dy, state_type &dydt, double t) {
                 this->odeSys_->step(dy, dydt, t); 
-            }, state_, lastT, curT, curT - lastT
+            }, state_, lastT, curT, ode_tick_
             //, synapse_observer(data_)
             );
     g_ = state_[0]*si::siemens;
