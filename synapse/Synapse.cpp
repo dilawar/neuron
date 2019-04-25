@@ -39,7 +39,11 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
     , Esyn_(Esyn*si::volt)
 {
     SC_METHOD(processAlpha)
-    sensitive << clock.neg();
+    sensitive << clock.pos();
+
+    SC_METHOD(monitor_spike);
+    sensitive << pre;
+
     g_ = 0.0*si::siemens;
     BOOST_LOG_TRIVIAL(debug) << repr();
 }
@@ -69,15 +73,20 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
 {
 
     g_ = 0.0*si::siemens;
-    state_[0] = g_/(1*si::siemens);
-    state_[1] = g_/(1*si::siemens);
+    state_[0] = 0.0; //g_/(1*si::siemens);
+    state_[1] = 0.0; //(1*si::siemens);
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
     BOOST_LOG_TRIVIAL(debug) << repr();
 
-    SC_THREAD( tickOdeClock );
 
+    SC_METHOD(monitor_spike);
+    sensitive << pre;
+
+    // Make it sensitive to pre as well. Otherwise we will not collect spikes.
     SC_METHOD(processODE);
     sensitive << ode_clock;
+
+    SC_THREAD( tickOdeClock );
 }
 
 void Synapse::tickOdeClock(void)
@@ -98,23 +107,18 @@ void Synapse::tickOdeClock(void)
  * using ODE solver.
  */
 /* ----------------------------------------------------------------------------*/
-bool Synapse::beforeProcess( )
+void Synapse::monitor_spike( )
 {
-    bool spiked = false;
-
-    t_ = sc_time_stamp().to_seconds() * si::second;
+    auto t = sc_time_stamp().to_seconds() * si::second;
     vPost_ = post.read()*si::volt;
 
     // Time of previous spike.
     if(pre.read() == true)
     {
-        ts_ = t_;
-        t_spikes_.push_back(t_);
-        spiked = true;
+        t_spikes_.push_back(t);
         if(odeSys_)
-            odeSys_->addSpike(t_);
+            odeSys_->addSpike(t);
     }
-    return spiked;
 }
 
 void Synapse::injectCurrent( )
@@ -123,20 +127,9 @@ void Synapse::injectCurrent( )
     inject.write(g_/si::siemens);
 }
 
-void Synapse::processSingleExp() 
-{
-    beforeProcess();
-    assert(tau1_ > 0.0*si::second);
-    double T = (t_-ts_)/tau1_;
-    // cout << g_ << ' ' << t_ << ' ' << ts_ << ' ' << tau1_ <<  ' ' << T << endl;
-    auto dgdt = - (g_+gbar_) * exp(-T) / tau1_;
-    g_ += (dgdt * 1e-3*si::second);
-    injectCurrent();
-}
-
 void Synapse::processAlpha() 
 {
-    beforeProcess();
+    t_ = sc_time_stamp().to_seconds() * si::second;
     g_ = 0.0*si::siemens;
     for (auto tSpike : t_spikes_)
     {
@@ -170,35 +163,31 @@ void Synapse::start_of_simulation(void)
 void Synapse::processODE() 
 {
     // Call to this function will put the spike in the vector.
-    beforeProcess();
-
-    // if(t_spikes_.size() < 1)
-        // return;
-
-    //// Now solve the ODE system.
-    //double curT = t_spikes_[t_spikes_.size()-1]/si::second;
-    //double lastT = 0.0;
-    //if(t_spikes_.size() > 1)
-    //    lastT = t_spikes_[t_spikes_.size()-2]/si::second;
-
     double curT = sc_time_stamp().to_seconds();
     if(curT < ode_tick_)
         return;
     double lastT = curT-ode_tick_;
 
-    cout << name_ << ": " << curT << " " << lastT << ' ' << state_[0] << endl;
+    //cout << name_ << ": " << curT << " " << lastT << ' ' 
+    //    << state_[0] << ' ' << state_[1] << endl;
 
-   odeint::integrate_adaptive(
+#if 0
+    odeint::integrate_adaptive(
             rk_dopri_stepper_type_()
             , [this](const state_type &dy, state_type &dydt, double t) {
-                this->odeSys_->step(dy, dydt, t); 
+            this->odeSys_->step(dy, dydt, t); 
             }, state_, lastT, curT, ode_tick_
             //, synapse_observer(data_)
             );
-//    boost::numeric::odeint::integrate([this](const state_type &dy, state_type &dydt, double t) {
-//                    this->odeSys_->step(dy, dydt, t); 
-//            }, state_, last_tick_, curT, dt_ );
-//
+#else
+    boost::numeric::odeint::integrate(
+            [this](const state_type &dy, state_type &dydt, double t) 
+            {
+                this->odeSys_->systemSynapticConductance(dy, dydt, t);
+            }, state_, lastT, curT, ode_tick_ );
+
+#endif
+
     g_ = state_[0]*si::siemens;
     injectCurrent();
 }

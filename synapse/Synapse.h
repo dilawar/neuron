@@ -59,6 +59,7 @@ class Synapse: public sc_module
          *-----------------------------------------------------------------------------*/
         void processAlpha();                    /* Alpha synapse */
         void processODE();                      /* Use odeint to solve. */
+        void monitor_spike();                   
 
         void generateODEClock( );
         void start_of_simulation();
@@ -73,7 +74,6 @@ class Synapse: public sc_module
         //  Helper function.
         //-----------------------------------------------------------------------------
         void injectCurrent();
-        bool beforeProcess();                   
         std::string repr();
 
         // Synapse(sc_module_name name);
@@ -92,7 +92,7 @@ class Synapse: public sc_module
         quantity<si::electric_potential> vPre_, vPost_;
 
         quantity<si::time> t_;               /* Current Time. */
-        quantity<si::time> ts_;                     /* Previous firing. */
+        quantity<si::time> tspike_;             /* Previous firing. */
         
         // Keep the spike timings.
         std::vector<quantity<si::time>> t_spikes_;
