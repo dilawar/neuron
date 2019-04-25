@@ -181,8 +181,9 @@ void Synapse::processODE()
     //cout << endl;
 
     odeint::integrate_const( 
-            // rk_dopri_stepper_type_()
-            rk_karp_stepper_type_()
+            rk_dopri_stepper_type_()
+            // rk_karp_stepper_type_()
+            //rk_felhberg_stepper_type_()
             , [this](const state_type &dy, state_type &dydt, double t) {
                 this->odeSys_->systemSynapticConductance(dy, dydt, t); 
             }
@@ -190,7 +191,7 @@ void Synapse::processODE()
             , quantity_cast<double>(prevT_/si::second)
             , quantity_cast<double>(t_/si::second)
             , dt
-            //, synapse_observer(data_)
+            , synapse_observer(data_)
             );
 
     prevT_ = t_;
