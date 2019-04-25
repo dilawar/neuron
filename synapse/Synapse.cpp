@@ -106,10 +106,9 @@ bool Synapse::beforeProcess( )
     vPost_ = post.read()*si::volt;
 
     // Time of previous spike.
-    if(pre.read())
+    if(pre.read() == true)
     {
         ts_ = t_;
-        leftover_ = g_;
         t_spikes_.push_back(t_);
         spiked = true;
         if(odeSys_)
@@ -120,7 +119,19 @@ bool Synapse::beforeProcess( )
 
 void Synapse::injectCurrent( )
 {
-    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    // inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    inject.write(g_/si::siemens);
+}
+
+void Synapse::processSingleExp() 
+{
+    beforeProcess();
+    assert(tau1_ > 0.0*si::second);
+    double T = (t_-ts_)/tau1_;
+    // cout << g_ << ' ' << t_ << ' ' << ts_ << ' ' << tau1_ <<  ' ' << T << endl;
+    auto dgdt = - (g_+gbar_) * exp(-T) / tau1_;
+    g_ += (dgdt * 1e-3*si::second);
+    injectCurrent();
 }
 
 void Synapse::processAlpha() 
@@ -147,6 +158,7 @@ void Synapse::start_of_simulation(void)
 {
     // sc_clock *channel = dynamic_cast<sc_clock *>(clock.get_interface());
     // cout << (channel ? channel->period() : SC_ZERO_TIME).to_seconds()*si::second;
+    // dt_ = (channel ? channel->period() : SC_ZERO_TIME).to_seconds()*si::second;
 } 
 
 /* --------------------------------------------------------------------------*/
@@ -183,6 +195,10 @@ void Synapse::processODE()
             }, state_, lastT, curT, ode_tick_
             //, synapse_observer(data_)
             );
+//    boost::numeric::odeint::integrate([this](const state_type &dy, state_type &dydt, double t) {
+//                    this->odeSys_->step(dy, dydt, t); 
+//            }, state_, last_tick_, curT, dt_ );
+//
     g_ = state_[0]*si::siemens;
     injectCurrent();
 }
