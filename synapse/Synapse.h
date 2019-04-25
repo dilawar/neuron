@@ -91,7 +91,8 @@ class Synapse: public sc_module
         quantity<si::electric_potential> Esyn_;
         quantity<si::electric_potential> vPre_, vPost_;
 
-        quantity<si::time> t_;               /* Current Time. */
+        quantity<si::time> t_;                  /* Current Time. */
+        quantity<si::time> prevT_;              /* Previous tick time. ODE solver. */
         quantity<si::time> tspike_;             /* Previous firing. */
         
         // Keep the spike timings.

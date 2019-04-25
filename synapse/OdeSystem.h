@@ -94,18 +94,18 @@ struct SynapseODESystem
         double _tau2 = tau2/si::second;
 
         dxdt[0] = x[1];
-        dxdt[1] = (-x[0] - (_tau1+_tau2)*x[1] + gb*spike(t*si::second));
+        dxdt[1] = (-x[0] - (_tau1+_tau2)*x[1] + gb*spike(t*si::second))/_tau1/_tau2;
 
-        //std::cout << "Spike " << spike(t*si::second) << std::endl;
-        //std::cout << boost::format( "y %1% dydy %2% tau1 %3% tau2 %4%\n") % dxdt[0] % dxdt[1] % tau1 % tau2;
+        // std::cout << "  @" << t << ' ' << spike(t*si::second);
+        // std::cout << boost::format( "y %1% dydy %2% tau1 %3% tau2 %4%\n") % dxdt[0] % dxdt[1] % tau1 % tau2;
     }
 
     quantity<si::conductance> gbar;
     quantity<si::time> tau1, tau2;
     std::vector<quantity<si::time>> spikes;
 
-    double epsRel = 1e-5;
-    double epsAbs = 1e-5;
+    double epsRel = 1e-6;
+    double epsAbs = 1e-6;
 
 };
 
