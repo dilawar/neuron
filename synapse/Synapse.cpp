@@ -151,6 +151,12 @@ void Synapse::start_of_simulation(void)
     // dt_ = (channel ? channel->period() : SC_ZERO_TIME).to_seconds()*si::second;
 } 
 
+void Synapse::printODEData()
+{
+    for(auto v : data_)
+        cout << std::get<0>(v) << ' ' << std::get<1>(v) << endl;
+}
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Solve the simple using ODE solver. 
@@ -162,6 +168,9 @@ void Synapse::start_of_simulation(void)
 void Synapse::processODE() 
 {
     t_ = sc_time_stamp().to_seconds() * si::second;
+    double dt = quantity_cast<double>((t_-prevT_)/si::second);
+    if( dt == 0.0)
+        return;
 
     // Make sure we put the spike into ODE system.
     if(true == pre.read())
@@ -170,9 +179,6 @@ void Synapse::processODE()
         odeSys_->addSpike(t_);
     }
 
-    double dt = quantity_cast<double>((t_-prevT_)/si::second);
-    if( dt == 0.0)
-        return;
 
     //// std::cout << "Calling ODE process " << sc_time_stamp() << std::endl;
     //cout << boost::format("%1%: time: %2%  prevtime: %3% state: %4% %5%, spikes %6% "
@@ -180,7 +186,8 @@ void Synapse::processODE()
     //for(auto spk: t_spikes_) cout << spk << ' ';
     //cout << endl;
 
-    odeint::integrate_const( 
+#if 1
+    odeint::integrate_adaptive( 
             rk_dopri_stepper_type_()
             // rk_karp_stepper_type_()
             //rk_felhberg_stepper_type_()
@@ -190,9 +197,23 @@ void Synapse::processODE()
             , state_
             , quantity_cast<double>(prevT_/si::second)
             , quantity_cast<double>(t_/si::second)
-            , dt
-            , synapse_observer(data_)
+            , 1e-5
+            // , synapse_observer(data_)
             );
+#else
+    size_t n = odeint::integrate( 
+            [this](const state_type &dy, state_type &dydt, double t) {
+                this->odeSys_->systemSynapticConductance(dy, dydt, t); 
+            }
+            , state_
+            , quantity_cast<double>(prevT_/si::second)
+            , quantity_cast<double>(t_/si::second)
+            , 1e-5
+            // , synapse_observer(data_)
+            );
+    cout << "# Steps " << n << endl;
+
+#endif
 
     prevT_ = t_;
     g_ = state_[0]*si::siemens;

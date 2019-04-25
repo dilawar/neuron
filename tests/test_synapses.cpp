@@ -93,9 +93,14 @@ SC_MODULE(TestExpSyn)
     }
 
     // Methods
-    void plot_data( )
+    void save_data( )
     {
         map2csv(data, "exp_syn1.csv");
+    }
+    
+    void print_data()
+    {
+        odeExc_->printODEData();
     }
 
     // Data members.
@@ -122,7 +127,8 @@ int sc_main(int argc, char *argv[])
 
     sc_start(40, SC_MS);
 
-    tb.plot_data();
+    tb.save_data();
+    //tb.print_data();
 
     return 0;
 }
