@@ -11,17 +11,16 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import sys
-import os
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import solve_ivp
 
 tau1 = 1e-3
 tau2 = 1e-3
-gb   = 1e-9
+gb   = 1
 
-spks = [1e-3, 2e-3, 4e-3]
+spks = [0]
 spikes_ = spks[:]
 
 def spike(t, spikes):
@@ -46,13 +45,29 @@ def alpha(t):
 
 def f(t, y):
     s = 1.0
-    return [y[1], (-y[0]-(tau1+tau2)*y[1]+gb*s*spike(t, spikes_))/tau1/tau2]
+    tau = tau1
+    return [y[1], (-y[0]-2*tau*y[1]+gb*s*spike(t, spikes_))/tau/tau]
 
-for dt in [1e-6, 1e-5, 1e-4]:
+def ff(t, y):
+    tau = tau1
+    if t == 0:
+        return 0.0
+    return [y[1], (-y[0]*tau - gb/t)/tau/tau]
+
+def ode1(t, y):
+    tau = tau1
+    return -y/tau + math.exp(-t/tau)/tau
+
+plt.subplot(211)
+for dt in [1e-3, 1e-4, 1e-5]:
     spikes_ = spks.copy()
-    sol = solve_ivp(f, (0,1.2e-2), (0.0,0.0), max_step=dt) 
+    sol = solve_ivp(ode1, (0,1.2e-2), (0.0,0.0), max_step=dt) 
     plt.plot(sol.t, sol.y[0,:], label = f'ode dt={dt:g}')
 
+#  plt.plot(sol.t, alpha(sol.t), lw=2, color='black', label='alpha')
+plt.legend()
+
+plt.subplot(212)
 plt.plot(sol.t, alpha(sol.t), lw=2, color='black', label='alpha')
 plt.legend()
 
