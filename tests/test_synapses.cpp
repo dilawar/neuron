@@ -51,8 +51,8 @@ SC_MODULE(TestExpSyn)
         data["post"].push_back(post);
         data["exc"].push_back(injectExc);
         data["inh"].push_back(injectInh);
-        data["odeinh"].push_back(odeInh);
-        data["odeexc"].push_back(odeExc);
+        // data["odeinh"].push_back(odeInh);
+        // data["odeexc"].push_back(odeExc);
     }
 
     SC_CTOR(TestExpSyn) 
