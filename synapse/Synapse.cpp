@@ -172,8 +172,9 @@ void Synapse::processODE()
 {
     t_ = sc_time_stamp().to_seconds() * si::second;
     double dt = quantity_cast<double>(t_-prevT_);
+    std::cout << "Warn: This method does not work very well." << std::endl;
 
-    cout << 'x' << t_ << ' ' << prevT_ << ' ' << dt << ' ' << gbar_ << endl;
+    // cout << 'x' << t_ << ' ' << prevT_ << ' ' << dt << ' ' << gbar_ << endl;
 
     if( dt == 0.0)
         return;
@@ -186,11 +187,11 @@ void Synapse::processODE()
     }
 
 
-    // std::cout << "Calling ODE process " << sc_time_stamp() << std::endl;
-    cout << boost::format("%1%: time: %2%  prevtime: %3% state: %4% %5%, spikes %6% "
-            ) % name_ % t_ % prevT_ % state_[0] % state_[1] % t_spikes_.size(); 
-    for(auto spk: t_spikes_) cout << spk << ' ';
-    cout << endl;
+    //// std::cout << "Calling ODE process " << sc_time_stamp() << std::endl;
+    //cout << boost::format("%1%: time: %2%  prevtime: %3% state: %4% %5%, spikes %6% "
+    //        ) % name_ % t_ % prevT_ % state_[0] % state_[1] % t_spikes_.size(); 
+    //for(auto spk: t_spikes_) cout << spk << ' ';
+    //cout << endl;
 
 #if 1
     size_t n = odeint::integrate_adaptive( 
@@ -205,7 +206,7 @@ void Synapse::processODE()
             , state_
             , quantity_cast<double>(prevT_/si::second)
             , quantity_cast<double>(t_/si::second)
-            , 1e-6
+            , 1e-5
             // , synapse_observer(data_)
             );
 #else
