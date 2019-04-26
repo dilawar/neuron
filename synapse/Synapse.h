@@ -85,7 +85,7 @@ class Synapse: public sc_module
 
         /* Dual exp synapse (use ode solver) */
         Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn
-                , double odedt=0.5e-3
+                , double odedt=3e-5
                 );
 
         sc_module_name name_;

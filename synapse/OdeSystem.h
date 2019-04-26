@@ -68,19 +68,20 @@ struct SynapseODESystem
 
     double spike(const quantity<si::time> t)
     {
+        double val = 1.0;
     #if 1
         // Return 1 if there is a spike in spikeVector.
         if(spikes.end() == std::find(spikes.begin(), spikes.end(), t))
-           return 0.0;
-        return 1.0;
+            val = 0.0;
     #else
         if( spikes.size() > 0 && t >= spikes[0])
         {
             spikes.erase(spikes.begin());
-            return 1.0;
+            val = 1.0;
         }
-        return 0.0;
+        val = 0.0;
 #endif
+        return val;
     }
 
     void addSpike(const quantity<si::time> t)
@@ -94,17 +95,20 @@ struct SynapseODESystem
         spikes.insert(spikes.end(), spks.begin(), spks.end());
     }
 
-    // This is for ODE system.
-    void systemSynapticConductance(const state_type &x, state_type& dxdt, const double t)
+    // When tau1 and tau2 are equal, this is equivalent to alpha synapse.
+    // Otherwise the solution would not match the alpha synapse.
+    void alphaSynapse(const state_type &x, state_type& dxdt, const double t)
     {
         double gb = quantity_cast<double>(gbar/si::siemens);
         double _tau1 = quantity_cast<double>(tau1/si::second);
         double _tau2 = quantity_cast<double>(tau2/si::second);
 
+        double _gscale = _tau1;
+
         int spikeVal = spike(t*si::second);
 
         dxdt[0] = x[1];
-        dxdt[1] = (-x[0] - (_tau1+_tau2)*x[1] + gb*spikeVal)/_tau1/_tau2;
+        dxdt[1] = (-x[0] - (_tau1+_tau2)*x[1] + gb/_gscale*spikeVal)/_tau1/_tau2;
 
         if(spikeVal > 0)
             BOOST_LOG_TRIVIAL(info) << "Spike @" << t << ' ' << spikeVal << endl;

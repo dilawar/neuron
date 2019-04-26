@@ -88,11 +88,11 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
     BOOST_LOG_TRIVIAL(debug) << repr();
 
-    //SC_THREAD( tickOdeClock );
+    SC_THREAD( tickOdeClock );
 
     // Make it sensitive to pre as well. Otherwise we will not collect spikes.
     SC_METHOD(processODE);
-    sensitive << clock.pos(); // << ode_clock;
+    sensitive << pre << ode_clock;
 
 }
 
@@ -193,25 +193,25 @@ void Synapse::processODE()
     cout << endl;
 
 #if 1
-    size_t n = odeint::integrate_const( 
+    size_t n = odeint::integrate_adaptive( 
             // rk4_stepper_type_()
-            // odeint::make_controlled<rk_dopri_stepper_type_>( 1e-4, 1e-4 )
-            rk_dopri_stepper_type_()
+            odeint::make_controlled<rk_dopri_stepper_type_>( 1e-6, 1e-3 )
+            // rk_dopri_stepper_type_()
             // rk_karp_stepper_type_()
             // rk_felhberg_stepper_type_()
             , [this](const state_type &dy, state_type &dydt, double t) {
-                this->odeSys_->systemSynapticConductance(dy, dydt, t); 
+                this->odeSys_->alphaSynapse(dy, dydt, t); 
             }
             , state_
             , quantity_cast<double>(prevT_/si::second)
             , quantity_cast<double>(t_/si::second)
-            , dt
+            , 1e-6
             // , synapse_observer(data_)
             );
 #else
     size_t n = odeint::integrate( 
             [this](const state_type &dy, state_type &dydt, double t) {
-                this->odeSys_->systemSynapticConductance(dy, dydt, t); 
+                this->odeSys_->alphaSynapse(dy, dydt, t); 
             }
             , state_
             , quantity_cast<double>(prevT_/si::second)
@@ -225,8 +225,7 @@ void Synapse::processODE()
     cout.flush();
 
     prevT_ = t_;
-
-    g_ += (dt*state_[1])*si::siemens;
+    g_ = state_[0] * si::siemens;
     injectCurrent();
 }
 

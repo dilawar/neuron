@@ -1,0 +1,12 @@
+/* The ode of synaptic conductance:
+ * Impulse response of a damped oscillator.
+ */
+
+load("absimp")$
+
+g(t) := g0/(tau^2)*t*exp(-t/tau);
+
+/* x1 should be equal to -g(t); */
+x1 : expand(tau^2 * diff(g(t),t,2) + 2*tau*diff(g(t),t))$
+expand(x1); /* Must be equal to -g(t) */
+is(equal(g(t), - x1));
