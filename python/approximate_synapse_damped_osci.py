@@ -15,8 +15,8 @@ import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
 
-tau = 5e-4
-gb   = 1e-9
+tau     = 1e-3
+gb      = 1e-9
 
 spks = [0e-3, 3e-3, 5e-3, 10e-3, 50e-3]
 spikes_ = spks[:]
