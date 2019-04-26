@@ -36,7 +36,7 @@ def spike(t):
 def f(t, y):
     return [y[1], (-y[0] - (tau1+tau2)*y[1] + gb*spike(t))/tau1/tau2]
 
-sol = solve_ivp(f, (0, 2e-2), (0.0,0.0), max_step=0.1e-2) #t_eval = tt)
+sol = solve_ivp(f, (0, 2e-2), (0.0,0.0), max_step=0.2e-3) #t_eval = tt)
 plt.plot(sol.t, sol.y[0,:], '-o')
 plt.ylim(0, gb)
 plt.show()
