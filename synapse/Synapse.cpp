@@ -88,11 +88,11 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
     BOOST_LOG_TRIVIAL(debug) << repr();
 
-    SC_THREAD( tickOdeClock );
+    //SC_THREAD( tickOdeClock );
 
     // Make it sensitive to pre as well. Otherwise we will not collect spikes.
     SC_METHOD(processODE);
-    sensitive << clock.pos();
+    sensitive << clock.pos(); // << ode_clock;
 
 }
 
@@ -186,11 +186,11 @@ void Synapse::processODE()
     }
 
 
-    //// std::cout << "Calling ODE process " << sc_time_stamp() << std::endl;
-    //cout << boost::format("%1%: time: %2%  prevtime: %3% state: %4% %5%, spikes %6% "
-    //        ) % name_ % t_ % prevT_ % state_[0] % state_[1] % t_spikes_.size(); 
-    //for(auto spk: t_spikes_) cout << spk << ' ';
-    //cout << endl;
+    // std::cout << "Calling ODE process " << sc_time_stamp() << std::endl;
+    cout << boost::format("%1%: time: %2%  prevtime: %3% state: %4% %5%, spikes %6% "
+            ) % name_ % t_ % prevT_ % state_[0] % state_[1] % t_spikes_.size(); 
+    for(auto spk: t_spikes_) cout << spk << ' ';
+    cout << endl;
 
 #if 1
     size_t n = odeint::integrate_const( 
@@ -203,8 +203,8 @@ void Synapse::processODE()
                 this->odeSys_->systemSynapticConductance(dy, dydt, t); 
             }
             , state_
-            , quantity_cast<double>(prevT_)
-            , quantity_cast<double>(t_)
+            , quantity_cast<double>(prevT_/si::second)
+            , quantity_cast<double>(t_/si::second)
             , dt
             // , synapse_observer(data_)
             );
