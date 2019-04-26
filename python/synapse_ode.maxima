@@ -10,3 +10,8 @@ g(t) := g0/(tau^2)*t*exp(-t/tau);
 x1 : expand(tau^2 * diff(g(t),t,2) + 2*tau*diff(g(t),t))$
 expand(x1); /* Must be equal to -g(t) */
 is(equal(g(t), - x1));
+
+/* Another test */
+alpha(t) := g0 * (t/tau) * exp(-t/tau);
+r : diff(alpha(t)*tau^2, t,2) + diff(alpha, t)*tau;
+expand(r);

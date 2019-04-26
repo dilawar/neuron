@@ -18,9 +18,9 @@ from scipy.integrate import solve_ivp
 
 tau1 = 1e-3
 tau2 = 1e-3
-gb   = 1
+gb   = 1e-9
 
-spks = [0]
+spks = [0, 1e-3, 5e-3]
 spikes_ = spks[:]
 
 def spike(t, spikes):
@@ -32,7 +32,7 @@ def spike(t, spikes):
         return 1.0
     return 0.0
 
-def alpha(t):
+def alpha1(t):
     spikes1_ = spks.copy()
     tau = tau1
     g = np.zeros_like(t)
@@ -43,7 +43,24 @@ def alpha(t):
         g += g1
     return g
 
-def f(t, y):
+def alpha(t):
+    tau = tau1
+    return gb * t / tau * np.exp(-t/tau)
+
+def damped_oscillator(t, y, zeta=1.0):
+    """damped_oscillator
+
+    System driven by external force Fext.
+
+        d^2x(t)         dx(t)
+        -------  + 2ζω0 -----  + ω0 = Fext(t)
+          dt^2           dt 
+
+
+    :param t:
+    :param y:
+    :param zeta:
+    """
     s = 1.0
     tau = tau1
     return [y[1], (-y[0]-2*tau*y[1]+gb*s*spike(t, spikes_))/tau/tau]
@@ -56,15 +73,14 @@ def ff(t, y):
 
 def ode1(t, y):
     tau = tau1
-    return -y/tau + math.exp(-t/tau)/tau
+    return -y/tau + math.exp(-t/tau)*gb/tau
 
 plt.subplot(211)
 for dt in [1e-3, 1e-4, 1e-5]:
     spikes_ = spks.copy()
-    sol = solve_ivp(ode1, (0,1.2e-2), (0.0,0.0), max_step=dt) 
+    sol = solve_ivp(ode1, (0,1.2e-2), (0.0,), max_step=dt) 
     plt.plot(sol.t, sol.y[0,:], label = f'ode dt={dt:g}')
 
-#  plt.plot(sol.t, alpha(sol.t), lw=2, color='black', label='alpha')
 plt.legend()
 
 plt.subplot(212)
