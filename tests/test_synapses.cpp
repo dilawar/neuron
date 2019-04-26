@@ -31,16 +31,15 @@ SC_MODULE(TestExpSyn)
     void gen_stim() 
     {
         spike.write(false);
-        //post.write(-65e-3);
-        // Generate a 100Hz stimulation i.e. 10ms is the gap.
+        // Post is always at Erest.
+        post.write(-65e-3);
+
         while(true)
         {
             wait(10, SC_MS);
-            spike = true;
+            spike.write(true);
             wait(0.1, SC_MS);
-            spike = false;
-            // Post is always at Erest.
-            post = -65e-3;
+            spike.write(false);
         }
     }
 
@@ -70,17 +69,17 @@ SC_MODULE(TestExpSyn)
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
-        odeExc_ = make_unique<Synapse>("odeexc", 1e-9, 1e-3, 1e-3, 0.0);
-        odeExc_->clock(clock);
-        odeExc_->pre(spike);
-        odeExc_->post(post);
-        odeExc_->inject(odeExc);
-
         dutInh_ = make_unique<Synapse>("inh", 1e-9, 5e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->pre(spike);
         dutInh_->post(post);
         dutInh_->inject(injectInh);
+
+        odeExc_ = make_unique<Synapse>("odeexc", 1e-9, 1e-3, 1e-3, 0.0);
+        odeExc_->clock(clock);
+        odeExc_->pre(spike);
+        odeExc_->post(post);
+        odeExc_->inject(odeExc);
 
         odeInh_ = make_unique<Synapse>("odeinh", 1e-9, 5e-3, 5e-3, -90e-3);
         odeInh_->clock(clock);

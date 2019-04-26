@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <sstream>
+#include <functional>
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/numeric/odeint.hpp>
@@ -17,6 +18,8 @@
 using namespace std;
 using namespace boost;
 namespace odeint = boost::numeric::odeint;
+
+typedef odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
 
 Synapse::Synapse(sc_module_name name) : name_(name)
 {
@@ -89,7 +92,7 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
 
     // Make it sensitive to pre as well. Otherwise we will not collect spikes.
     SC_METHOD(processODE);
-    sensitive << pre << ode_clock;
+    sensitive << clock.pos();
 
 }
 
@@ -168,7 +171,10 @@ void Synapse::printODEData()
 void Synapse::processODE() 
 {
     t_ = sc_time_stamp().to_seconds() * si::second;
-    double dt = quantity_cast<double>((t_-prevT_)/si::second);
+    double dt = quantity_cast<double>(t_-prevT_);
+
+    cout << 'x' << t_ << ' ' << prevT_ << ' ' << dt << ' ' << gbar_ << endl;
+
     if( dt == 0.0)
         return;
 
@@ -187,17 +193,19 @@ void Synapse::processODE()
     //cout << endl;
 
 #if 1
-    odeint::integrate_adaptive( 
+    size_t n = odeint::integrate_const( 
+            // rk4_stepper_type_()
+            // odeint::make_controlled<rk_dopri_stepper_type_>( 1e-4, 1e-4 )
             rk_dopri_stepper_type_()
             // rk_karp_stepper_type_()
-            //rk_felhberg_stepper_type_()
+            // rk_felhberg_stepper_type_()
             , [this](const state_type &dy, state_type &dydt, double t) {
                 this->odeSys_->systemSynapticConductance(dy, dydt, t); 
             }
             , state_
-            , quantity_cast<double>(prevT_/si::second)
-            , quantity_cast<double>(t_/si::second)
-            , 1e-5
+            , quantity_cast<double>(prevT_)
+            , quantity_cast<double>(t_)
+            , dt
             // , synapse_observer(data_)
             );
 #else
@@ -208,15 +216,17 @@ void Synapse::processODE()
             , state_
             , quantity_cast<double>(prevT_/si::second)
             , quantity_cast<double>(t_/si::second)
-            , 1e-5
+            , dt
             // , synapse_observer(data_)
             );
-    cout << "# Steps " << n << endl;
 
 #endif
+    cout << " #" << n <<  ' ' << state_[1]/state_[0] << ' ' << dt << endl;
+    cout.flush();
 
     prevT_ = t_;
-    g_ = state_[0]*si::siemens;
+
+    g_ += (dt*state_[1])*si::siemens;
     injectCurrent();
 }
 

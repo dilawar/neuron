@@ -36,7 +36,6 @@ typedef std::array<double, 2> state_type;
 // state_type is in OdeSystem.h
 typedef boost::numeric::odeint::runge_kutta4< state_type > rk4_stepper_type_;
 typedef boost::numeric::odeint::runge_kutta_dopri5< state_type > rk_dopri_stepper_type_;
-typedef boost::numeric::odeint::modified_midpoint< state_type > rk_midpoint_stepper_type_;
 
 /*-----------------------------------------------------------------------------
  *  This stepper type found to be most suitable for adaptive solver. The gsl
@@ -69,10 +68,19 @@ struct SynapseODESystem
 
     double spike(const quantity<si::time> t)
     {
+    #if 1
         // Return 1 if there is a spike in spikeVector.
         if(spikes.end() == std::find(spikes.begin(), spikes.end(), t))
-            return 0.0;
+           return 0.0;
         return 1.0;
+    #else
+        if( spikes.size() > 0 && t >= spikes[0])
+        {
+            spikes.erase(spikes.begin());
+            return 1.0;
+        }
+        return 0.0;
+#endif
     }
 
     void addSpike(const quantity<si::time> t)
@@ -89,16 +97,20 @@ struct SynapseODESystem
     // This is for ODE system.
     void systemSynapticConductance(const state_type &x, state_type& dxdt, const double t)
     {
-        double gb = gbar/si::siemens;
-        double _tau1 = tau1/si::second;
-        double _tau2 = tau2/si::second;
+        double gb = quantity_cast<double>(gbar/si::siemens);
+        double _tau1 = quantity_cast<double>(tau1/si::second);
+        double _tau2 = quantity_cast<double>(tau2/si::second);
+
+        int spikeVal = spike(t*si::second);
 
         dxdt[0] = x[1];
-        dxdt[1] = (-x[0] - (_tau1+_tau2)*x[1] + gb*spike(t*si::second))/_tau1/_tau2;
+        dxdt[1] = (-x[0] - (_tau1+_tau2)*x[1] + gb*spikeVal)/_tau1/_tau2;
 
-        // std::cout << "  @" << t << ' ' << spike(t*si::second);
-        //std::cout << boost::format( "@t%5% %1% dydy %2% tau1 %3% tau2 %4%\n"
-        //        ) % dxdt[0] % dxdt[1] % tau1 % tau2 % t;
+        if(spikeVal > 0)
+            BOOST_LOG_TRIVIAL(info) << "Spike @" << t << ' ' << spikeVal << endl;
+
+        // std::cout << boost::format( "@t%5% %1% dydy %2% tau1 %3% tau2 %4% gb %6%\n"
+              // ) % dxdt[0] % dxdt[1] % _tau1 % _tau2 % t % gb;
     }
 
     quantity<si::conductance> gbar;

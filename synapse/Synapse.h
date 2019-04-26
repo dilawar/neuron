@@ -85,7 +85,7 @@ class Synapse: public sc_module
 
         /* Dual exp synapse (use ode solver) */
         Synapse(sc_module_name name, double gbar, double tau1, double tau2, double Esyn
-                , double odedt=2e-4
+                , double odedt=0.5e-3
                 );
 
         sc_module_name name_;
@@ -108,7 +108,8 @@ class Synapse: public sc_module
         double ode_tick_;
 
         // std::array<quantity<si::conductance>, 2> state_;
-        std::array<double, 2> state_;
+        // std::array<double, 2> state_;
+        state_type state_;
 
         // Collect all data.
         //std::vector<std::tuple<quantity<si::time>, quantity<si::conductance>> gVec_;
