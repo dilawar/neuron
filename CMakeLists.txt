@@ -16,6 +16,7 @@ ExternalProject_Add(libsystemc
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         -DBUILD_SHARED_LIBS=OFF 
         -DCMAKE_CXX_STANDARD=14
+        -DDISABLE_COPYRIGHT_MESSAGE=ON
         <SOURCE_DIR>
     BUILD_COMMAND $(MAKE) -j4
     )

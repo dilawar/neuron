@@ -18,9 +18,13 @@
 #include "IAF.h"
 
 
-IAF::IAF(sc_module_name name)
+IAF::IAF(sc_module_name name, double vm, double tau)
     : name_(name) 
+      , vm_(vm*si::volt)
+      , tau_(tau*si::second)
 {
+    spikes_.clear();
+    data_.clear();
 }
 
 void IAF::process()

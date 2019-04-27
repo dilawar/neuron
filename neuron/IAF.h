@@ -19,6 +19,16 @@
 
 #include <systemc.h>
 #include "../synapse/Synapse.h"
+#include <boost/units/systems/si.hpp>
+#include <boost/units/systems/si/io.hpp>
+#include <vector>
+#include <tuple>
+#include <array>
+#include <memory>
+
+using namespace boost::units;
+namespace si = boost::units::si;
+
 
 using namespace std;
 
@@ -32,10 +42,14 @@ class IAF : public sc_module
 
         void process( );
 
-        IAF(sc_module_name name);
+        IAF(sc_module_name name, double vm=-65e-3, double tau=1e-3);
 
     public:
         sc_module_name name_;
+        quantity<si::electric_potential> vm_;
+        quantity<si::time> tau_;
+        std::vector<std::tuple<si::time, si::electric_potential> > data_;
+        std::vector<si::time> spikes_;
 };
 
 #endif /* end of include guard: IAF_H */
