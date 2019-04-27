@@ -75,6 +75,17 @@ SC_MODULE(TestExpSyn)
         dutInh_->post(post);
         dutInh_->inject(injectInh);
 
+#if 0
+        //-----------------------------------------------------------------------------
+        // TODO: Current implementation is not equivalent. Explore this:
+        // Fast Calculation of Synaptic Conductances
+        // Rajagopal Srinivasan
+        // Department of Electrical Engineering,
+        // Case Western Reserve University, Cleveland, OH 44206 USA
+        // Hillel J. Chiel,
+        // Departments of Biology and Neuroscience,
+        // Case Western Reserve University, Cleveland, OH 44106 USA
+        //-----------------------------------------------------------------------------
         odeExc_ = make_unique<Synapse>("odeexc", 1e-9, 1e-3, 1e-3, 0.0);
         odeExc_->clock(clock);
         odeExc_->pre(spike);
@@ -86,6 +97,7 @@ SC_MODULE(TestExpSyn)
         odeInh_->pre(spike);
         odeInh_->post(post);
         odeInh_->inject(odeInh);
+#endif 
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
