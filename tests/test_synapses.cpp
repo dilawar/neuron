@@ -9,8 +9,13 @@
 #include <map>
 #include <cmath>
 
+#include <boost/assert.hpp>
+
 #include "../synapse/Synapse.h"
 #include "../utility/plot_util.h"
+#include "../utility/numeric.hpp"
+#include "../external/prettyprint.hpp"
+#include "../external/assert.hpp"
 
 using namespace std;
 
@@ -139,7 +144,24 @@ int sc_main(int argc, char *argv[])
     sc_start(40, SC_MS);
 
     tb.save_data();
-    //tb.print_data();
+
+    auto resExc = min_max_mean_std(tb.data["exc"]);
+    auto resInh = min_max_mean_std(tb.data["inh"]);
+    auto excExpected = make_tuple(0, 3.68047e-10, 7.4735e-11, 1.14582e-10);
+    auto inhExpected = make_tuple(0, 5.6821e-10, 3.07842e-10, 2.03052e-10);
+
+    // cout << resExc << endl;
+    // cout << resInh << endl;
+    ASSERT_EQ(std::get<0>(resExc), std::get<0>(excExpected), "EXC");
+    ASSERT_EQ(std::get<1>(resExc), std::get<1>(excExpected), "EXC");
+    ASSERT_EQ(std::get<2>(resExc), std::get<2>(excExpected), "EXC");
+    ASSERT_EQ(std::get<3>(resExc), std::get<3>(excExpected), "EXC");
+
+    ASSERT_EQ(std::get<0>(resInh), std::get<0>(inhExpected), "Inh");
+    ASSERT_EQ(std::get<1>(resInh), std::get<1>(inhExpected), "Inh");
+    ASSERT_EQ(std::get<2>(resInh), std::get<2>(inhExpected), "Inh");
+    ASSERT_EQ(std::get<3>(resInh), std::get<3>(inhExpected), "Inh");
+
 
     return 0;
 }

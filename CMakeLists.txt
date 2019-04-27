@@ -25,7 +25,7 @@ add_definitions(-Wall -std=c++14)
 
 find_package(Boost COMPONENTS log system filesystem iostreams)
 # Configuration macros.
-add_definitions( -DBOOST_LOG_DYN_LINK )
+add_definitions( -DBOOST_LOG_DYN_LINK)
 
 include_directories( ${SystemC_INCLUDE_DIR} )
 
@@ -47,6 +47,4 @@ add_subdirectory(tests)
 
 # Add main executable.
 add_executable(tantrika exp/experiment1.cpp)
-
 target_link_libraries(tantrika ${LIBS_TO_LINKS})
-
