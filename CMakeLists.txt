@@ -31,6 +31,7 @@ include_directories( ${SystemC_INCLUDE_DIR} )
 
 # subdirectories.
 add_subdirectory(synapse)
+add_subdirectory(neuron)
 add_subdirectory(utility)
 add_subdirectory(engine)
 

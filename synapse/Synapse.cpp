@@ -123,8 +123,7 @@ void Synapse::monitor_spike( )
 
 void Synapse::injectCurrent( )
 {
-    // inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
-    inject.write(g_/si::siemens);
+    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
 }
 
 void Synapse::processAlpha() 
