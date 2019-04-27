@@ -10,7 +10,9 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import math
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+mpl.style.use( ['bmh'] )
 import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
@@ -58,10 +60,10 @@ def damped_oscillator(t, y, zeta=1.0):
     """damped_oscillator
     System driven by external force Fext.
     """
-    return [y[1], (-2*tau*y[1] - y[0] + gb*spike(t, spikes_))/tau/tau ]
+    return [y[1], (-2*tau*y[1] - y[0] + gb/tau*spike(t, spikes_))/tau/tau]
 
 tmax = 0.07
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(10,5))
 ax1 = plt.subplot(211)
 ax2 = plt.subplot(212)
 
