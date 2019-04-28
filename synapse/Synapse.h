@@ -48,12 +48,12 @@ class Synapse: public sc_module
         // TODO: It can be done but may be later. See https://www.doulos.com/knowhow/systemc/faq/#q1 
 
         /* Bool type. Incoming spike. */
-        sc_in<bool> pre;  
+        sc_in<bool> spike;  
+
         /* Read only (post synaptic potential) */
         sc_in<double> post;
 
-
-        /* Amount of current injected into post synapse. */
+        /* Post synaptic current. */
         sc_out<double> inject; 
 
 

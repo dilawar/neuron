@@ -50,11 +50,15 @@ void IAF::init()
     SC_METHOD(handleInjection);
     sensitive << nonZeroInject;
 
+    SC_METHOD(handleSynapticInjection);
+    sensitive << nonZeroSynCurrent;
+
     t_ = sc_time_stamp().to_seconds();
     prevT_ = t_;
     threshold_ = Em_ + 10e-3;
     refactory_ = 0.0;
     fired_ = false;
+    numSynapses_ = 0;
 }
 
 std::string IAF::repr()
@@ -109,8 +113,16 @@ void IAF::decay()
     }
 
     // Inject only when fired_ is set to false or inject value is non-zero.
-    if(inject != 0.0 && (! fired_))
+    if((inject != 0.0) && (! fired_))
         nonZeroInject.notify();
+
+    // Collect currents from synspases.
+    sum_all_synapse_inject_ = 0.0;
+    for (size_t i = 0; i < numSynapses_; i++) 
+        sum_all_synapse_inject_ += synapse_inject[i].read();
+
+    if(sum_all_synapse_inject_ != 0.0)
+        nonZeroSynCurrent.notify();
 
     vm_ += dt_*(-vm+Em_)/tau_;
     if(vm_ >= threshold_)
@@ -123,16 +135,23 @@ void IAF::decay()
     prevT_ = t_;
 }
 
-void IAF::handleInjection()
+void IAF::handleSynapticInjection()
 {
-    double dvdt = (inject * dt_)/Cm_;
-    vm_ += dvdt;
-    // cout << " Injected " << inject << " dv " << dvdt << " vm = " << vm_;
-    // cout << '\t' << repr() << endl;
+    // cout << " total injection " << sum_all_synapse_inject_ << endl;
+    vm_ += (-sum_all_synapse_inject_ * dt_)/Cm_;
 }
 
-void IAF::addSynapse(Synapse& syn)
+void IAF::handleInjection()
+{
+    vm_ += (inject * dt_)/Cm_;
+}
+
+void IAF::addSynapse(shared_ptr<Synapse> syn)
 {
     // BOOST_LOG_TRIVIAL(debug) << "Added synapse " << syn << " to " << name_;
-    synapses_.push_back( std::shared_ptr<Synapse>(&syn) );
+    syn->post(vm);
+    syn->clock(clock);
+    syn->inject(synapse_inject[numSynapses_]);
+    synapses_.push_back(syn);
+    numSynapses_ += 1;
 }

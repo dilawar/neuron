@@ -50,7 +50,7 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
     sensitive << clock.pos();
 
     SC_METHOD(monitor_spike);
-    sensitive << pre;
+    sensitive << spike;
 
     g_ = 0.0*si::siemens;
     BOOST_LOG_TRIVIAL(debug) << repr();
@@ -95,9 +95,9 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
 
     SC_THREAD( tickOdeClock );
 
-    // Make it sensitive to pre as well. Otherwise we will not collect spikes.
+    // Make it sensitive to spike as well. Otherwise we will not collect spikes.
     SC_METHOD(processODE);
-    sensitive << pre << ode_clock;
+    sensitive << spike << ode_clock;
 
 }
 
@@ -122,7 +122,7 @@ void Synapse::monitor_spike( )
     vPost_ = post.read()*si::volt;
 
     // Time of previous spike.
-    if(pre.read() == true)
+    if(spike.read() == true)
         t_spikes_.push_back(t);
 }
 
@@ -184,18 +184,11 @@ void Synapse::processODE()
         return;
 
     // Make sure we put the spike into ODE system.
-    if(true == pre.read())
+    if(true == spike.read())
     {
         t_spikes_.push_back(t_);
         odeSys_->addSpike(t_);
     }
-
-
-    //// std::cout << "Calling ODE process " << sc_time_stamp() << std::endl;
-    //cout << boost::format("%1%: time: %2%  prevtime: %3% state: %4% %5%, spikes %6% "
-    //        ) % name_ % t_ % prevT_ % state_[0] % state_[1] % t_spikes_.size(); 
-    //for(auto spk: t_spikes_) cout << spk << ' ';
-    //cout << endl;
 
 #if 1
     size_t n = odeint::integrate_adaptive( 

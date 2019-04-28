@@ -70,13 +70,13 @@ SC_MODULE(TestExpSyn)
         // Excitatory and inhibitory synapses.
         dutExc_ = make_unique<Synapse>("exc", 1e-9, 1e-3, 0.0);
         dutExc_->clock(clock);
-        dutExc_->pre(spike);
+        dutExc_->spike(spike);
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
         dutInh_ = make_unique<Synapse>("inh", 1e-9, 5e-3, -90e-3);
         dutInh_->clock(clock);
-        dutInh_->pre(spike);
+        dutInh_->spike(spike);
         dutInh_->post(post);
         dutInh_->inject(injectInh);
 
@@ -93,13 +93,13 @@ SC_MODULE(TestExpSyn)
         //-----------------------------------------------------------------------------
         odeExc_ = make_unique<Synapse>("odeexc", 1e-9, 1e-3, 1e-3, 0.0);
         odeExc_->clock(clock);
-        odeExc_->pre(spike);
+        odeExc_->spike(spike);
         odeExc_->post(post);
         odeExc_->inject(odeExc);
 
         odeInh_ = make_unique<Synapse>("odeinh", 1e-9, 5e-3, 5e-3, -90e-3);
         odeInh_->clock(clock);
-        odeInh_->pre(spike);
+        odeInh_->spike(spike);
         odeInh_->post(post);
         odeInh_->inject(odeInh);
 #endif 

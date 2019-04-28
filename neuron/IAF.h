@@ -17,6 +17,8 @@
 #ifndef IAF_H
 #define IAF_H
 
+#define MAX_SYNAPSES 100
+
 #include <systemc.h>
 #include "../synapse/Synapse.h"
 #include <vector>
@@ -49,21 +51,25 @@ class IAF : public sc_module
         sc_in_clk clock;                        // Incoming clock. 
         sc_out<double> vm;                      // Neuron membrane potential.
         sc_in<double> inject;                   // Injection of current by users.
+        
+        sc_signal<double> synapse_inject[MAX_SYNAPSES];     // Currents from all synapses.
 
         //-----------------------------------------------------------------------------
         //  Events.
         //-----------------------------------------------------------------------------
         sc_event nonZeroInject;
+        sc_event nonZeroSynCurrent;
 
         void decay( );
         void handleInjection();                 // Tick when there is inject
+        void handleSynapticInjection();
 
         void model(const double &vm, double &dvdt, const double t);
 
         //-----------------------------------------------------------------------------
         //  Mutators.
         //-----------------------------------------------------------------------------
-        void addSynapse(Synapse& syn);
+        void addSynapse(shared_ptr<Synapse> syn);
         void setRefactory(double t);
         void setTau(double t);
         void setThreshold(double t);
@@ -92,6 +98,9 @@ class IAF : public sc_module
         // Helper variables.
         double t_, prevT_;
         double dt_;
+
+        size_t numSynapses_;
+        double sum_all_synapse_inject_;
 
 };
 
