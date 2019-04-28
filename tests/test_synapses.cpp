@@ -160,5 +160,6 @@ int sc_main(int argc, char *argv[])
     ASSERT_EQ(std::get<2>(resInh), std::get<2>(inhExpected), "Inh");
     ASSERT_EQ(std::get<3>(resInh), std::get<3>(inhExpected), "Inh");
 
+
     return 0;
 }

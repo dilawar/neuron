@@ -93,16 +93,13 @@ int sc_main(int argc, char *argv[])
 
     TestIAF tb("TestBench");
     tb.clock(clock);
-
-    sc_start(40, SC_MS);
-
+    sc_start(100, SC_MS);
     tb.save_data();
 
+    auto vm = min_max_mean_std(tb.data["vm"]);
+    cout << vm << endl;
+
 #if 0
-    auto resExc = min_max_mean_std(tb.data["exc"]);
-    auto resInh = min_max_mean_std(tb.data["inh"]);
-    auto excExpected = make_tuple(-2.39231e-11, 0, -4.85778e-12, 7.44786e-12);
-    auto inhExpected = make_tuple(0, 1.42053e-11, 7.69605e-12, 5.07631e-12);
 
     ASSERT_EQ(std::get<0>(resExc), std::get<0>(excExpected), "EXC");
     ASSERT_EQ(std::get<1>(resExc), std::get<1>(excExpected), "EXC");

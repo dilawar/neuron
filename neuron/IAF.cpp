@@ -39,15 +39,6 @@ IAF::IAF(sc_module_name name, double em, double cm, double rm)
     init();
 }
 
-std::string IAF::repr()
-{
-    std::stringstream ss;
-    ss << boost::format("IAF:%1%, Em=%2%, cm=%3% rm=%4% tau=%5%") 
-        % name_ % Em_ % Cm_ % Rm_ % tau_;
-    return ss.str();
-}
-
-
 void IAF::init()
 {
     spikes_.clear();
@@ -63,7 +54,19 @@ void IAF::init()
     prevT_ = t_;
     threshold_ = Em_ + 10e-3;
     fired_ = false;
+
+    cout << repr() << endl;
 }
+
+std::string IAF::repr()
+{
+    std::stringstream ss;
+    ss << boost::format("IAF:%1%, Em=%2%, cm=%3% rm=%4% tau=%5%") 
+        % name_ % Em_ % Cm_ % Rm_ % tau_;
+    return ss.str();
+}
+
+
 
 void IAF::model(const double &vm, double &vmdt, const double t)
 {
