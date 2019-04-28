@@ -43,7 +43,6 @@ class IAF : public sc_module
 
         void init();
 
-
         //-----------------------------------------------------------------------------
         //  Ports
         //-----------------------------------------------------------------------------
@@ -56,7 +55,6 @@ class IAF : public sc_module
         //-----------------------------------------------------------------------------
         sc_event nonZeroInject;
 
-
         void decay( );
         void handleInjection();                 // Tick when there is inject
 
@@ -66,29 +64,29 @@ class IAF : public sc_module
         //  Mutators.
         //-----------------------------------------------------------------------------
         void addSynapse(Synapse& syn);
-
+        void setRefactory(double t);
+        void setTau(double t);
+        void setThreshold(double t);
 
         //-----------------------------------------------------------------------------
         //  Helper
         //-----------------------------------------------------------------------------
         string repr();
 
-    public:
+    private:
+        // Collect synapses.
         sc_module_name name_;
         std::vector<std::tuple<double, double>> data_;
         std::vector<double> spikes_;            // Time of spikes.
-
-
-    private:
-        // Collect synapses.
         vector<shared_ptr<Synapse>> synapses_;
-        state_type state_;
+
         double Cm_;
         double Em_;
         double Rm_;
         double vm_;
         double tau_;
         double threshold_;
+        double refactory_;
         bool fired_;
 
         // Helper variables.

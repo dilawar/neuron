@@ -53,19 +53,36 @@ void IAF::init()
     t_ = sc_time_stamp().to_seconds();
     prevT_ = t_;
     threshold_ = Em_ + 10e-3;
+    refactory_ = 0.0;
     fired_ = false;
-
-    cout << repr() << endl;
 }
 
 std::string IAF::repr()
 {
     std::stringstream ss;
-    ss << boost::format("IAF:%1%, Em=%2%, cm=%3% rm=%4% tau=%5%") 
-        % name_ % Em_ % Cm_ % Rm_ % tau_;
+    ss << boost::format("IAF:%1%, Em=%2%, cm=%3% rm=%4% tau=%5% refactory=%6% threshold=%7%") 
+        % name_ % Em_ % Cm_ % Rm_ % tau_ % refactory_ % threshold_;
     return ss.str();
 }
 
+void IAF::setRefactory(const double ref)
+{
+    assert(ref >= 0.0);
+    refactory_ = ref;
+}
+
+void IAF::setThreshold(const double thres)
+{
+    assert(thres > Em_);
+    threshold_ = thres;
+}
+
+
+void IAF::setTau(const double tau)
+{
+    assert(tau > 0.0);
+    tau_ = tau;
+}
 
 
 void IAF::model(const double &vm, double &vmdt, const double t)
@@ -76,17 +93,23 @@ void IAF::model(const double &vm, double &vmdt, const double t)
 void IAF::decay()
 {
     t_ = sc_time_stamp().to_seconds();
+
     dt_ = t_ - prevT_;
     if(dt_ == 0.0)
         return;
 
+
     if(fired_)
     {
         vm_ = Em_;
-        fired_ = false;
+
+        // Reset fired to false only after refactory period.
+        if(t_ - spikes_.back() >= refactory_)
+            fired_ = false;
     }
 
-    if(inject != 0.0)
+    // Inject only when fired_ is set to false or inject value is non-zero.
+    if(inject != 0.0 && (! fired_))
         nonZeroInject.notify();
 
     vm_ += dt_*(-vm+Em_)/tau_;

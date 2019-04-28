@@ -81,7 +81,6 @@ SC_MODULE(TestIAF)
     std::poisson_distribution<> dist_;
 
     unique_ptr<IAF> dut;
-
     std::map<string, vector<double> > data;
 
 };
