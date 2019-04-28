@@ -33,29 +33,28 @@ SC_MODULE(TestIAF)
     // And record vm 
     sc_signal<double> vm;
 
-    void gen_stim() 
+    void gen_inh_stim() 
     {
-        inject.write(0.0);
-        spike1.write(false);
-        spike2.write(false);
+        wait(1, SC_MS);
         spike3.write(false);
-
         while(true)
         {
-            wait(10, SC_MS);
-            // inject.write(10e-6);
-            spike1.write(true);
-            spike2.write(true);
-            spike3.write(true);
-
             wait(1, SC_MS);
-            spike1.write(false);
-            spike2.write(false);
+            spike3.write(true);
             wait(1, SC_MS);
             spike3.write(false);
+        }
+    }
 
-            wait(8, SC_MS);
-            inject.write(0.0);
+    void gen_exc_stim() 
+    {
+        spike1.write(false);
+        while(true)
+        {
+            wait(3, SC_MS);
+            spike1.write(true);
+            wait(1, SC_MS);
+            spike1.write(false);
         }
     }
 
@@ -73,7 +72,8 @@ SC_MODULE(TestIAF)
     {
         vm.write(-65e-3);
 
-        SC_THREAD(gen_stim);
+        SC_THREAD(gen_exc_stim);
+        SC_THREAD(gen_inh_stim);
 
         SC_METHOD(record);
         sensitive << clock.neg();
@@ -84,9 +84,9 @@ SC_MODULE(TestIAF)
         dut->inject(inject);
 
         // Excitatory and inhibitory synapses. Add them to this dut.
-        syn1 = make_shared<Synapse>("exc1", 20e-9, 1e-3, 0.0);
-        syn2 = make_shared<Synapse>("exc2", 20e-9, 1e-3, 0.0 );
-        syn3 = make_shared<Synapse>("inh1", 1e-10, 10e-3, -90e-3 );
+        syn1 = make_shared<Synapse>("exc1", 10e-9, 5e-3, 0.0);
+        syn2 = make_shared<Synapse>("exc2", 10e-9, 5e-3, 0.0 );
+        syn3 = make_shared<Synapse>("inh1", 5e-9, 15e-3, -90e-3 );
 
         // Add spikes.
         syn1->spike(spike1);
@@ -97,8 +97,6 @@ SC_MODULE(TestIAF)
         dut->addSynapse(syn1);
         dut->addSynapse(syn2);
         dut->addSynapse(syn3);
-
-
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
@@ -131,7 +129,7 @@ int sc_main(int argc, char *argv[])
 
     TestIAF tb("TestBench");
     tb.clock(clock);
-    sc_start(100, SC_MS);
+    sc_start(200, SC_MS);
     tb.save_data();
 
     auto vm = min_max_mean_std(tb.data["vm"]);
