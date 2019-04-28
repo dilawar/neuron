@@ -19,7 +19,7 @@
 
 IAF::IAF(sc_module_name name, double em, double tau)
     : name_(name) 
-      , Cm_(1e-6)
+      , Cm_(100e-12)                            // 100 pF
       , Em_(em)
       , vm_(em)
       , tau_(tau)

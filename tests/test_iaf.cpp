@@ -71,6 +71,8 @@ SC_MODULE(TestIAF)
 
     SC_CTOR(TestIAF) 
     {
+        vm.write(-65e-3);
+
         SC_THREAD(gen_stim);
 
         SC_METHOD(record);
@@ -82,9 +84,9 @@ SC_MODULE(TestIAF)
         dut->inject(inject);
 
         // Excitatory and inhibitory synapses. Add them to this dut.
-        syn1 = make_shared<Synapse>("exc1", 1e-4, 1e-3, 0.0);
-        syn2 = make_shared<Synapse>("exc2", 1e-4, 1e-3, 0.0 );
-        syn3 = make_shared<Synapse>("inh1", 1e-8, 10e-3, -90e-3 );
+        syn1 = make_shared<Synapse>("exc1", 20e-9, 1e-3, 0.0);
+        syn2 = make_shared<Synapse>("exc2", 20e-9, 1e-3, 0.0 );
+        syn3 = make_shared<Synapse>("inh1", 1e-10, 10e-3, -90e-3 );
 
         // Add spikes.
         syn1->spike(spike1);
