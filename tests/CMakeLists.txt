@@ -1,6 +1,6 @@
 find_package(Boost COMPONENTS unit_test_framework)
 
-foreach(_test test_hebbian test_synapses)
+foreach(_test test_hebbian test_synapses test_iaf)
     add_executable(${_test} ${_test}.cpp)
     target_compile_definitions(${_test} PRIVATE "BOOST_TEST_DYN_LINK=1")
     target_compile_definitions(${_test} PRIVATE "ENABLE_TEST=ON")

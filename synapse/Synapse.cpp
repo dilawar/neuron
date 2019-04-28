@@ -34,6 +34,11 @@ std::string Synapse::repr()
     return ss.str();
 }
 
+std::string Synapse::name()
+{
+    return string((const char*)name_);
+}
+
 
 Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool isalpha): 
     name_(name) 

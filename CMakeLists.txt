@@ -36,8 +36,10 @@ add_subdirectory(neuron)
 add_subdirectory(utility)
 add_subdirectory(engine)
 
-set(LIBS_TO_LINKS utility 
+set(LIBS_TO_LINKS 
     synapse
+    neuron
+    utility 
     ${Boost_LIBRARIES} 
     ${SystemC_LIBRARY}
     )

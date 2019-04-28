@@ -19,8 +19,6 @@
 
 #include <systemc.h>
 #include "../synapse/Synapse.h"
-#include <boost/units/systems/si.hpp>
-#include <boost/units/systems/si/io.hpp>
 #include <vector>
 #include <tuple>
 #include <array>
@@ -29,27 +27,74 @@
 using namespace boost::units;
 namespace si = boost::units::si;
 
-
 using namespace std;
 
 class IAF : public sc_module
 {
     public:
         SC_HAS_PROCESS(IAF);
-        sc_in_clk clock;
 
-        // Ports.
 
-        void process( );
+        //-----------------------------------------------------------------------------
+        //  Constructors.
+        //-----------------------------------------------------------------------------
+        IAF(sc_module_name name, double em=-65e-3, double tau=10e-3);
+        IAF(sc_module_name name, double em, double cm, double rm);
 
-        IAF(sc_module_name name, double vm=-65e-3, double tau=1e-3);
+        void init();
+
+
+        //-----------------------------------------------------------------------------
+        //  Ports
+        //-----------------------------------------------------------------------------
+        sc_in_clk clock;                        // Incoming clock. 
+        sc_out<double> vm;                      // Neuron membrane potential.
+        sc_in<double> inject;                   // Injection of current by users.
+
+        //-----------------------------------------------------------------------------
+        //  Events.
+        //-----------------------------------------------------------------------------
+        sc_event nonZeroInject;
+
+
+        void decay( );
+        void handleInjection();                 // Tick when there is inject
+
+        void model(const double &vm, double &dvdt, const double t);
+
+        //-----------------------------------------------------------------------------
+        //  Mutators.
+        //-----------------------------------------------------------------------------
+        void addSynapse(Synapse& syn);
+
+
+        //-----------------------------------------------------------------------------
+        //  Helper
+        //-----------------------------------------------------------------------------
+        string repr();
 
     public:
         sc_module_name name_;
-        quantity<si::electric_potential> vm_;
-        quantity<si::time> tau_;
-        std::vector<std::tuple<si::time, si::electric_potential> > data_;
-        std::vector<si::time> spikes_;
+        std::vector<std::tuple<double, double>> data_;
+        std::vector<double> spikes_;            // Time of spikes.
+
+
+    private:
+        // Collect synapses.
+        vector<shared_ptr<Synapse>> synapses_;
+        state_type state_;
+        double Cm_;
+        double Em_;
+        double Rm_;
+        double vm_;
+        double tau_;
+        double threshold_;
+        bool fired_;
+
+        // Helper variables.
+        double t_, prevT_;
+        double dt_;
+
 };
 
 #endif /* end of include guard: IAF_H */
