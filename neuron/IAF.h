@@ -60,7 +60,8 @@ class IAF : public sc_module
         sc_event nonZeroInject;
         sc_event nonZeroSynCurrent;
 
-        void decay( );
+        void decay();
+        void record();
         void handleInjection();                 // Tick when there is inject
         void handleSynapticInjection();
 
@@ -73,6 +74,12 @@ class IAF : public sc_module
         void setRefactory(double t);
         void setTau(double t);
         void setThreshold(double t);
+
+        
+        //-----------------------------------------------------------------------------
+        //  Accessor.
+        //-----------------------------------------------------------------------------
+        std::vector<std::tuple<double, double>> data( ) const;
 
         //-----------------------------------------------------------------------------
         //  Helper

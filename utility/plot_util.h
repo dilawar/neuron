@@ -15,6 +15,12 @@
 
 void plot_vectors(const std::vector<double>& t, const std::vector<double>& y);
 
+void plot_data(const std::vector<std::tuple<double, double> >& data
+        , const std::string& title
+        , const std::string& xlabel = "Time (sec)"
+        , const std::string& ylabel = "NA"
+        );
+
 void map2csv( const std::map<std::string, std::vector<double>>& data
         , const std::string& csvname
         , const std::string& delim = ","

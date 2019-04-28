@@ -44,6 +44,9 @@ void IAF::init()
     spikes_.clear();
     data_.clear();
 
+    SC_METHOD(record);
+    sensitive << clock.neg();
+
     SC_METHOD(decay);
     sensitive << clock.pos();
 
@@ -59,6 +62,12 @@ void IAF::init()
     refactory_ = 0.0;
     fired_ = false;
     numSynapses_ = 0;
+}
+
+void IAF::record( void )
+{
+    t_ = sc_time_stamp().to_seconds();
+    data_.push_back( make_tuple(t_, vm.read()));
 }
 
 std::string IAF::repr()
@@ -154,4 +163,9 @@ void IAF::addSynapse(shared_ptr<Synapse> syn)
     syn->inject(synapse_inject[numSynapses_]);
     synapses_.push_back(syn);
     numSynapses_ += 1;
+}
+
+std::vector<std::tuple<double, double>> IAF::data() const
+{
+    return data_;
 }

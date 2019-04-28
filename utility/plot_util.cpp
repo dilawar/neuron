@@ -24,6 +24,18 @@ void plot_vectors(const vector<double>& t, const vector<double>& y)
     gp.send1d(boost::make_tuple(t, y));
 }
 
+void plot_data(const vector<std::tuple<double, double>>& data
+        , const string& title
+        , const string& xlabel
+        , const string& ylabel)
+{
+    std::cout << "Plotting vector of size: " << data.size() << std::endl;
+    Gnuplot gp;
+    gp << "set xlabel '" << xlabel << "';set ylabel '" << ylabel << "';";
+    gp << "plot '-' with lp title '" << title << "' ;";
+    gp.send1d(data);
+}
+
 void map2csv( const map<string, vector<double>>& data, const string& csvname, const string& delim)
 {
     io::stream_buffer<io::file_sink> buf(csvname);

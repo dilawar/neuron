@@ -29,7 +29,6 @@ SC_MODULE(TestIAF)
     sc_signal<bool> spike2;
     sc_signal<bool> spike3;
 
-
     // And record vm 
     sc_signal<double> vm;
 
@@ -51,7 +50,7 @@ SC_MODULE(TestIAF)
         spike1.write(false);
         while(true)
         {
-            wait(3, SC_MS);
+            wait(2, SC_MS);
             spike1.write(true);
             wait(1, SC_MS);
             spike1.write(false);
@@ -135,6 +134,7 @@ int sc_main(int argc, char *argv[])
     auto vm = min_max_mean_std(tb.data["vm"]);
     cout << vm << endl;
 
+
 #if 0
 
     ASSERT_EQ(std::get<0>(resExc), std::get<0>(excExpected), "EXC");
@@ -148,5 +148,6 @@ int sc_main(int argc, char *argv[])
     ASSERT_EQ(std::get<3>(resInh), std::get<3>(inhExpected), "Inh");
 #endif
 
+    // plot_data( tb.dut->data(), "Exc+Inh" );
     return 0;
 }
