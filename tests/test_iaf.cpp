@@ -50,7 +50,7 @@ SC_MODULE(TestIAF)
         spike1.write(false);
         while(true)
         {
-            wait(2, SC_MS);
+            wait(3, SC_MS);
             spike1.write(true);
             wait(1, SC_MS);
             spike1.write(false);
@@ -83,9 +83,9 @@ SC_MODULE(TestIAF)
         dut->inject(inject);
 
         // Excitatory and inhibitory synapses. Add them to this dut.
-        syn1 = make_shared<Synapse>("exc1", 10e-9, 5e-3, 0.0);
-        syn2 = make_shared<Synapse>("exc2", 10e-9, 5e-3, 0.0 );
-        syn3 = make_shared<Synapse>("inh1", 5e-9, 15e-3, -90e-3 );
+        syn1 = make_shared<Synapse>("exc1", 10e-9, 05e-3, 00.0);
+        syn2 = make_shared<Synapse>("exc2", 10e-9, 05e-3, 00.0 );
+        syn3 = make_shared<Synapse>("inh1", 03e-9, 15e-3, -90e-3 );
 
         // Add spikes.
         syn1->spike(spike1);
