@@ -20,7 +20,7 @@
 #define MAX_SYNAPSES 100
 
 #include <systemc.h>
-#include "../synapse/Synapse.h"
+#include "Synapse.h"
 #include <vector>
 #include <tuple>
 #include <array>

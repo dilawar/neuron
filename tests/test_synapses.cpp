@@ -11,7 +11,7 @@
 
 #include <boost/assert.hpp>
 
-#include "../synapse/Synapse.h"
+#include "Synapse.h"
 #include "../utility/plot_util.h"
 #include "../utility/numeric.hpp"
 #include "../external/prettyprint.hpp"

@@ -30,8 +30,10 @@ find_package(Boost COMPONENTS log system filesystem iostreams)
 add_definitions( -DBOOST_LOG_DYN_LINK)
 
 include_directories( ${SystemC_INCLUDE_DIR} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
 add_definitions(-fPIC)
+
 # subdirectories.
 add_subdirectory(synapse)
 add_subdirectory(neuron)
@@ -49,12 +51,22 @@ set(LIBS_TO_LINKS
 # Add main executable.
 add_library(tantrika_static STATIC src/tantrika.cpp)
 add_library(tantrika SHARED src/tantrika.cpp)
-set_target_properties(tantrika tantrika_static PROPERTIES INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
+
 set_target_properties(tantrika_static PROPERTIES LIBRARY_OUTPUT_NAME tantrika)
-target_link_libraries(tantrika ${LIBS_TO_LINKS})
 target_link_libraries(tantrika_static ${LIBS_TO_LINKS})
+target_link_libraries(tantrika ${LIBS_TO_LINKS})
+
 
 # Add test directory at the end
 enable_testing()
 add_subdirectory(tests)
 
+# install
+include(GNUInstallDirs)
+install(TARGETS tantrika_static tantrika
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )

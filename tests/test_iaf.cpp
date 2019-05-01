@@ -11,7 +11,7 @@
 
 #include <boost/assert.hpp>
 
-#include "../neuron/IAF.h"
+#include "IAF.h"
 #include "../utility/plot_util.h"
 #include "../utility/numeric.hpp"
 #include "../external/prettyprint.hpp"

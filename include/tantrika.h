@@ -17,8 +17,8 @@
 #ifndef TANTRIKA_H
 #define TANTRIKA_H
 
-#include "neuron/IAF.h"
-#include "synapse/Synapse.h"
+#include "IAF.h"
+#include "Synapse.h"
 
 namespace tantrika {
 
