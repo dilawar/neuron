@@ -86,9 +86,11 @@ class IAF : public sc_module
         //-----------------------------------------------------------------------------
         string repr();
 
+        void save_data(const string& outfile="");
+
     private:
         // Collect synapses.
-        sc_module_name name_;
+        std::string name_;
         std::vector<std::tuple<double, double>> data_;
         std::vector<double> spikes_;            // Time of spikes.
         vector<shared_ptr<Synapse>> synapses_;

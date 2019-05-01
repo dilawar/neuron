@@ -5,7 +5,7 @@
  *   Organization:  NCBS Bangalore
  */
 
-#include "plot_util.h"
+#include "data_util.h"
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/algorithm/string.hpp>
@@ -60,5 +60,19 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
 
         csvF << endl;
     }
+    buf.close();
+}
+
+void write_to_csv(const vector<tuple<double,double>>& data, const string outfile, const string header)
+{
+    io::stream_buffer<io::file_sink> buf(outfile);
+    std::ostream f(&buf);
+
+    if(header.size() > 0)
+        f << header << endl;
+
+    for(auto v : data)
+        f << get<0>(v) << ',' << get<1>(v) << endl;
+
     buf.close();
 }

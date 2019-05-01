@@ -51,6 +51,7 @@ set(LIBS_TO_LINKS
 # Add main executable.
 add_library(tantrika_static STATIC src/tantrika.cpp)
 add_library(tantrika SHARED src/tantrika.cpp)
+add_dependencies(tantrika libsystemc)
 
 set_target_properties(tantrika_static PROPERTIES LIBRARY_OUTPUT_NAME tantrika)
 target_link_libraries(tantrika_static ${LIBS_TO_LINKS})

@@ -16,6 +16,7 @@
 
 #include "IAF.h"
 #include <systemc.h>
+#include "../utility/data_util.h"
 
 IAF::IAF(sc_module_name name, double em, double tau)
     : name_(name) 
@@ -168,4 +169,14 @@ void IAF::addSynapse(shared_ptr<Synapse> syn)
 std::vector<std::tuple<double, double>> IAF::data() const
 {
     return data_;
+}
+
+void IAF::save_data(const string& outfile)
+{
+    // If outfile is empty, then write to nauron name.
+    string filename(outfile);
+    if(outfile.size() == 0)
+        filename = name_ + ".csv";
+
+    write_to_csv(data_, filename, "time, vm");
 }

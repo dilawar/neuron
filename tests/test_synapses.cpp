@@ -12,7 +12,7 @@
 #include <boost/assert.hpp>
 
 #include "Synapse.h"
-#include "../utility/plot_util.h"
+#include "../utility/data_util.h"
 #include "../utility/numeric.hpp"
 #include "../external/prettyprint.hpp"
 #include "../external/assert.hpp"
