@@ -14,11 +14,12 @@ ExternalProject_Add(libsystemc
     URL ${LIBSYSTEMC_ROOT}/systemc-2.3.3.tar.gz
     CONFIGURE_COMMAND ${CMAKE_COMMAND} 
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DCMAKE_CXX_FLAGS=-fPIC
         -DBUILD_SHARED_LIBS=OFF 
         -DCMAKE_CXX_STANDARD=14
         -DDISABLE_COPYRIGHT_MESSAGE=ON
         <SOURCE_DIR>
-    BUILD_COMMAND $(MAKE) -j4
+    BUILD_COMMAND $(MAKE)
     )
 set(SystemC_INCLUDE_DIR ${LIBSYSTEMC_ROOT}/install/include)
 set(SystemC_LIBRARY ${LIBSYSTEMC_ROOT}/install/lib64/libsystemc.a)
@@ -30,6 +31,7 @@ add_definitions( -DBOOST_LOG_DYN_LINK)
 
 include_directories( ${SystemC_INCLUDE_DIR} )
 
+add_definitions(-fPIC)
 # subdirectories.
 add_subdirectory(synapse)
 add_subdirectory(neuron)
@@ -44,11 +46,15 @@ set(LIBS_TO_LINKS
     ${SystemC_LIBRARY}
     )
 
+# Add main executable.
+add_library(tantrika_static STATIC src/tantrika.cpp)
+add_library(tantrika SHARED src/tantrika.cpp)
+set_target_properties(tantrika tantrika_static PROPERTIES INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
+set_target_properties(tantrika_static PROPERTIES LIBRARY_OUTPUT_NAME tantrika)
+target_link_libraries(tantrika ${LIBS_TO_LINKS})
+target_link_libraries(tantrika_static ${LIBS_TO_LINKS})
 
 # Add test directory at the end
 enable_testing()
 add_subdirectory(tests)
 
-# Add main executable.
-add_executable(tantrika exp/experiment1.cpp)
-target_link_libraries(tantrika ${LIBS_TO_LINKS})
