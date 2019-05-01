@@ -26,9 +26,6 @@
 #include <array>
 #include <memory>
 
-using namespace boost::units;
-namespace si = boost::units::si;
-
 using namespace std;
 
 class IAF : public sc_module

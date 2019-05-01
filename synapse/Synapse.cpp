@@ -23,7 +23,7 @@ typedef odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
 
 Synapse::Synapse(sc_module_name name) : name_(name)
 {
-    g_ = 0.0*si::siemens;
+    g_ = 0.0;
 }
 
 std::string Synapse::repr()
@@ -36,15 +36,15 @@ std::string Synapse::repr()
 
 std::string Synapse::name()
 {
-    return string((const char*)name_);
+    return name_;
 }
 
 
 Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool isalpha): 
     name_(name) 
-    , gbar_(gbar*si::siemens)
-    , tau1_(tau*si::second)
-    , Esyn_(Esyn*si::volt)
+    , gbar_(gbar)
+    , tau1_(tau)
+    , Esyn_(Esyn)
 {
     SC_METHOD(processAlpha)
     sensitive << clock.pos();
@@ -52,7 +52,7 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
     SC_METHOD(monitor_spike);
     sensitive << spike;
 
-    g_ = 0.0*si::siemens;
+    g_ = 0.0;
     BOOST_LOG_TRIVIAL(debug) << repr();
 }
 
@@ -77,18 +77,18 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
         , double Esyn, double odedt
         ): 
     name_(name) 
-    , gbar_(gbar*si::siemens)
-    , tau1_(tau1*si::second)
-    , tau2_(tau2*si::second)
-    , Esyn_(Esyn*si::volt)
+    , gbar_(gbar)
+    , tau1_(tau1)
+    , tau2_(tau2)
+    , Esyn_(Esyn)
     , ode_tick_(odedt)
 {
-    g_ = 0.0*si::siemens;
-    state_[0] = 0.0; //g_/(1*si::siemens);
-    state_[1] = 0.0; //(1*si::siemens);
+    g_ = 0.0;
+    state_[0] = 0.0; 
+    state_[1] = 0.0; 
 
-    t_ = 0.0*si::second;
-    prevT_ = 0.0*si::second;
+    t_ = 0.0;
+    prevT_ = 0.0;
 
     odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
     BOOST_LOG_TRIVIAL(debug) << repr();
@@ -118,8 +118,8 @@ void Synapse::tickOdeClock(void)
 /* ----------------------------------------------------------------------------*/
 void Synapse::monitor_spike( )
 {
-    auto t = sc_time_stamp().to_seconds() * si::second;
-    vPost_ = post.read()*si::volt;
+    auto t = sc_time_stamp().to_seconds();
+    vPost_ = post.read();
 
     // Time of previous spike.
     if(spike.read() == true)
@@ -128,13 +128,13 @@ void Synapse::monitor_spike( )
 
 void Synapse::injectCurrent( )
 {
-    inject.write(quantity_cast<double>(g_*(vPost_-Esyn_)));
+    inject.write(g_*(vPost_-Esyn_));
 }
 
 void Synapse::processAlpha() 
 {
-    t_ = sc_time_stamp().to_seconds() * si::second;
-    g_ = 0.0*si::siemens;
+    t_ = sc_time_stamp().to_seconds();
+    g_ = 0.0;
     for (auto tSpike : t_spikes_)
     {
         if(tSpike < t_)
@@ -143,6 +143,8 @@ void Synapse::processAlpha()
             g_ += gbar_ * T * exp(-T);
         }
     }
+
+    data_.push_back(std::make_pair(t_, g_));
     injectCurrent();
 }
 
@@ -153,9 +155,6 @@ void Synapse::processAlpha()
 /* ----------------------------------------------------------------------------*/
 void Synapse::start_of_simulation(void)
 {
-    // sc_clock *channel = dynamic_cast<sc_clock *>(clock.get_interface());
-    // cout << (channel ? channel->period() : SC_ZERO_TIME).to_seconds()*si::second;
-    // dt_ = (channel ? channel->period() : SC_ZERO_TIME).to_seconds()*si::second;
 } 
 
 void Synapse::printODEData()
@@ -174,11 +173,9 @@ void Synapse::printODEData()
 /* ----------------------------------------------------------------------------*/
 void Synapse::processODE() 
 {
-    t_ = sc_time_stamp().to_seconds() * si::second;
-    double dt = quantity_cast<double>(t_-prevT_);
+    t_ = sc_time_stamp().to_seconds();
+    double dt = (t_-prevT_);
     std::cout << "Warn: This method does not work very well." << std::endl;
-
-    // cout << 'x' << t_ << ' ' << prevT_ << ' ' << dt << ' ' << gbar_ << endl;
 
     if( dt == 0.0)
         return;
@@ -200,10 +197,7 @@ void Synapse::processODE()
             , [this](const state_type &dy, state_type &dydt, double t) {
                 this->odeSys_->alphaSynapse(dy, dydt, t); 
             }
-            , state_
-            , quantity_cast<double>(prevT_/si::second)
-            , quantity_cast<double>(t_/si::second)
-            , 1e-5
+            , state_, prevT_, t_, 1e-5
             // , synapse_observer(data_)
             );
 #else
@@ -212,8 +206,8 @@ void Synapse::processODE()
                 this->odeSys_->alphaSynapse(dy, dydt, t); 
             }
             , state_
-            , quantity_cast<double>(prevT_/si::second)
-            , quantity_cast<double>(t_/si::second)
+            , quantity_cast<double>(prevT_)
+            , quantity_cast<double>(t_)
             , dt
             // , synapse_observer(data_)
             );
@@ -223,7 +217,14 @@ void Synapse::processODE()
     cout.flush();
 
     prevT_ = t_;
-    g_ = state_[0] * si::siemens;
+    g_ = state_[0];
     injectCurrent();
 }
 
+void Synapse::save_data(const std::string& filename)
+{
+    string outfile(filename);
+    if(filename.size() < 1)
+        outfile = name_ + ".csv";
+
+}

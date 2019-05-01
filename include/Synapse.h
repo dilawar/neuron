@@ -15,17 +15,12 @@
 #define SYNAPSEBASE_H
 
 #include <systemc.h>
-#include <boost/units/systems/si.hpp>
-#include <boost/units/systems/si/io.hpp>
 #include <vector>
 #include <tuple>
 #include <array>
 #include <memory>
 
 #include "OdeSystem.h"
-
-using namespace boost::units;
-namespace si = boost::units::si;
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -81,6 +76,8 @@ class Synapse: public sc_module
         std::string name();
         void printODEData();
 
+        void save_data(const std::string& filename="");
+
         // Synapse(sc_module_name name);
         Synapse(sc_module_name name);
 
@@ -92,33 +89,28 @@ class Synapse: public sc_module
                 , double odedt=3e-5
                 );
 
-        sc_module_name name_;
-        quantity<si::conductance> g_, gbar_, leftover_;
-        quantity<si::time> tau1_, tau2_;            /* Decay contants. */
-        quantity<si::electric_potential> Esyn_;
-        quantity<si::electric_potential> vPre_, vPost_;
+    private:
 
-        quantity<si::time> t_;                  /* Current Time. */
-        quantity<si::time> prevT_;              /* Previous tick time. ODE solver. */
-        quantity<si::time> tspike_;             /* Previous firing. */
+        std::string name_;
+        double g_, gbar_, leftover_;
+        double tau1_, tau2_;            /* Decay contants. */
+        double Esyn_;
+        double vPre_, vPost_;
+
+        double t_;                  /* Current Time. */
+        double prevT_;              /* Previous tick time. ODE solver. */
+        double tspike_;             /* Previous firing. */
         
         // Keep the spike timings.
-        std::vector<quantity<si::time>> t_spikes_;
+        std::vector<double> t_spikes_;
         
         // Ode System
         std::unique_ptr<SynapseODESystem> odeSys_;
 
         sc_signal<bool> ode_clock;              // A slower clock of ODE solver.
         double ode_tick_;
-
-        // std::array<quantity<si::conductance>, 2> state_;
-        // std::array<double, 2> state_;
         state_type state_;
-
-        // Collect all data.
-        //std::vector<std::tuple<quantity<si::time>, quantity<si::conductance>> gVec_;
-        std::vector<std::tuple<quantity<si::time>, quantity<si::current> > > injectVec_;
-
+        std::vector<std::tuple<double, double>> injectVec_;
         std::vector<std::tuple<double, double>>  data_;
 };
 

@@ -23,13 +23,9 @@
 #include <vector>
 #include <tuple>
 
-#include <boost/units/systems/si.hpp>
-#include <boost/units/systems/si/io.hpp>
 #include <boost/numeric/odeint.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/format.hpp>
-
-using namespace boost::units;
 
 typedef std::array<double, 2> state_type;
 
@@ -60,13 +56,13 @@ struct synapse_observer
 
 struct SynapseODESystem
 {
-    SynapseODESystem( quantity<si::conductance> gbar, quantity<si::time> tau1, quantity<si::time> tau2) 
+    SynapseODESystem(double gbar,  double tau1, double tau2) 
         : gbar(gbar), tau1(tau1), tau2(tau2)
     {
         spikes.clear();
     }
 
-    double spike(const quantity<si::time> t)
+    double spike(const double t)
     {
         double val = 1.0;
     #if 1
@@ -84,13 +80,13 @@ struct SynapseODESystem
         return val;
     }
 
-    void addSpike(const quantity<si::time> t)
+    void addSpike(const double t)
     {
         // cout << "Adding spike";
         spikes.push_back(t);
     }
 
-    void addSpikes(const std::vector<quantity<si::time>> spks)
+    void addSpikes(const std::vector<double> spks)
     {
         spikes.insert(spikes.end(), spks.begin(), spks.end());
     }
@@ -99,27 +95,19 @@ struct SynapseODESystem
     // Otherwise the solution would not match the alpha synapse.
     void alphaSynapse(const state_type &x, state_type& dxdt, const double t)
     {
-        double gb = quantity_cast<double>(gbar/si::siemens);
-        double _tau1 = quantity_cast<double>(tau1/si::second);
-        double _tau2 = quantity_cast<double>(tau2/si::second);
-
-        double _gscale = _tau1;
-
-        int spikeVal = spike(t*si::second);
+        double _gscale = tau1;
+        int spikeVal = spike(t);
 
         dxdt[0] = x[1];
-        dxdt[1] = (-x[0] - (_tau1+_tau2)*x[1] + gb/_gscale*spikeVal)/_tau1/_tau2;
+        dxdt[1] = (-x[0] - (tau1+tau2)*x[1] + gbar/_gscale*spikeVal)/tau1/tau2;
 
         if(spikeVal > 0)
             BOOST_LOG_TRIVIAL(info) << "Spike @" << t << ' ' << spikeVal << endl;
-
-        // std::cout << boost::format( "@t%5% %1% dydy %2% tau1 %3% tau2 %4% gb %6%\n"
-              // ) % dxdt[0] % dxdt[1] % _tau1 % _tau2 % t % gb;
     }
 
-    quantity<si::conductance> gbar;
-    quantity<si::time> tau1, tau2;
-    std::vector<quantity<si::time>> spikes;
+    double gbar;
+    double tau1, tau2;
+    std::vector<double> spikes;
 
     double epsRel = 1e-6;
     double epsAbs = 1e-6;
