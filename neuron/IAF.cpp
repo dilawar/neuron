@@ -45,6 +45,9 @@ void IAF::init()
     spikes_.clear();
     data_.clear();
 
+    std::random_device rd;
+    gen_.seed( rd() );
+
     SC_METHOD(record);
     sensitive << clock.neg();
 
@@ -112,6 +115,11 @@ void IAF::handleOnFire()
     vm_ = Em_;
 }
 
+double IAF::noise()
+{
+    return dist_(gen_);
+}
+
 void IAF::decay()
 {
     t_ = sc_time_stamp().to_seconds();
@@ -137,7 +145,7 @@ void IAF::decay()
     if(sum_all_synapse_inject_ != 0.0)
         nonZeroSynCurrent.notify();
 
-    vm_ += dt_*(-vm+Em_)/tau_;
+    vm_ += dt_*(-vm+Em_)/tau_ + noise();
     if(vm_ >= threshold_)
     {
         vm_ = 40e-3;

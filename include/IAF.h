@@ -25,6 +25,7 @@
 #include <tuple>
 #include <array>
 #include <memory>
+#include <random>
 
 using namespace std;
 
@@ -73,7 +74,6 @@ class IAF : public sc_module
         void setRefactory(double t);
         void setTau(double t);
         void setThreshold(double t);
-
         
         //-----------------------------------------------------------------------------
         //  Accessor.
@@ -84,6 +84,7 @@ class IAF : public sc_module
         //  Helper
         //-----------------------------------------------------------------------------
         string repr();
+        double noise();
 
         void save_data(const string& outfile="");
 
@@ -108,6 +109,9 @@ class IAF : public sc_module
         double dt_;
         double sum_all_synapse_inject_;
 
+        // noise source.
+        std::default_random_engine gen_;
+        std::uniform_real_distribution<double>  dist_{-1e-3, 1e-3};
 };
 
 #endif /* end of include guard: IAF_H */
