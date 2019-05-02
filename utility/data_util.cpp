@@ -12,6 +12,8 @@
 #include <boost/range/combine.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/log/trivial.hpp>
+
 #include <iostream>
 
 using namespace std;
@@ -36,8 +38,19 @@ void plot_data(const vector<std::tuple<double, double>>& data
     gp.send1d(data);
 }
 
-void map2csv( const map<string, vector<double>>& data, const string& csvname, const string& delim)
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Write a map<string, vector<double>> to csv file.
+ *
+ * @Param data
+ * @Param csvname
+ * @Param delim
+ */
+/* ----------------------------------------------------------------------------*/
+void map2csv( const map<string, vector<double>>& data, const string& csvname, const char delim)
 {
+    std::string delimStr(1, delim); // for boost join.
+
     io::stream_buffer<io::file_sink> buf(csvname);
     std::ostream csvF(&buf);
 
@@ -51,18 +64,28 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
         nVals = min(v.second.size(), nVals);
     }
 
-    csvF << boost::algorithm::join(header, delim) << delim << endl;
+    csvF << boost::algorithm::join(header, delimStr) << endl;
 
     for (size_t i = 0; i < nVals; i++) 
     {
         for(auto v : data)
             csvF << v.second[i] << delim;
-
-        csvF << endl;
+        csvF.seekp(-1, std::ios_base::cur);     // Remove last delim
+        csvF << endl;                           
     }
     buf.close();
+    BOOST_LOG_TRIVIAL(info) << "Saved " << data.size() << " entries to " << csvname;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Write a vector of tuple to csv file.
+ *
+ * @Param data      vector<tuple<double, double>> data_
+ * @Param outfile   output file. If not given, use name_ + ".csv"
+ * @Param header    header to add to csv file.
+ */
+/* ----------------------------------------------------------------------------*/
 void write_to_csv(const vector<tuple<double,double>>& data, const string outfile, const string header)
 {
     io::stream_buffer<io::file_sink> buf(outfile);
@@ -75,4 +98,5 @@ void write_to_csv(const vector<tuple<double,double>>& data, const string outfile
         f << get<0>(v) << ',' << get<1>(v) << endl;
 
     buf.close();
+    BOOST_LOG_TRIVIAL(info) << "Saved " << data.size() << " entries to " << outfile;
 }

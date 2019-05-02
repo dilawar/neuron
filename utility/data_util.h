@@ -26,7 +26,7 @@ void plot_data(const std::vector<std::tuple<double, double> >& data
 
 void map2csv( const std::map<std::string, std::vector<double>>& data
         , const std::string& csvname
-        , const std::string& delim = ","
+        , const char delim = ','
         );
 
 void write_to_csv(const vector<tuple<double,double>>& data, const string outfile, const string header="");

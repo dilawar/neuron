@@ -25,6 +25,7 @@ SC_MODULE(TestIAF)
 
     // Inject current if any.
     sc_signal<double> inject;
+    // Other ports.
     sc_signal<bool> spike1;
     sc_signal<bool> spike2;
     sc_signal<bool> spike3;
@@ -34,13 +35,12 @@ SC_MODULE(TestIAF)
 
     void gen_inh_stim() 
     {
-        wait(1, SC_MS);
         spike3.write(false);
         while(true)
         {
-            wait(1, SC_MS);
+            wait(9.9, SC_MS);
             spike3.write(true);
-            wait(1, SC_MS);
+            wait(0.1, SC_MS);
             spike3.write(false);
         }
     }
@@ -50,9 +50,9 @@ SC_MODULE(TestIAF)
         spike1.write(false);
         while(true)
         {
-            wait(3, SC_MS);
+            wait(9.9, SC_MS);
             spike1.write(true);
-            wait(1, SC_MS);
+            wait(0.1, SC_MS);
             spike1.write(false);
         }
     }
@@ -63,7 +63,8 @@ SC_MODULE(TestIAF)
 
         // Store to plot later.
         data["time"].push_back(t);
-        data["inject"].push_back(inject);
+        //double syn = syn1->inject.read() + syn3->inject.read();
+        //data["syn"].push_back(syn);
         data["vm"].push_back(vm);
     }
 
@@ -82,19 +83,18 @@ SC_MODULE(TestIAF)
         dut->vm(vm);
         dut->inject(inject);
 
-        // Excitatory and inhibitory synapses. Add them to this dut.
-        syn1 = make_shared<Synapse>("exc1", 10e-9, 05e-3, 00.0);
-        syn2 = make_shared<Synapse>("exc2", 10e-9, 05e-3, 00.0 );
-        syn3 = make_shared<Synapse>("inh1", 03e-9, 15e-3, -90e-3 );
+        // Excitatory synapses.
+        syn1 = make_shared<Synapse>("exc1", 5e-9, 10e-3, 0.0);
+
+        // Inhibitory synapse. Slower decay.
+        syn3 = make_shared<Synapse>("inh1", 15e-9, 20e-3, -70e-3 );
 
         // Add spikes.
         syn1->spike(spike1);
-        syn2->spike(spike2);
         syn3->spike(spike3);
         
         // Add to DUT.
         dut->addSynapse(syn1);
-        dut->addSynapse(syn2);
         dut->addSynapse(syn3);
 
         gen_.seed(rd_());
@@ -104,6 +104,8 @@ SC_MODULE(TestIAF)
     // Methods
     void save_data( )
     {
+        syn1->save_data();
+        syn3->save_data();
         map2csv(data, "test_iaf1.csv");
     }
 
@@ -114,7 +116,6 @@ SC_MODULE(TestIAF)
 
     unique_ptr<IAF> dut;
     shared_ptr<Synapse> syn1;
-    shared_ptr<Synapse> syn2;
     shared_ptr<Synapse> syn3;
 
     std::map<string, vector<double> > data;
@@ -128,7 +129,7 @@ int sc_main(int argc, char *argv[])
 
     TestIAF tb("TestBench");
     tb.clock(clock);
-    sc_start(200, SC_MS);
+    sc_start(500, SC_MS);
     tb.save_data();
 
     auto vm = min_max_mean_std(tb.data["vm"]);

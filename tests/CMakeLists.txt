@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.0)
 find_package(Boost COMPONENTS unit_test_framework)
 
 foreach(_test test_hebbian test_synapses test_iaf)

@@ -54,13 +54,15 @@ class IAF : public sc_module
         //-----------------------------------------------------------------------------
         //  Events.
         //-----------------------------------------------------------------------------
-        sc_event nonZeroInject;
-        sc_event nonZeroSynCurrent;
+        sc_event nonZeroInject;                 // If non-zero injection of current.
+        sc_event nonZeroSynCurrent;             // If non-zero injection via synapses.
+        sc_event onFire;                        // If this neuron has fired.
 
         void decay();
         void record();
         void handleInjection();                 // Tick when there is inject
         void handleSynapticInjection();
+        void handleOnFire();
 
         void model(const double &vm, double &dvdt, const double t);
 
@@ -104,8 +106,6 @@ class IAF : public sc_module
         // Helper variables.
         double t_, prevT_;
         double dt_;
-
-        size_t numSynapses_;
         double sum_all_synapse_inject_;
 
 };

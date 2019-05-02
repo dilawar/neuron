@@ -57,12 +57,14 @@ void IAF::init()
     SC_METHOD(handleSynapticInjection);
     sensitive << nonZeroSynCurrent;
 
+    SC_METHOD(handleOnFire);
+    sensitive << onFire;
+
     t_ = sc_time_stamp().to_seconds();
     prevT_ = t_;
     threshold_ = Em_ + 10e-3;
     refactory_ = 0.0;
     fired_ = false;
-    numSynapses_ = 0;
 }
 
 void IAF::record( void )
@@ -104,6 +106,12 @@ void IAF::model(const double &vm, double &vmdt, const double t)
     vmdt = (-vm+Em_ + inject.read()*Rm_)/tau_;
 }
 
+void IAF::handleOnFire()
+{
+    // reset.
+    vm_ = Em_;
+}
+
 void IAF::decay()
 {
     t_ = sc_time_stamp().to_seconds();
@@ -112,15 +120,10 @@ void IAF::decay()
     if(dt_ == 0.0)
         return;
 
+    // Refactory period.
+    if(! spikes_.empty() > 0 && t_ - spikes_.back() <= refactory_)
+        return;
 
-    if(fired_)
-    {
-        vm_ = Em_;
-
-        // Reset fired to false only after refactory period.
-        if(t_ - spikes_.back() >= refactory_)
-            fired_ = false;
-    }
 
     // Inject only when fired_ is set to false or inject value is non-zero.
     if((inject != 0.0) && (! fired_))
@@ -128,7 +131,7 @@ void IAF::decay()
 
     // Collect currents from synspases.
     sum_all_synapse_inject_ = 0.0;
-    for (size_t i = 0; i < numSynapses_; i++) 
+    for (size_t i = 0; i < synapses_.size(); i++) 
         sum_all_synapse_inject_ += synapse_inject[i].read();
 
     if(sum_all_synapse_inject_ != 0.0)
@@ -137,9 +140,9 @@ void IAF::decay()
     vm_ += dt_*(-vm+Em_)/tau_;
     if(vm_ >= threshold_)
     {
-        vm_ = 10e-3;
+        vm_ = 40e-3;
         spikes_.push_back(t_);
-        fired_ = true;
+        onFire.notify();
     }
     vm.write(vm_);
     prevT_ = t_;
@@ -161,9 +164,8 @@ void IAF::addSynapse(shared_ptr<Synapse> syn)
     // BOOST_LOG_TRIVIAL(debug) << "Added synapse " << syn << " to " << name_;
     syn->post(vm);
     syn->clock(clock);
-    syn->inject(synapse_inject[numSynapses_]);
+    syn->inject(synapse_inject[synapses_.size()]);
     synapses_.push_back(syn);
-    numSynapses_ += 1;
 }
 
 std::vector<std::tuple<double, double>> IAF::data() const

@@ -12,8 +12,9 @@
 #include <boost/log/trivial.hpp>
 #include <boost/numeric/odeint.hpp>
 
-#include "Synapse.h"
+#include "../include/Synapse.h"
 #include "../engine/engine.h"
+#include "../utility/data_util.h"
 
 using namespace std;
 using namespace boost;
@@ -145,6 +146,7 @@ void Synapse::processAlpha()
     }
 
     data_.push_back(std::make_pair(t_, g_));
+
     injectCurrent();
 }
 
@@ -226,5 +228,10 @@ void Synapse::save_data(const std::string& filename)
     string outfile(filename);
     if(filename.size() < 1)
         outfile = name_ + ".csv";
+    write_to_csv(data_, outfile, "time, g");
+}
 
+const std::vector<std::tuple<double, double> >* Synapse::data() const
+{
+    return &data_;
 }

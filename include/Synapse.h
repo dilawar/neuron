@@ -89,6 +89,8 @@ class Synapse: public sc_module
                 , double odedt=3e-5
                 );
 
+        const std::vector<std::tuple<double, double> >*  data() const;
+
     private:
 
         std::string name_;
