@@ -45,6 +45,7 @@ void IAF::init()
     spikes_.clear();
     data_.clear();
 
+    noise_ = 0.0;
     std::random_device rd;
     gen_.seed( rd() );
 
@@ -74,6 +75,12 @@ void IAF::record( void )
 {
     t_ = sc_time_stamp().to_seconds();
     data_.push_back( make_tuple(t_, vm.read()));
+}
+
+void IAF::setNoise( double eps)
+{
+    assert(eps >= 0.0);
+    noise_ = eps;
 }
 
 std::string IAF::repr()
@@ -117,7 +124,9 @@ void IAF::handleOnFire()
 
 double IAF::noise()
 {
-    return dist_(gen_);
+    if(noise_ == 0.0)
+        return 0.0;
+    return noise_*dist_(gen_);
 }
 
 void IAF::decay()
@@ -132,7 +141,6 @@ void IAF::decay()
     if(! spikes_.empty() > 0 && t_ - spikes_.back() <= refactory_)
         return;
 
-
     // Inject only when fired_ is set to false or inject value is non-zero.
     if((inject != 0.0) && (! fired_))
         nonZeroInject.notify();
@@ -145,7 +153,7 @@ void IAF::decay()
     if(sum_all_synapse_inject_ != 0.0)
         nonZeroSynCurrent.notify();
 
-    vm_ += dt_*(-vm+Em_)/tau_ + noise();
+    vm_ += dt_*(-vm+Em_+noise())/tau_;
     if(vm_ >= threshold_)
     {
         vm_ = 40e-3;

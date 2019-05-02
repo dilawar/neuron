@@ -33,29 +33,32 @@ SC_MODULE(TestIAF)
     // And record vm 
     sc_signal<double> vm;
 
-    void gen_inh_stim() 
-    {
-        spike3.write(false);
-        while(true)
-        {
-            wait(9.9, SC_MS);
-            spike3.write(true);
-            wait(0.1, SC_MS);
-            spike3.write(false);
-        }
-    }
+    double spikeDt = 24.9;
 
     void gen_exc_stim() 
     {
         spike1.write(false);
         while(true)
         {
-            wait(9.9, SC_MS);
+            wait(spikeDt, SC_MS);
             spike1.write(true);
-            wait(0.1, SC_MS);
+            wait(0.1, SC_MS); // doesn't matter. Edge sensitive.
             spike1.write(false);
         }
     }
+
+    void gen_inh_stim() 
+    {
+        spike3.write(false);
+        while(true)
+        {
+            wait(spikeDt, SC_MS);
+            spike3.write(true);
+            wait(0.1, SC_MS);
+            spike3.write(false);
+        }
+    }
+
 
     void record()
     {
@@ -63,8 +66,10 @@ SC_MODULE(TestIAF)
 
         // Store to plot later.
         data["time"].push_back(t);
-        //double syn = syn1->inject.read() + syn3->inject.read();
-        //data["syn"].push_back(syn);
+        double syn = syn1->inject.read() + syn3->inject.read();
+        data["syn"].push_back(syn);
+        data["exc"].push_back(syn1->inject.read());
+        data["inh"].push_back(syn3->inject.read());
         data["vm"].push_back(vm);
     }
 
@@ -79,15 +84,16 @@ SC_MODULE(TestIAF)
         sensitive << clock.neg();
 
         dut = make_unique<IAF>("iaf1");
+        // dut->setNoise(0.1e-3);
         dut->clock(clock);
         dut->vm(vm);
         dut->inject(inject);
 
         // Excitatory synapses.
-        syn1 = make_shared<Synapse>("exc1", 5e-9, 10e-3, 0.0);
+        syn1 = make_shared<Synapse>("exc1", 10e-9, 12e-3, 0.0);
 
         // Inhibitory synapse. Slower decay.
-        syn3 = make_shared<Synapse>("inh1", 15e-9, 20e-3, -70e-3 );
+        syn3 = make_shared<Synapse>("inh1", 30e-9, 20e-3, -70e-3 );
 
         // Add spikes.
         syn1->spike(spike1);
@@ -129,12 +135,11 @@ int sc_main(int argc, char *argv[])
 
     TestIAF tb("TestBench");
     tb.clock(clock);
-    sc_start(500, SC_MS);
+    sc_start(1000, SC_MS);
     tb.save_data();
 
     auto vm = min_max_mean_std(tb.data["vm"]);
     cout << vm << endl;
-
 
 #if 0
 

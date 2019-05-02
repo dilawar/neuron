@@ -39,6 +39,7 @@ class IAF : public sc_module
         //  Constructors.
         //-----------------------------------------------------------------------------
         IAF(sc_module_name name, double em=-65e-3, double tau=10e-3);
+
         IAF(sc_module_name name, double em, double cm, double rm);
 
         void init();
@@ -73,6 +74,7 @@ class IAF : public sc_module
         void addSynapse(shared_ptr<Synapse> syn);
         void setRefactory(double t);
         void setTau(double t);
+        void setNoise(double eps);
         void setThreshold(double t);
         
         //-----------------------------------------------------------------------------
@@ -111,7 +113,8 @@ class IAF : public sc_module
 
         // noise source.
         std::default_random_engine gen_;
-        std::uniform_real_distribution<double>  dist_{-1e-3, 1e-3};
+        std::uniform_real_distribution<double>  dist_{-1, 1};
+        double noise_;
 };
 
 #endif /* end of include guard: IAF_H */

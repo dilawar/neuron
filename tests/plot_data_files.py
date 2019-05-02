@@ -14,7 +14,27 @@ import matplotlib.pyplot as plt
 mpl.style.use( ['bmh'] )
 import pandas as pd
 
+def plot_single_csv(f):
+    if ':' in f:
+        f, fptype = f.split(':')
+    df = pd.read_csv(f)
+    df.plot(x='time', subplots=True)
+
+
 def main(args):
+    if len(args.input_ptype) == 1:
+        plot_single_csv(args.input_ptype[0])
+    else:
+        plot_multiple(args)
+
+    plt.tight_layout()
+    if args.output:
+        plt.savefig(args.output)
+    else:
+        plt.show()
+
+
+def plot_multiple(args):
     plt.figure(figsize=(8, 1.75*len(args.input_ptype)))
     for i, f in enumerate(args.input_ptype):
         fptype = 'line'
@@ -30,12 +50,6 @@ def main(args):
         if  len(df.columns) > 2:
             df.plot(x='time', y=col[1], kind=fptype, secondary_y=True, ax=ax)
         ax.set_title(f, fontsize=9)
-
-    plt.tight_layout()
-    if args.output:
-        plt.savefig(args.output)
-    else:
-        plt.show()
 
 
 if __name__ == '__main__':

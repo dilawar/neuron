@@ -8,7 +8,9 @@
 #include <memory>
 #include <sstream>
 #include <functional>
+#include <boost/range/adaptor/reversed.hpp>
 #include <boost/format.hpp>
+
 #include <boost/log/trivial.hpp>
 #include <boost/numeric/odeint.hpp>
 
@@ -136,12 +138,16 @@ void Synapse::processAlpha()
 {
     t_ = sc_time_stamp().to_seconds();
     g_ = 0.0;
-    for (auto tSpike : t_spikes_)
+
+    // Any spike which occured 10*tau_ before is not worth computing.
+    for (auto tSpike : boost::adaptors::reverse(t_spikes_))
     {
         if(tSpike < t_)
         {
             auto T = (t_-tSpike)/tau1_;
             g_ += gbar_ * T * exp(-T);
+            if( T > 10)
+                break;
         }
     }
 
