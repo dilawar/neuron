@@ -1,12 +1,14 @@
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 from brian2 import *
 
 def main():
-    N = 100
+    N = 1000
 
     # input
     #  P = NeuronGroup(N, 'dx/dt= 20*Hz : 1', threshold='x>1', reset='x=0')
     P = NeuronGroup(N, 'rates :Hz', threshold='rand()<rates*dt')
-    P.rates = 20*Hz
+    P.rates = 50*Hz
     #  P = PoissonGroup(N, 20*Hz)
 
     Cm = 100e-12*farad
@@ -16,10 +18,8 @@ def main():
     Erest = -65*mV
 
     # excitatory synapses.
-    gEbar = 30 * nS
-    gIbar = 20 * nS
-    tauE = 10 * ms
-    tauI = 30 * ms
+    gEbar, tauE = 10*nS, 10*ms
+    gIbar, tauI = 5*nS, 20*ms
 
     VeSyn = 0.0*mV    # excitatory reversal potential.
     ViSyn = -70*mV    # inhibitory reversal potential.
@@ -52,23 +52,29 @@ def main():
                 gI=gIbar*exp(-(t-preT)/tauI)
                 preT = t
             '''
+            , delay = 1*ms
             )
     SI.connect('i==j')
 
     SM = SpikeMonitor(G, variables=['v'])
     SN = SpikeMonitor(P) #, variables=['x'])
     M = StateMonitor(G, 'v', record=True)
+    F = PopulationRateMonitor(G)
 
-    run(2*second)
+    run(0.5*second)
 
-    plt.subplot(211)
-    #plot(M.t, M.v.T)
-    plt.xlabel('t')
-    plt.ylabel('v')
+    plt.subplot(311)
+    plot(M.t, M.v[1:5].T, alpha=0.5)
+    #plt.xlabel('t')
+    #plt.ylabel('v')
 
-    plt.subplot(212)
-    plot(SM.t, SM.i, '.')
-    #plot(SN.t, SN.i, '.')
+    plt.subplot(312)
+    plt.plot(SM.t, SM.i, 'k.', markersize=3)
+    plt.subplot(313)
+    plt.plot(F.t, F.smooth_rate(width=10*ms))
+    plt.ylabel('Hz')
+
+    plt.tight_layout()
     plt.show()
 
 if __name__ == '__main__':
