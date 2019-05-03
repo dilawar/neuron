@@ -14,7 +14,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/numeric/odeint.hpp>
 
-#include "../include/Synapse.h"
+#include "../include/SynapseBase.h"
 #include "../engine/engine.h"
 #include "../utility/data_util.h"
 
@@ -24,32 +24,14 @@ namespace odeint = boost::numeric::odeint;
 
 typedef odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
 
-Synapse::Synapse(sc_module_name name) : name_(name)
-{
-    g_ = 0.0;
-}
-
-std::string Synapse::repr()
-{
-    std::stringstream ss;
-    ss << boost::format("SYNAPSE:%1%, gbar=%2%, Esyn=%3% tau1=%4% tau2=%5%\n") 
-        % name_ % gbar_ % Esyn_ % tau1_ % tau2_;
-    return ss.str();
-}
-
-std::string Synapse::name()
-{
-    return name_;
-}
-
-
-Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool isalpha): 
+SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau, double Esyn):
     name_(name) 
     , gbar_(gbar)
     , tau1_(tau)
     , Esyn_(Esyn)
 {
-    SC_METHOD(processAlpha)
+    //SC_METHOD(processAlpha)
+    SC_METHOD(processSingleExp)
     sensitive << clock.pos();
 
     SC_METHOD(monitor_spike);
@@ -58,6 +40,21 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
     g_ = 0.0;
     BOOST_LOG_TRIVIAL(debug) << repr();
 }
+
+
+std::string SynapseBase::repr()
+{
+    std::stringstream ss;
+    ss << boost::format("SYNAPSE:%1%, gbar=%2%, Esyn=%3% tau1=%4% tau2=%5%\n") 
+        % name_ % gbar_ % Esyn_ % tau1_ % tau2_;
+    return ss.str();
+}
+
+std::string SynapseBase::name()
+{
+    return name_;
+}
+
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -76,7 +73,7 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau, double Esyn, bool
  * @Param dt
  */
 /* ----------------------------------------------------------------------------*/
-Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
+SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double tau2
         , double Esyn, double odedt
         ): 
     name_(name) 
@@ -84,7 +81,6 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     , tau1_(tau1)
     , tau2_(tau2)
     , Esyn_(Esyn)
-    , ode_tick_(odedt)
 {
     g_ = 0.0;
     state_[0] = 0.0; 
@@ -93,24 +89,10 @@ Synapse::Synapse(sc_module_name name, double gbar, double tau1, double tau2
     t_ = 0.0;
     prevT_ = 0.0;
 
-    odeSys_ = std::make_unique<SynapseODESystem>(gbar_, tau1_, tau2_);
-    BOOST_LOG_TRIVIAL(debug) << repr();
-
-    SC_THREAD( tickOdeClock );
-
     // Make it sensitive to spike as well. Otherwise we will not collect spikes.
     SC_METHOD(processODE);
-    sensitive << spike << ode_clock;
+    sensitive << spike;
 
-}
-
-void Synapse::tickOdeClock(void)
-{
-    while(true)
-    {
-        ode_clock.write(! ode_clock.read());
-        wait(ode_tick_, SC_SEC);
-    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -119,7 +101,7 @@ void Synapse::tickOdeClock(void)
  * conductance. DO NOT USE IT IN ODE solver.
  */
 /* ----------------------------------------------------------------------------*/
-void Synapse::monitor_spike( )
+void SynapseBase::monitor_spike( )
 {
     auto t = sc_time_stamp().to_seconds();
     vPost_ = post.read();
@@ -129,12 +111,35 @@ void Synapse::monitor_spike( )
         t_spikes_.push_back(t);
 }
 
-void Synapse::injectCurrent( )
+#if 0
+void SynapseBase::injectCurrent( )
 {
     inject.write(g_*(vPost_-Esyn_));
 }
 
-void Synapse::processAlpha() 
+void SynapseBase::processSingleExp() 
+{
+    t_ = sc_time_stamp().to_seconds();
+    g_ = 0.0;
+
+    // Any spike which occured 10*tau_ before is not worth computing.
+    for (auto tSpike : boost::adaptors::reverse(t_spikes_))
+    {
+        if(tSpike < t_)
+        {
+            auto T = (t_-tSpike)/tau1_;
+            g_ += gbar_ * exp(-T);
+            if( T > 10)
+                break;
+        }
+    }
+
+    data_.push_back(std::make_pair(t_, g_));
+
+    injectCurrent();
+}
+
+void SynapseBase::processAlpha() 
 {
     t_ = sc_time_stamp().to_seconds();
     g_ = 0.0;
@@ -161,11 +166,11 @@ void Synapse::processAlpha()
  * @Synopsis  Start of simulation.
  */
 /* ----------------------------------------------------------------------------*/
-void Synapse::start_of_simulation(void)
+void SynapseBase::start_of_simulation(void)
 {
 } 
 
-void Synapse::printODEData()
+void SynapseBase::printODEData()
 {
     for(auto v : data_)
         cout << std::get<0>(v) << ' ' << std::get<1>(v) << endl;
@@ -179,7 +184,7 @@ void Synapse::printODEData()
  * This function does not always tick at fixed dt.
  */
 /* ----------------------------------------------------------------------------*/
-void Synapse::processODE() 
+void SynapseBase::processODE() 
 {
     t_ = sc_time_stamp().to_seconds();
     double dt = (t_-prevT_);
@@ -203,7 +208,7 @@ void Synapse::processODE()
             // rk_karp_stepper_type_()
             // rk_felhberg_stepper_type_()
             , [this](const state_type &dy, state_type &dydt, double t) {
-                this->odeSys_->alphaSynapse(dy, dydt, t); 
+                this->odeSys_->alphaSynapseBase(dy, dydt, t); 
             }
             , state_, prevT_, t_, 1e-5
             // , synapse_observer(data_)
@@ -211,7 +216,7 @@ void Synapse::processODE()
 #else
     size_t n = odeint::integrate( 
             [this](const state_type &dy, state_type &dydt, double t) {
-                this->odeSys_->alphaSynapse(dy, dydt, t); 
+                this->odeSys_->alphaSynapseBase(dy, dydt, t); 
             }
             , state_
             , quantity_cast<double>(prevT_)
@@ -228,8 +233,9 @@ void Synapse::processODE()
     g_ = state_[0];
     injectCurrent();
 }
+#endif
 
-void Synapse::save_data(const std::string& filename)
+void SynapseBase::save_data(const std::string& filename)
 {
     string outfile(filename);
     if(filename.size() < 1)
@@ -237,7 +243,7 @@ void Synapse::save_data(const std::string& filename)
     write_to_csv(data_, outfile, "time, g");
 }
 
-const std::vector<std::tuple<double, double> >* Synapse::data() const
+const std::vector<std::tuple<double, double> >* SynapseBase::data() const
 {
     return &data_;
 }

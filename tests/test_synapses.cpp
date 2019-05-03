@@ -11,7 +11,7 @@
 
 #include <boost/assert.hpp>
 
-#include "Synapse.h"
+#include "../include/Synapse.h"
 #include "../utility/data_util.h"
 #include "../utility/numeric.hpp"
 #include "../external/prettyprint.hpp"
@@ -68,13 +68,13 @@ SC_MODULE(TestExpSyn)
         sensitive << clock.neg();
 
         // Excitatory and inhibitory synapses.
-        dutExc_ = make_unique<Synapse>("exc", 1e-9, 1e-3, 0.0);
+        dutExc_ = make_unique<SynapseExp>("exc", 1e-9, 1e-3, 0.0);
         dutExc_->clock(clock);
         dutExc_->spike(spike);
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
-        dutInh_ = make_unique<Synapse>("inh", 1e-9, 5e-3, -90e-3);
+        dutInh_ = make_unique<SynapseExp>("inh", 1e-9, 5e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->spike(spike);
         dutInh_->post(post);
@@ -124,10 +124,10 @@ SC_MODULE(TestExpSyn)
     std::mt19937 gen_;
     std::poisson_distribution<> dist_;
 
-    unique_ptr<Synapse> dutExc_;
-    unique_ptr<Synapse> odeExc_;
-    unique_ptr<Synapse> dutInh_;
-    unique_ptr<Synapse> odeInh_;
+    unique_ptr<SynapseExp> dutExc_;
+    unique_ptr<SynapseExp> odeExc_;
+    unique_ptr<SynapseExp> dutInh_;
+    unique_ptr<SynapseExp> odeInh_;
 
     std::map<string, vector<double> > data;
 

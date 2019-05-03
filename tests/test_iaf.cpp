@@ -25,6 +25,7 @@ SC_MODULE(TestIAF)
 
     // Inject current if any.
     sc_signal<double> inject;
+
     // Other ports.
     sc_signal<bool> spike1;
     sc_signal<bool> spike2;
@@ -97,7 +98,7 @@ SC_MODULE(TestIAF)
 
         // Add spikes.
         syn1->spike(spike1);
-        syn3->spike(spike3);
+        syn3->spike(spike1);
         
         // Add to DUT.
         dut->addSynapse(syn1);

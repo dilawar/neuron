@@ -175,7 +175,7 @@ void IAF::handleInjection()
     vm_ += (inject * dt_)/Cm_;
 }
 
-void IAF::addSynapse(shared_ptr<Synapse> syn)
+void IAF::addSynapse(shared_ptr<SynapseBase> syn)
 {
     // BOOST_LOG_TRIVIAL(debug) << "Added synapse " << syn << " to " << name_;
     syn->post(vm);

@@ -2,10 +2,10 @@
 //
 //       Filename:  Synapse.h
 //
-//    Description:  Include all other synapses.
+//    Description:  All synapses.
 //
 //        Version:  1.0
-//        Created:  Friday 03 May 2019 04:50:43  IST
+//        Created:  Friday 03 May 2019 04:19:25  IST
 //       Revision:  none
 //       Compiler:  g++
 //
@@ -17,7 +17,6 @@
 #ifndef SYNAPSE_H
 #define SYNAPSE_H
 
-#include "SynapseExp.h"
-
+#include "SynapseBase.h"
 
 #endif /* end of include guard: SYNAPSE_H */

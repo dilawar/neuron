@@ -71,7 +71,7 @@ class IAF : public sc_module
         //-----------------------------------------------------------------------------
         //  Mutators.
         //-----------------------------------------------------------------------------
-        void addSynapse(shared_ptr<Synapse> syn);
+        void addSynapse(shared_ptr<SynapseBase> syn);
         void setRefactory(double t);
         void setTau(double t);
         void setNoise(double eps);
@@ -95,7 +95,7 @@ class IAF : public sc_module
         std::string name_;
         std::vector<std::tuple<double, double>> data_;
         std::vector<double> spikes_;            // Time of spikes.
-        vector<shared_ptr<Synapse>> synapses_;
+        vector<shared_ptr<SynapseBase>> synapses_;
 
         double Cm_;
         double Em_;
