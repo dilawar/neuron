@@ -74,35 +74,11 @@ SC_MODULE(TestExpSyn)
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
-        dutInh_ = make_unique<SynapseExp>("inh", 1e-9, 5e-3, -90e-3);
+        dutInh_ = make_unique<SynapseExp>("inh", 1e-9, 10e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->spike(spike);
         dutInh_->post(post);
         dutInh_->inject(injectInh);
-
-#if 0
-        //-----------------------------------------------------------------------------
-        // TODO: Current implementation is not equivalent. Explore this:
-        // Fast Calculation of Synaptic Conductances
-        // Rajagopal Srinivasan
-        // Department of Electrical Engineering,
-        // Case Western Reserve University, Cleveland, OH 44206 USA
-        // Hillel J. Chiel,
-        // Departments of Biology and Neuroscience,
-        // Case Western Reserve University, Cleveland, OH 44106 USA
-        //-----------------------------------------------------------------------------
-        odeExc_ = make_unique<Synapse>("odeexc", 1e-9, 1e-3, 1e-3, 0.0);
-        odeExc_->clock(clock);
-        odeExc_->spike(spike);
-        odeExc_->post(post);
-        odeExc_->inject(odeExc);
-
-        odeInh_ = make_unique<Synapse>("odeinh", 1e-9, 5e-3, 5e-3, -90e-3);
-        odeInh_->clock(clock);
-        odeInh_->spike(spike);
-        odeInh_->post(post);
-        odeInh_->inject(odeInh);
-#endif 
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
@@ -136,24 +112,34 @@ int sc_main(int argc, char *argv[])
     TestExpSyn tb("TestBench");
     tb.clock(clock);
 
-    sc_start(40, SC_MS);
+    sc_start(100, SC_MS);
 
     tb.save_data();
 
     auto resExc = min_max_mean_std(tb.data["exc"]);
     auto resInh = min_max_mean_std(tb.data["inh"]);
-    auto excExpected = make_tuple(-2.39231e-11, 0, -4.85778e-12, 7.44786e-12);
-    auto inhExpected = make_tuple(0, 1.42053e-11, 7.69605e-12, 5.07631e-12);
+    valarray<double> excExpected = {-5.88168e-11, 0, -5.55675e-12, 1.18621e-11};
+    valarray<double> inhExpected = {0, 3.89261e-11, 2.07922e-11, 9.82262e-12};
 
-    ASSERT_EQ(std::get<0>(resExc), std::get<0>(excExpected), "EXC");
-    ASSERT_EQ(std::get<1>(resExc), std::get<1>(excExpected), "EXC");
-    ASSERT_EQ(std::get<2>(resExc), std::get<2>(excExpected), "EXC");
-    ASSERT_EQ(std::get<3>(resExc), std::get<3>(excExpected), "EXC");
+    std::cout << "Testing for equality ... " << std::endl;
+    std::cout << "Exc: Got " << resExc << " Expected:" << excExpected << std::endl;
+    std::cout << "Inh: Got " << resInh << " Expected:" << inhExpected << std::endl;
 
+
+    for (size_t i = 0; i < excExpected.size(); i++) 
+        ASSERT_EQ(resExc[i], excExpected[i], "EXC");
+
+    for (size_t i = 0; i < inhExpected.size(); i++) 
+        ASSERT_EQ(resInh[i], inhExpected[i], "INH");
+
+#if 0
     ASSERT_EQ(std::get<0>(resInh), std::get<0>(inhExpected), "Inh");
     ASSERT_EQ(std::get<1>(resInh), std::get<1>(inhExpected), "Inh");
     ASSERT_EQ(std::get<2>(resInh), std::get<2>(inhExpected), "Inh");
     ASSERT_EQ(std::get<3>(resInh), std::get<3>(inhExpected), "Inh");
+#endif
+
+    std::cout << "\t\t.... PASSED." << std::endl;
 
 
     return 0;
