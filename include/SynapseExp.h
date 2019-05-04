@@ -29,6 +29,12 @@ class SynapseExp: public SynapseBase
 public:
     SC_HAS_PROCESS(SynapseExp);
 
+
+    //-----------------------------------------------------------------------------
+    //  Constructors.
+    //-----------------------------------------------------------------------------
+    SynapseExp(sc_module_name name, double gbar, double tau, double Esyn);
+
     /*-----------------------------------------------------------------------------
      *  At each tick, these process function computes the model.
      *-----------------------------------------------------------------------------*/

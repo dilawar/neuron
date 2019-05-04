@@ -45,6 +45,7 @@ public:
     sc_in_clk clock;
 
     SynapseBase(sc_module_name name, double gbar, double tau, double Esyn);
+    ~SynapseBase();
 
     /* Bool type. Incoming spike. */
     sc_in<bool> spike;
@@ -56,17 +57,14 @@ public:
     sc_out<double> inject;
 
     // Overridden in derived classes.
-    virtual void process();
-
+    virtual void process() = 0;
 
     //-----------------------------------------------------------------------------
     //  Helper functions.
     //-----------------------------------------------------------------------------
     void monitor_spike();
-    void start_of_simulation();
     void injectCurrent();
     void save_data(const std::string& filename="");
-
     
     //-----------------------------------------------------------------------------
     //  Setters.

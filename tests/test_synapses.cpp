@@ -114,11 +114,6 @@ SC_MODULE(TestExpSyn)
         map2csv(data, "exp_syn1.csv");
     }
     
-    void print_data()
-    {
-        odeExc_->printODEData();
-    }
-
     // Data members.
     std::random_device rd_;
     std::mt19937 gen_;

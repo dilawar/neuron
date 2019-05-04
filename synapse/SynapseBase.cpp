@@ -30,9 +30,10 @@ SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau, double Es
     , tau1_(tau)
     , Esyn_(Esyn)
 {
-    //SC_METHOD(processAlpha)
-    SC_METHOD(processSingleExp)
+#if 0
+    SC_METHOD(process)
     sensitive << clock.pos();
+#endif
 
     SC_METHOD(monitor_spike);
     sensitive << spike;
@@ -40,6 +41,9 @@ SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau, double Es
     g_ = 0.0;
     BOOST_LOG_TRIVIAL(debug) << repr();
 }
+
+SynapseBase::~SynapseBase()
+{}
 
 
 std::string SynapseBase::repr()
@@ -55,6 +59,7 @@ std::string SynapseBase::name()
     return name_;
 }
 
+#if 0
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -73,9 +78,7 @@ std::string SynapseBase::name()
  * @Param dt
  */
 /* ----------------------------------------------------------------------------*/
-SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double tau2
-        , double Esyn, double odedt
-        ): 
+SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double tau2, double Esyn): 
     name_(name) 
     , gbar_(gbar)
     , tau1_(tau1)
@@ -94,6 +97,7 @@ SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double t
     sensitive << spike;
 
 }
+#endif
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -166,9 +170,6 @@ void SynapseBase::processAlpha()
  * @Synopsis  Start of simulation.
  */
 /* ----------------------------------------------------------------------------*/
-void SynapseBase::start_of_simulation(void)
-{
-} 
 
 void SynapseBase::printODEData()
 {

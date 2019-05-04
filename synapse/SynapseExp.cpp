@@ -14,21 +14,13 @@
 //
 // =====================================================================================
 
-#include "../SynapseExp.h"
+#include "SynapseExp.h"
 
-/* Alpha synapse */
-SynapseExp::SynaspeExp(sc_module_name name, double gbar, double tau, double Esynl)
-{
+SynapseExp::SynapseExp(sc_module_name name, double gbar, double tau, double Esyn) :
+    SynapseBase(name, gbar, tau, Esyn)
+{}
 
-}
-
-/* Dual exp synapse (use ode solver) */
-SynapseExp::SynaspeExp(sc_module_name name, double gbar, double tau1, double tau2, double Esyn)
-{
-
-}
-
-void SynaspeExp::process()
+void SynapseExp::process()
 {
     cout <<  " process " << endl;
 }
