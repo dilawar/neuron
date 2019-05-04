@@ -421,8 +421,7 @@ namespace simpletest {
 
 inline bool doubleEq(double a, double b )
 {
-    return (std::fabs(a-b) < 1e-10);
-            // * std::numeric_limits<double>::epsilon());
+    return (std::fabs(a-b) < std::numeric_limits<double>::epsilon());
 }
 
 static ostringstream assertStream;
