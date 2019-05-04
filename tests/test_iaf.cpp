@@ -91,10 +91,10 @@ SC_MODULE(TestIAF)
         dut->inject(inject);
 
         // Excitatory synapses.
-        syn1 = make_shared<Synapse>("exc1", 10e-9, 12e-3, 0.0);
+        syn1 = make_shared<SynapseExp>("exc1", 10e-9, 12e-3, 0.0);
 
         // Inhibitory synapse. Slower decay.
-        syn3 = make_shared<Synapse>("inh1", 30e-9, 20e-3, -70e-3 );
+        syn3 = make_shared<SynapseExp>("inh1", 30e-9, 20e-3, -70e-3 );
 
         // Add spikes.
         syn1->spike(spike1);
@@ -122,8 +122,8 @@ SC_MODULE(TestIAF)
     std::poisson_distribution<> dist_;
 
     unique_ptr<IAF> dut;
-    shared_ptr<Synapse> syn1;
-    shared_ptr<Synapse> syn3;
+    shared_ptr<SynapseExp> syn1;
+    shared_ptr<SynapseExp> syn3;
 
     std::map<string, vector<double> > data;
 

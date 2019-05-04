@@ -77,7 +77,7 @@ public:
     std::string name();
     const std::vector<std::tuple<double, double> >*  data() const;
 
-private:
+protected:
 
     std::string name_;
     double g_, gbar_, leftover_;

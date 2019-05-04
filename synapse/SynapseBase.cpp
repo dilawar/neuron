@@ -115,12 +115,12 @@ void SynapseBase::monitor_spike( )
         t_spikes_.push_back(t);
 }
 
-#if 0
 void SynapseBase::injectCurrent( )
 {
     inject.write(g_*(vPost_-Esyn_));
 }
 
+#if 0
 void SynapseBase::processSingleExp() 
 {
     t_ = sc_time_stamp().to_seconds();
