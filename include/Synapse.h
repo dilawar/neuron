@@ -18,6 +18,7 @@
 #define SYNAPSE_H
 
 #include "SynapseExp.h"
+#include "SynapseAlpha.h"
 
 
 #endif /* end of include guard: SYNAPSE_H */

@@ -29,9 +29,9 @@ SC_MODULE(TestExpSyn)
 
     // A voltage comes out of synapse.
     sc_signal<double> injectExc;
-    sc_signal<double> odeExc;
+    sc_signal<double> alphaExc;
     sc_signal<double> injectInh;
-    sc_signal<double> odeInh;
+    sc_signal<double> alphaInh;
 
     void gen_stim() 
     {
@@ -56,8 +56,9 @@ SC_MODULE(TestExpSyn)
         data["post"].push_back(post);
         data["exc"].push_back(injectExc);
         data["inh"].push_back(injectInh);
-        // data["odeinh"].push_back(odeInh);
-        // data["odeexc"].push_back(odeExc);
+
+        data["alphainh"].push_back(alphaInh);
+        data["alphaexc"].push_back(alphaExc);
     }
 
     SC_CTOR(TestExpSyn) 
@@ -74,11 +75,23 @@ SC_MODULE(TestExpSyn)
         dutExc_->post(post);
         dutExc_->inject(injectExc);
 
+        dutAlphaExc_ = make_unique<SynapseAlpha>("excAlpha", 1e-9, 1e-3, 0.0);
+        dutAlphaExc_->clock(clock);
+        dutAlphaExc_->spike(spike);
+        dutAlphaExc_->post(post);
+        dutAlphaExc_->inject(alphaExc);
+
         dutInh_ = make_unique<SynapseExp>("inh", 1e-9, 10e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->spike(spike);
         dutInh_->post(post);
         dutInh_->inject(injectInh);
+
+        dutAlphaInh_ = make_unique<SynapseAlpha>("inhAlpha", 1e-9, 10e-3, -90e-3);
+        dutAlphaInh_->clock(clock);
+        dutAlphaInh_->spike(spike);
+        dutAlphaInh_->post(post);
+        dutAlphaInh_->inject(alphaInh);
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
@@ -96,9 +109,10 @@ SC_MODULE(TestExpSyn)
     std::poisson_distribution<> dist_;
 
     unique_ptr<SynapseExp> dutExc_;
-    unique_ptr<SynapseExp> odeExc_;
     unique_ptr<SynapseExp> dutInh_;
-    unique_ptr<SynapseExp> odeInh_;
+
+    unique_ptr<SynapseAlpha> dutAlphaExc_;
+    unique_ptr<SynapseAlpha> dutAlphaInh_;
 
     std::map<string, vector<double> > data;
 
@@ -118,19 +132,29 @@ int sc_main(int argc, char *argv[])
 
     auto resExc = min_max_mean_std(tb.data["exc"]);
     auto resInh = min_max_mean_std(tb.data["inh"]);
+    auto resAutoExc = min_max_mean_std(tb.data["alphaexc"]);
+    auto resAutoInh = min_max_mean_std(tb.data["alphainh"]);
+
     valarray<double> excExpected = {-5.88168e-11, 0, -5.55675e-12, 1.18621e-11};
     valarray<double> inhExpected = {0, 3.89261e-11, 2.07922e-11, 9.82262e-12};
 
+    valarray<double> excAlphaExpected =  {-2.39231e-11, 0, -5.83859e-12, 7.80734e-12};
+    valarray<double> inhAlphaExpected = {0, 2.57706e-11, 1.85562e-11, 8.45435e-12};
+
     std::cout << "Testing for equality ... " << std::endl;
-    std::cout << "Exc: Got " << resExc << " Expected:" << excExpected << std::endl;
-    std::cout << "Inh: Got " << resInh << " Expected:" << inhExpected << std::endl;
+    std::cout << "Exp Exc: Got " << resExc << " Expected:" << excExpected << std::endl;
+    std::cout << "Exp Inh: Got " << resInh << " Expected:" << inhExpected << std::endl;
+    std::cout << "Alpha Inh: Got " << resAutoExc << " Expected:" << excAlphaExpected << std::endl;
+    std::cout << "Alpha Inh: Got " << resAutoInh << " Expected:" << inhAlphaExpected << std::endl;
 
 
     for (size_t i = 0; i < excExpected.size(); i++) 
-        ASSERT_EQ(resExc[i], excExpected[i], "EXC");
-
-    for (size_t i = 0; i < inhExpected.size(); i++) 
-        ASSERT_EQ(resInh[i], inhExpected[i], "INH");
+    {
+        ASSERT_EQ(resExc[i], excExpected[i], "Exp Exc");
+        ASSERT_EQ(resInh[i], inhExpected[i], "Exp Inh");
+        ASSERT_EQ(resAutoExc[i], excAlphaExpected[i], "Exp Exc");
+        ASSERT_EQ(resAutoInh[i], inhAlphaExpected[i], "Alpha Inh");
+    }
 
 #if 0
     ASSERT_EQ(std::get<0>(resInh), std::get<0>(inhExpected), "Inh");
