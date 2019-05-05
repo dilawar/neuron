@@ -39,6 +39,7 @@ add_subdirectory(synapse)
 add_subdirectory(neuron)
 add_subdirectory(utility)
 add_subdirectory(engine)
+add_subdirectory(cython)
 
 set(LIBS_TO_LINKS 
     synapse
@@ -49,14 +50,9 @@ set(LIBS_TO_LINKS
     )
 
 # Add main executable.
-add_library(tantrika_static STATIC src/tantrika.cpp)
-add_library(tantrika SHARED src/tantrika.cpp)
+add_library(tantrika STATIC src/tantrika.cpp)
 add_dependencies(tantrika libsystemc)
-
-set_target_properties(tantrika_static PROPERTIES LIBRARY_OUTPUT_NAME tantrika)
-target_link_libraries(tantrika_static ${LIBS_TO_LINKS})
 target_link_libraries(tantrika ${LIBS_TO_LINKS})
-
 
 # Add test directory at the end
 enable_testing()
@@ -64,7 +60,7 @@ add_subdirectory(tests)
 
 # install
 include(GNUInstallDirs)
-install(TARGETS tantrika_static tantrika
+install(TARGETS tantrika 
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 
