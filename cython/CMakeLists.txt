@@ -25,12 +25,12 @@ message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 set(TANTRIKA_MODULE tantrika${PYTHON_SO_EXTENSION})
 
 # Copy releavant files to build directory.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in ${CMAKE_BINARY_DIR}/setup.py)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${CMAKE_BINARY_DIR})
-
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
 add_custom_command(OUTPUT ${TANTRIKA_MODULE}
     COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
-        build_ext --inplace
+        build_ext 
+        --build-lib ${CMAKE_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating ${TANTRIKA_MODULE}"
     )
@@ -49,6 +49,8 @@ foreach(_pytest_file ${_pytest_files})
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
     set_tests_properties(${_test_name} 
-        PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}"
+        PROPERTIES 
+            ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}"
+            ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}"
         )
 endforeach()
