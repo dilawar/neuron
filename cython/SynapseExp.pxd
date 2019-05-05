@@ -1,5 +1,5 @@
 cdef extern from "../include/SynapseExp.h":
 
     cdef cppclass SynapseExp:
-        SynapseExp(string, double, double, double) except +
+        SynapseExp(const char*, double, double, double) except +
 

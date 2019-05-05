@@ -39,20 +39,42 @@ add_subdirectory(synapse)
 add_subdirectory(neuron)
 add_subdirectory(utility)
 add_subdirectory(engine)
-add_subdirectory(cython)
 
-set(LIBS_TO_LINKS 
+set(STATIC_LIBRARIES 
     synapse
     neuron
     utility 
-    ${Boost_LIBRARIES} 
     ${SystemC_LIBRARY}
     )
+set(SYSTEM_SHARED_LIBS ${Boost_LIBRARIES} )
+message(STATUS " Libraries to link ${STATIC_LIBRARIES}")
+
+# Build cython extention.
+add_subdirectory(cython)
+add_dependencies(pytantrika tantrika)
 
 # Add main executable.
-add_library(tantrika STATIC src/tantrika.cpp)
+add_library(tantrika SHARED src/tantrika.cpp)
 add_dependencies(tantrika libsystemc)
-target_link_libraries(tantrika ${LIBS_TO_LINKS})
+if(APPLE)
+    target_link_libraries(tantrika
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        )
+
+    target_link_libraries(tantrika
+        ${SYSTEM_SHARED_LIBS}
+        ${CMAKE_DL_LIBS}
+        )
+else(APPLE)
+    target_link_libraries(tantrika
+        "-Wl,--whole-archive"
+        ${STATIC_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${SYSTEM_SHARED_LIBS}
+        )
+endif(APPLE)
 
 # Add test directory at the end
 enable_testing()

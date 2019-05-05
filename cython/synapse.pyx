@@ -10,5 +10,6 @@ from SynapseExp cimport SynapseExp
 cdef class Synapse:
     cdef SynapseExp* c_syn_exp 
 
-    def __cinit__(self, str name, double x0, double y0, double tau):
+    def __cinit__(self, const char* name, double x0, double y0, double tau):
+        print("Creating module with name " + name )
         self.c_syn_exp = new SynapseExp(name, x0, y0, tau)

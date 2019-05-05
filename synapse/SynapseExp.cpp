@@ -18,7 +18,7 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-SynapseExp::SynapseExp(sc_module_name name, double gbar, double tau, double Esyn) :
+SynapseExp::SynapseExp(const char* name, double gbar, double tau, double Esyn) :
     SynapseBase(name, gbar, tau, Esyn)
 {
     SC_METHOD(process);

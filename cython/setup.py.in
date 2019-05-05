@@ -16,14 +16,14 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
 
-os.environ['CC']  = "/usr/bin/c++"
-os.environ['CXX'] = "/usr/bin/c++"
+os.environ['CC']  = "@CMAKE_CXX_COMPILER@"
+os.environ['CXX'] = "@CMAKE_CXX_COMPILER@"
 
 extensions = [
         Extension("_synapse", ["synapse.pyx"],
-            include_dirs = [ '.' ],
+            include_dirs = [ @CMAKE_TANTRIKAPY_INCLUDE_DIR@ ],
             libraries = ["tantrika"],
-            library_dirs = [ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
+            library_dirs = [ "@CMAKE_TANTRIKAPY_LIBDIR@" ],
             extra_compile_args = [ "-std=c++14" ],
             ),
         ]
@@ -33,7 +33,7 @@ setup(
         author= "Dilawar Singh <dilawars@ncbs.res.in>",
         ext_modules = cythonize(extensions
             , compiler_directives= {'language_level': 3}
-            , build_dir="/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build",
+            , build_dir="@CMAKE_BINARY_DIR@",
             ),
         )
 
