@@ -1,6 +1,6 @@
 # distutils: language = c++
 # language_level = 3
-from cython.operator import dereference as dref
+from cython.operator import dereference as deref
 
 from libcpp.string cimport string
 from libcpp.vector cimport vector
@@ -16,20 +16,20 @@ cdef class Synapse:
     cdef unique_ptr[SynapseExp] synExp;
     cdef unique_ptr[SynapseAlpha] synAlpha;
 
-    def __cinit__(self, const char* name, double x0, double y0, double tau,
-            stype='alpha'):
+    def __init__(self, name, gbar=1e-9, tau=1e-3, Esyn=0.0, stype='alpha'):
         if stype == 'alpha':
-            self.synAlpha.reset(new SynapseAlpha(name, x0, y0, tau))
+            self.synAlpha.reset(new SynapseAlpha(name, gbar, tau, Esyn))
         else:
-            self.synExp.reset(new SynapseExp(name, x0, y0, tau))
+            self.synExp.reset(new SynapseExp(name, gbar, tau, Esyn))
+
 
 # Now here is our wrapper class.
 cdef class Network:
     cdef unique_ptr[CppNetwork] thisptr 
+    synapses = []
 
     def __cinit__(self, name):
         self.thisptr.reset(new CppNetwork(name.encode('utf8')))
-        self.synapses = []
 
     def __repr__(self):
         return str(type(self)) + " Path:" + self.path() 
@@ -38,19 +38,16 @@ cdef class Network:
         return self.c_network.path().decode('utf8')
 
     def getSynapses(self):
-        return self.synapses
+        deref(self.thisptr).getSynapses()
 
-    cdef addSynapseAlpha(self, string path):
-        dref(self.thisptr).addSynapseAlpha(path)
-        #  cdef SynapseAlpha* syn = self.c_network.addSynapseAlpha(path)
-        #  self.synapses.append(SynapseAlpha(syn))
+    cdef addSynapseAlpha(self, SynapseAlpha* ptr):
+        deref(self.thisptr).addSynapseAlpha(ptr)
 
-    cdef addSynapseExp(self, string path):
-        dref(self.thisptr).addSynapseExp(path)
-        #  cdef SynapseExp* syn = self.c_network.addSynapseExp(path)
-        #  self.synapses.append(syn)
+    cdef addSynapseExp(self, SynapseExp* ptr)
+        deref(self.thisptr).addSynapseExp(ptr)
 
     def addSynapse(self, path, ctype='alpha'):
+        syn = Synapse(path, ctype)
         if ctype == 'alpha':
             self.addSynapseAlpha(path.encode('utf8'))
         else:

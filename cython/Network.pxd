@@ -6,11 +6,15 @@ from libcpp.vector cimport vector
 
 cimport Synapse 
 
+
 cdef extern from "../include/Network.h":
 
     cdef cppclass Network:
         Network() except +
         Network(const char*) except +
         string path()
-        Synapse.SynapseAlpha* addSynapseAlpha(string path)
-        Synapse.SynapseExp* addSynapseExp(string path)
+        void addSynapseAlpha(string path)
+        void addSynapseAlpha(SynapseAlpha* ptr)
+        void.addSynapseExp(string path)
+        void.addSynapseExp(SynapseExp* path)
+        void getSynapses()
