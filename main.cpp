@@ -16,11 +16,6 @@
 
 #include "tantrika.h"
 
-void create_network( )
-{
-
-}
-
 int sc_main(int argc, char* argv[])
 { 
     std::cout << "Warning: This should be empty." << std::endl;

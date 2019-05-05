@@ -49,8 +49,7 @@ foreach(_pytest_file ${_pytest_files})
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
     set_tests_properties(${_test_name} 
-        PROPERTIES 
-            ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}"
-            ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}"
+        PROPERTIES ENVIRONMENT 
+            "PYTHONPATH=${CMAKE_BINARY_DIR};LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}"
         )
 endforeach()

@@ -39,11 +39,13 @@ add_subdirectory(synapse)
 add_subdirectory(neuron)
 add_subdirectory(utility)
 add_subdirectory(engine)
+add_subdirectory(network)
 
 set(STATIC_LIBRARIES 
     synapse
     neuron
     utility 
+    network
     ${SystemC_LIBRARY}
     )
 set(SYSTEM_SHARED_LIBS ${Boost_LIBRARIES} )
@@ -54,7 +56,7 @@ add_subdirectory(cython)
 add_dependencies(pytantrika tantrika)
 
 # Add main executable.
-add_library(tantrika SHARED src/tantrika.cpp)
+add_library(tantrika SHARED main.cpp)
 add_dependencies(tantrika libsystemc)
 if(APPLE)
     target_link_libraries(tantrika
