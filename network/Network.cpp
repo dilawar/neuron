@@ -19,19 +19,26 @@ Network::Network(const string& path):
 Network::~Network()
 {}
 
-void Network::addSynapse(const string& path, const string& type)
+SynapseAlpha* Network::addSynapseAlpha(const string& path)
 {
-    boost::any syn(nullptr);
-    if(type == "alpha")
-        syn = new SynapseAlpha(path.c_str());
-    else
-        syn = new SynapseExp(path.c_str());
+    auto syn = new SynapseAlpha(path.c_str());
+    elements_["synapse.alpha"].push_back(boost::any(syn));
+    return syn;
+}
 
-    std::cout << "Info: " << "Created synapse " << path << std::endl;
-    elements_[path] = syn;
+SynapseExp* Network::addSynapseExp(const string& path)
+{
+    auto syn = new SynapseExp(path.c_str());
+    elements_["synapse.exp"].push_back(boost::any(syn));
+    return syn;
 }
 
 string Network::path() const
 {
     return path_;
+}
+
+vector<boost::any> Network::getSynapses()
+{
+    return elements_["synapse"];
 }

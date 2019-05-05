@@ -20,12 +20,6 @@ os.environ['CC']  = "/usr/bin/c++"
 os.environ['CXX'] = "/usr/bin/c++"
 
 extensions = [
-        #Extension("_synapse", ["synapse.pyx"],
-        #    include_dirs = [ '.' ],
-        #    libraries = ["tantrika", "systemc"],
-        #    library_dirs = [ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
-        #    extra_compile_args = [ "-std=c++14" ],
-        #    ),
         Extension("_tantrika", ["tantrika.pyx"],
             include_dirs = [ '.' ],
             libraries = ["tantrika", "systemc"],

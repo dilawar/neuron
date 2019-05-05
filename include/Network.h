@@ -25,15 +25,19 @@ class Network
         Network(const string& path);
         ~Network();
 
-        void addSynapse(const string& path, const string& type="alpha");
+        SynapseAlpha* addSynapseAlpha(const string& path);
+        SynapseExp* addSynapseExp(const string& path);
+
         void addNeuron(const string& path, const string& type="iaf");
+
+        vector<boost::any> getSynapses();
 
         string path() const;
 
     private:
         string path_;
         /* data */
-        map<string, boost::any> elements_;
+        map<string, vector<boost::any> > elements_;
 };
 
 

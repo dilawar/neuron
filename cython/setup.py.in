@@ -20,12 +20,6 @@ os.environ['CC']  = "@CMAKE_CXX_COMPILER@"
 os.environ['CXX'] = "@CMAKE_CXX_COMPILER@"
 
 extensions = [
-        #Extension("_synapse", ["synapse.pyx"],
-        #    include_dirs = [ @CMAKE_TANTRIKAPY_INCLUDE_DIR@ ],
-        #    libraries = ["tantrika", "systemc"],
-        #    library_dirs = [ "@CMAKE_TANTRIKAPY_LIBDIR@" ],
-        #    extra_compile_args = [ "-std=c++14" ],
-        #    ),
         Extension("_tantrika", ["tantrika.pyx"],
             include_dirs = [ @CMAKE_TANTRIKAPY_INCLUDE_DIR@ ],
             libraries = ["tantrika", "systemc"],
