@@ -22,10 +22,10 @@ os.environ['CXX'] = "/usr/bin/c++"
 extensions = [
         Extension("_tantrika", ["tantrika.pyx"],
             include_dirs = [ '/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/external/install/include', '/usr/include/python3.7m' ],
-            libraries = [""],
+            libraries = [ ],
             library_dirs = [ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
             extra_compile_args = [ "-std=c++14" ],
-            extract_objects=[ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build/libtantrika.a" ]
+            extra_objects=[ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build/libtantrika.a" ]
             ),
         ]
 

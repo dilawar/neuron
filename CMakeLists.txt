@@ -5,6 +5,7 @@ option(GENERATE_PYTHON_BINDING "Generate Cython bindings" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+include(mergestaticlibs)
 
 add_definitions(-Wall -std=c++14)
 
@@ -69,19 +70,7 @@ endif(GENERATE_PYTHON_BINDING)
 # system C with libsystemc.a double free segv.
 add_library(tantrika STATIC main.cpp)
 add_dependencies(tantrika libsystemc)
-if(APPLE)
-    target_link_libraries(tantrika
-        "-Wl,-all_load"
-        ${MOOSE_LIBRARIES}
-        ${STATIC_LIBRARIES}
-        )
-else(APPLE)
-    target_link_libraries(tantrika
-        "-Wl,--whole-archive"
-        ${STATIC_LIBRARIES}
-        "-Wl,--no-whole-archive"
-        )
-endif(APPLE)
+target_link_libraries(tantrika ${STATIC_LIBRARIES})
 target_link_libraries(tantrika ${SYSTEM_SHARED_LIBS})
 
 # Add test directory at the end
