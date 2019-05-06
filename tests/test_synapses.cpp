@@ -146,7 +146,6 @@ int sc_main(int argc, char *argv[])
     std::cout << "Alpha Inh: Got " << resAutoExc << " Expected:" << excAlphaExpected << std::endl;
     std::cout << "Alpha Inh: Got " << resAutoInh << " Expected:" << inhAlphaExpected << std::endl;
 
-#if 0
     for (size_t i = 0; i < excExpected.size(); i++) 
     {
         ASSERT_EQ(resExc[i], excExpected[i], "Exp Exc");
@@ -154,8 +153,7 @@ int sc_main(int argc, char *argv[])
         ASSERT_EQ(resAutoExc[i], excAlphaExpected[i], "Exp Exc");
         ASSERT_EQ(resAutoInh[i], inhAlphaExpected[i], "Alpha Inh");
     }
-#endif
 
     std::cout << "\t\t.... PASSED." << std::endl;
-    return 1;
+    return 0;
 }
