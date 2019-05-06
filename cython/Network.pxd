@@ -14,3 +14,6 @@ cdef extern from "../include/Network.h":
         string path()
         void addSynapse(string path)
         void getSynapses()
+
+        void SynapseGroup(int N, double gbar, double tau, double Esyn, string stype)  
+        int start(double) 

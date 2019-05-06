@@ -14,34 +14,63 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <systemc>
 #include <boost/any.hpp>
+
+class Synapse;
 
 using namespace std;
 
-class Network
+class Network : public sc_module 
 {
-    public:
-        Network();
-        Network(const string path);
-        ~Network();
+    SC_HAS_PROCESS(Network);
 
-        void addSynapseAlpha(const string path);
-        void addSynapseExp(const string path);
+public:
 
-        void addSynapseAlpha(const SynapseAlpha* ptr);
-        void addSynapseExp(const SynapseExp* ptr);
+    Network(sc_module_name path);
 
-        void addNeuron(const string path, const string& type="iaf");
+    void addSynapse(const string path, const string = "alpha");
+    void addSynapse(const Synapse* ptr);
 
-        vector<boost::any> getSynapses( );
-        vector<boost::any> getSynapses(const string ctype);
+    void addNeuron(const string path, const string& type="iaf");
 
-        string path() const;
+    // Groups 
+    void SynapseGroup(size_t N, 
+            double gbar, double tau, double Esyn
+            , const string type="alpha"
+            );
 
-    private:
-        string path_;
-        /* data */
-        map<string, vector<boost::any> > elements_;
+    void NeuronGroup(size_t N);
+
+    // Spike generation.
+    void PoissonGroup(size_t N);
+    void SpikeGenerator(size_t N);
+
+    vector<boost::any> getSynapses( );
+    vector<boost::any> getSynapses(const string ctype);
+
+    string path() const;
+
+    // 
+    void record();
+    void gen_clock();
+
+    // TODO: return error code 
+    int start(double runtime);
+
+private:
+    sc_module_name name_;
+    string path_;
+    double dt_;                     // Timeperiod of clock
+
+    /* data */
+    vector<unique_ptr<Synapse> > synapses_;
+    map<string, vector<boost::any> > elements_;
+
+public:
+    sc_clock clk_{ "clock", 0.1, SC_MS };
+    sc_signal<bool> event_;
+
 };
 
 

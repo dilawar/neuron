@@ -37,9 +37,11 @@ class Synapse
 {
     public:
         Synapse();
-        Synapse(const string path);
+        Synapse(const string path, const string type="alpha");
         Synapse(const string path, double gbar, double tau, double Em, const string type="alpha");
         ~Synapse();
+
+        SynapseBase* get() const;
 
     private:
         /* data */

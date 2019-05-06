@@ -33,14 +33,16 @@ message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 set(TANTRIKA_MODULE tantrika${PYTHON_SO_EXTENSION})
 add_custom_command(OUTPUT ${TANTRIKA_MODULE}
+    DEPENDS tantrika
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
-        build_ext 
-        --build-lib ${CMAKE_BINARY_DIR}
+        build_ext -f --build-lib ${CMAKE_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating ${TANTRIKA_MODULE}"
     )
 
-add_custom_target(pytantrika ALL DEPENDS ${TANTRIKA_MODULE})
+add_custom_target(pytantrika ALL 
+    DEPENDS ${TANTRIKA_MODULE} tantrika
+    )
 add_dependencies(pytantrika tantrika)
 add_dependencies(pytantrika libsystemc)
 

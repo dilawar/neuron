@@ -33,7 +33,7 @@ cdef class Network:
         return str(type(self)) + " Path:" + self.path() 
 
     def path(self):
-        return self.c_network.path().decode('utf8')
+        return deref(self.thisptr).path().decode('utf8')
 
     def getSynapses(self):
         return self.synapses
@@ -41,3 +41,14 @@ cdef class Network:
     def addSynapse(self, path, stype='alpha'):
         syn = Synapse(path, stype=stype)
         self.synapses.append(syn)
+
+    cpdef int start(self, double runtime):
+        deref(self.thisptr).start(runtime)
+
+    cdef void SynapseGroup(self, int N, double gbar, double tau, double Esyn, str syntype):
+        deref(self.thisptr).SynapseGroup(N, gbar, tau, Esyn,
+                syntype.encode('utf8') )
+
+    def SynapseGroup(self, N, gbar=1e-9, tau=1e-3, Esyn=0.0, syntype="alpha"):
+        deref(self.thisptr).SynapseGroup(N, gbar, tau, Esyn,
+                syntype.encode('utf8') )
