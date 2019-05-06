@@ -18,7 +18,7 @@ cdef class Synapse:
         self.syn.reset(
                 new CppSynapse(name.encode('utf8')
                     , gbar, tau, Esyn
-                    , stype.decode('utf8'))
+                    , stype.encode('utf8'))
                 )
 
 # Now here is our wrapper class.
