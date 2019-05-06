@@ -41,6 +41,7 @@ add_custom_command(OUTPUT ${TANTRIKA_MODULE}
 
 add_custom_target(pytantrika ALL DEPENDS ${TANTRIKA_MODULE})
 add_dependencies(pytantrika tantrika)
+add_dependencies(pytantrika libsystemc)
 
 enable_testing()
 file(GLOB _pytest_files "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py")
