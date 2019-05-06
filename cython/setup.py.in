@@ -25,7 +25,9 @@ extensions = [
             libraries = [ ],
             library_dirs = [ "@CMAKE_TANTRIKAPY_LIBDIR@" ],
             extra_compile_args = [ "-std=c++14" ],
-            extra_objects=[ "@CMAKE_TANTRIKAPY_STATIC_LIB@" ]
+            extra_objects=[ "@CMAKE_TANTRIKAPY_STATIC_LIB@"
+                , "@CMAKE_SYSTEMC_STATIC_LIB@"
+                ]
             ),
         ]
 

@@ -8,11 +8,16 @@ include_directories(${SystemC_INCLUDE_DIR})
 set(CMAKE_TANTRIKAPY_INCLUDE_DIR 
     "'${SystemC_INCLUDE_DIR}', '${PYTHON_INCLUDE_DIRS}'"
     )
+
 set(CMAKE_TANTRIKAPY_LIBDIR ${CMAKE_BINARY_DIR})
 set(CMAKE_TANTRIKAPY_STATIC_LIB ${CMAKE_BINARY_DIR}/libtantrika.a)
-message(STATUS "Library directory: ${CMAKE_TANTRIKAPY_LIBDIR}")
+set(CMAKE_SYSTEMC_STATIC_LIB ${SystemC_LIBRARY})
 
-# set module extensiton. default is .so. 
+# Generate setup.py file.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
+
+# Find module extensiton. default is .so. 
 execute_process( COMMAND
     ${PYTHON_EXECUTABLE} -c
 "import importlib.machinery
@@ -27,10 +32,6 @@ endif()
 message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 set(TANTRIKA_MODULE tantrika${PYTHON_SO_EXTENSION})
-
-# Copy releavant files to build directory.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
 add_custom_command(OUTPUT ${TANTRIKA_MODULE}
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
         build_ext 
@@ -50,7 +51,7 @@ foreach(_pytest_file ${_pytest_files})
     set(_test_name "cython_${_fname}")
     message(STATUS "Adding test ${_test_name}")
     add_test(NAME "${_test_name}"
-        COMMAND ${Python_EXECUTABLE} ${_pytest_file}
+        COMMAND ${PYTHON_EXECUTABLE} ${_pytest_file}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
     set_tests_properties(${_test_name} 

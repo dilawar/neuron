@@ -5,12 +5,12 @@ option(GENERATE_PYTHON_BINDING "Generate Cython bindings" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-include(mergestaticlibs)
 
 add_definitions(-Wall -std=c++14)
 
 # SystemC as external project.
 include(ExternalProject)
+
 set(LIBSYSTEMC_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/external)
 ExternalProject_Add(libsystemc
     PREFIX ${LIBSYSTEMC_ROOT}
@@ -37,13 +37,11 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
    add_link_options(-fsanitize=address)
 endif()
 
-find_package(Boost COMPONENTS log system filesystem iostreams)
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost REQUIRED)
 # Configuration macros.
 add_definitions( -DBOOST_LOG_DYN_LINK)
-
-
 add_definitions(-fPIC)
-
 # subdirectories.
 add_subdirectory(synapse)
 add_subdirectory(neuron)
@@ -51,14 +49,7 @@ add_subdirectory(utility)
 add_subdirectory(engine)
 add_subdirectory(network)
 
-set(STATIC_LIBRARIES 
-    synapse
-    neuron
-    utility 
-    network
-    ${SystemC_LIBRARY}
-    )
-set(SYSTEM_SHARED_LIBS ${Boost_LIBRARIES} )
+set(CMAKE_SHARED_LIBS ${Boost_LIBRARIES} )
 
 # Build cython extention.
 if(GENERATE_PYTHON_BINDING)
@@ -68,10 +59,16 @@ endif(GENERATE_PYTHON_BINDING)
 
 # TANTRIKA library. Somehow using a SHARED lib and creating a whole-archive with
 # system C with libsystemc.a double free segv.
-add_library(tantrika STATIC main.cpp)
+add_library(tantrika STATIC main.cpp
+    $<TARGET_OBJECTS:synapse>
+    $<TARGET_OBJECTS:neuron>
+    $<TARGET_OBJECTS:utility>
+    $<TARGET_OBJECTS:network>
+    )
 add_dependencies(tantrika libsystemc)
-target_link_libraries(tantrika ${STATIC_LIBRARIES})
-target_link_libraries(tantrika ${SYSTEM_SHARED_LIBS})
+
+target_link_libraries(tantrika ${SystemC_LIBRARY})
+target_link_libraries(tantrika ${CMAKE_SHARED_LIBS})
 
 # Add test directory at the end
 enable_testing()

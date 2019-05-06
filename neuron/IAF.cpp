@@ -15,6 +15,7 @@
 // =====================================================================================
 
 #include <boost/format.hpp>
+#include <sstream>
 
 #include "IAF.h"
 #include "../utility/data_util.h"

@@ -8,8 +8,6 @@
 #ifndef PLOT_UTIL_H
 #define PLOT_UTIL_H
 
-#include "../external/gnuplot/gnuplot-iostream.h"
-
 #include <vector>
 #include <map>
 #include <tuple>

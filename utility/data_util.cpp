@@ -6,19 +6,15 @@
  */
 
 #include "data_util.h"
-
 #include <boost/tuple/tuple.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/range/combine.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/log/trivial.hpp>
-
 #include <iostream>
+#include <fstream>
 
 using namespace std;
-namespace io = boost::iostreams;
 
+#if 0
 void plot_vectors(const vector<double>& t, const vector<double>& y)
 {
     std::cout << "Plotting vector of size: " << y.size() << std::endl;
@@ -38,6 +34,8 @@ void plot_data(const vector<std::tuple<double, double>>& data
     gp.send1d(data);
 }
 
+#endif
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Write a map<string, vector<double>> to csv file.
@@ -51,8 +49,8 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
 {
     std::string delimStr(1, delim); // for boost join.
 
-    io::stream_buffer<io::file_sink> buf(csvname);
-    std::ostream csvF(&buf);
+    std::ofstream csvF;
+    csvF.open(csvname);
 
     vector<string> header;
     size_t nVals = 10000000;
@@ -65,7 +63,6 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
     }
 
     csvF << boost::algorithm::join(header, delimStr) << endl;
-
     for (size_t i = 0; i < nVals; i++) 
     {
         for(auto v : data)
@@ -73,8 +70,7 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
         csvF.seekp(-1, std::ios_base::cur);     // Remove last delim
         csvF << endl;                           
     }
-    buf.close();
-    BOOST_LOG_TRIVIAL(info) << "Saved " << data.size() << " entries to " << csvname;
+    csvF.close();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -88,15 +84,13 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
 /* ----------------------------------------------------------------------------*/
 void write_to_csv(const vector<tuple<double,double>>& data, const string outfile, const string header)
 {
-    io::stream_buffer<io::file_sink> buf(outfile);
-    std::ostream f(&buf);
-
+    std::ofstream f;
+    f.open(outfile);
     if(header.size() > 0)
         f << header << endl;
 
     for(auto v : data)
         f << get<0>(v) << ',' << get<1>(v) << endl;
 
-    buf.close();
-    BOOST_LOG_TRIVIAL(info) << "Saved " << data.size() << " entries to " << outfile;
+    f.close();
 }

@@ -25,7 +25,9 @@ extensions = [
             libraries = [ ],
             library_dirs = [ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
             extra_compile_args = [ "-std=c++14" ],
-            extra_objects=[ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build/libtantrika.a" ]
+            extra_objects=[ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build/libtantrika.a"
+                , "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/external/install/lib64/libsystemc.a"
+                ]
             ),
         ]
 

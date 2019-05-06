@@ -1,3 +1,3 @@
 file(GLOB SRCS *.cpp)
-add_library(network STATIC ${SRCS})
+add_library(network OBJECT ${SRCS})
 add_dependencies(network libsystemc)

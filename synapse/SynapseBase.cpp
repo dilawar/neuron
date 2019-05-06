@@ -10,10 +10,7 @@
 #include <functional>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/format.hpp>
-
-#include <boost/log/trivial.hpp>
 #include <boost/numeric/odeint.hpp>
-
 #include "../include/SynapseBase.h"
 #include "../engine/engine.h"
 #include "../utility/data_util.h"
@@ -28,7 +25,6 @@ SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau, double Es
     sensitive << spike;
 
     g_ = 0.0;
-    BOOST_LOG_TRIVIAL(debug) << repr();
 }
 
 SynapseBase::~SynapseBase()
