@@ -96,18 +96,8 @@ void Network::SynapseGroup(size_t N
 }
 
 
-void Network::NeuronGroup(size_t N)
-{ 
-
-}
-
 // Spike generation.
-void Network::PoissonGroup(size_t N)
-{
-
-}
-
-void Network::SpikeGenerator(size_t N)
+void Network::PoissonGroup(size_t N, double lambda)
 {
 
 }

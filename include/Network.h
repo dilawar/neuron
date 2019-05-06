@@ -11,13 +11,14 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include <systemc>
 #include <memory>
 #include <vector>
 #include <map>
-#include <systemc>
 #include <boost/any.hpp>
 
 class Synapse;
+class SpikeGenerator;
 
 using namespace std;
 
@@ -40,11 +41,10 @@ public:
             , const string type="alpha"
             );
 
-    void NeuronGroup(size_t N);
+    void NeuronGroup(size_t N, double );
 
     // Spike generation.
-    void PoissonGroup(size_t N);
-    void SpikeGenerator(size_t N);
+    void PoissonGroup(size_t N, double lambda);
 
     vector<boost::any> getSynapses( );
     vector<boost::any> getSynapses(const string ctype);
@@ -62,6 +62,8 @@ private:
     sc_module_name name_;
     string path_;
     double dt_;                     // Timeperiod of clock
+
+    unique_ptr<SpikeGenerator> spkGenerator_;
 
     /* data */
     vector<unique_ptr<Synapse> > synapses_;
