@@ -6,24 +6,24 @@
  *        License:  MIT License
  */
 
-#include "SpikeGenerator.h"
+#include "../include/SpikeGenerator.h"
 
 SpikeGenerator::SpikeGenerator(sc_module_name name, double dt):
     name_(name)
-    dt_(dt)
+    , dt_(dt)
 {
     path_ = string( (const char*) name );
 
-    SC_METHOD(generate_spike);
+    SC_METHOD(generateSpike);
     sensitive << trigger;
 
-    out.write(false);
+    spike.write(false);
 }
 
 void SpikeGenerator::generateSpike( )
 {
     wait(dt_-1e-6, SC_SEC);
-    out.write(true);
+    spike.write(true);
     wait(1e-6, SC_SEC);
-    out.write(false);
+    spike.write(false);
 }

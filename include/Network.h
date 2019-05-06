@@ -17,8 +17,9 @@
 #include <map>
 #include <boost/any.hpp>
 
+#include "SpikeGenerator.h"
+
 class Synapse;
-class SpikeGenerator;
 
 using namespace std;
 

@@ -6,7 +6,10 @@
  *        License:  MIT License
  */
 
-#include <systemc>
+#ifndef SPIKEGENERATOR_H
+#define SPIKEGENERATOR_H
+
+#include <systemc.h>
 
 using namespace std;
 
@@ -28,3 +31,5 @@ private:
     string path_;
     double dt_; 
 };
+
+#endif /* end of include guard: SPIKEGENERATOR_H */
