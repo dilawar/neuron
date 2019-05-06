@@ -22,7 +22,7 @@ Network::~Network()
 // Alpha synapses.
 void Network::addSynapseAlpha(const string& path)
 {
-    auto syn = new SynapseAlpha(path.c_str());
+    auto syn = new SynapseAlpha(path);
     elements_["synapse.alpha"].push_back(boost::any(syn));
 }
 

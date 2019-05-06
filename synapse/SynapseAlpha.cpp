@@ -18,8 +18,8 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-SynapseAlpha::SynapseAlpha(const char* name, double gbar, double tau, double Esyn) :
-    SynapseBase(name, gbar, tau, Esyn)
+SynapseAlpha::SynapseAlpha(const std::string& name, double gbar, double tau, double Esyn) :
+    SynapseBase(name.c_str(), gbar, tau, Esyn)
 {
     SC_METHOD(process);
     sensitive << clock.pos();

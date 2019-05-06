@@ -4,7 +4,7 @@ from cython.operator import dereference as deref
 
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.memory cimport unique_ptr
+from libcpp.memory cimport unique_ptr, shared_ptr
 
 #  Import but with different name so that we can have the same Python name. For
 #  more see https://cython.readthedocs.io/en/latest/src/userguide/external_C_code.html#resolve-conflicts
@@ -18,9 +18,9 @@ cdef class Synapse:
 
     def __init__(self, name, gbar=1e-9, tau=1e-3, Esyn=0.0, stype='alpha'):
         if stype == 'alpha':
-            self.synAlpha.reset(new SynapseAlpha(name, gbar, tau, Esyn))
+            self.synAlpha.reset(new SynapseAlpha(name.encode('utf8'), gbar, tau, Esyn))
         else:
-            self.synExp.reset(new SynapseExp(name, gbar, tau, Esyn))
+            self.synExp.reset(new SynapseExp(name.encode('utf8'), gbar, tau, Esyn))
 
 
 # Now here is our wrapper class.
@@ -38,19 +38,19 @@ cdef class Network:
         return self.c_network.path().decode('utf8')
 
     def getSynapses(self):
-        deref(self.thisptr).getSynapses()
+        return self.synapses
 
     cdef addSynapseAlpha(self, SynapseAlpha* ptr):
         deref(self.thisptr).addSynapseAlpha(ptr)
 
-    cdef addSynapseExp(self, SynapseExp* ptr)
+    cdef addSynapseExp(self, SynapseExp* ptr):
         deref(self.thisptr).addSynapseExp(ptr)
 
-    def addSynapse(self, path, ctype='alpha'):
-        syn = Synapse(path, ctype)
-        if ctype == 'alpha':
-            self.addSynapseAlpha(path.encode('utf8'))
+    def addSynapse(self, path, stype='alpha'):
+        syn = Synapse(path, stype=stype)
+        if stype == 'alpha':
+            self.addSynapseAlpha(syn.synAlpha.get())
         else:
-            self.addSynapseExp(path.encode('utf8'))
-
+            self.addSynapseExp(syn.synExp.get())
+        self.synapses.append(syn)
 

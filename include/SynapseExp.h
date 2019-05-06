@@ -33,7 +33,7 @@ public:
     //-----------------------------------------------------------------------------
     //  Constructors.
     //-----------------------------------------------------------------------------
-    SynapseExp(const char* name, double gbar=1e-9, double tau=1e-3, double Esyn=0.0);
+    SynapseExp(const std::string& name, double gbar=1e-9, double tau=1e-3, double Esyn=0.0);
 
     /*-----------------------------------------------------------------------------
      *  At each tick, these process function computes the model.

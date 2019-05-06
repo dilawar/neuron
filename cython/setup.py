@@ -23,7 +23,7 @@ extensions = [
         Extension("_tantrika", ["tantrika.pyx"],
             include_dirs = [ '.' ],
             libraries = ["tantrika", "systemc"],
-            library_dirs = [ "/home/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
+            library_dirs = [ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
             extra_compile_args = [ "-std=c++14" ],
             ),
         ]
@@ -33,7 +33,7 @@ setup(
         author= "Dilawar Singh <dilawars@ncbs.res.in>",
         ext_modules = cythonize(extensions
             , compiler_directives= {'language_level': 3}
-            , build_dir="/home/dilawars/Work/GITHUB/DILAWAR/tantrika/_build",
+            , build_dir="/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build",
             ),
         )
 
