@@ -3,18 +3,18 @@ project(pytantrika)
 
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
-include_directories(${Python_INCLUDE_DIRS})
 include_directories(${SystemC_INCLUDE_DIR})
 
 set(CMAKE_TANTRIKAPY_INCLUDE_DIR 
-    "'${SystemC_INCLUDE_DIR}', '${PYTHON_INCLUDE_PATH}'"
+    "'${SystemC_INCLUDE_DIR}', '${PYTHON_INCLUDE_DIRS}'"
     )
 set(CMAKE_TANTRIKAPY_LIBDIR ${CMAKE_BINARY_DIR})
+set(CMAKE_TANTRIKAPY_STATIC_LIB ${CMAKE_BINARY_DIR}/libtantrika.a)
 message(STATUS "Library directory: ${CMAKE_TANTRIKAPY_LIBDIR}")
 
 # set module extensiton. default is .so. 
 execute_process( COMMAND
-    ${Python_EXECUTABLE} -c
+    ${PYTHON_EXECUTABLE} -c
 "import importlib.machinery
 print(importlib.machinery.EXTENSION_SUFFIXES[0])"
     OUTPUT_VARIABLE PYTHON_SO_EXTENSION
@@ -32,7 +32,7 @@ set(TANTRIKA_MODULE tantrika${PYTHON_SO_EXTENSION})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
     ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
 add_custom_command(OUTPUT ${TANTRIKA_MODULE}
-    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
         build_ext 
         --build-lib ${CMAKE_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
