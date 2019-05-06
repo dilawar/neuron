@@ -16,9 +16,11 @@
 
 #include "tantrika.h"
 
-int test_all(int argc, char* argv[])
+#ifdef BUILDING_WITH_CYTHHON
+int sc_main(int argc, char* argv[])
 { 
     std::cout << "Warning: This should be empty." << std::endl;
     return 0;
 }
+#endif
 

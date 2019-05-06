@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 project(tantrika)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+add_definitions(-Wall -std=c++14)
 
 # SystemC as external project.
 include(ExternalProject)
@@ -16,6 +17,7 @@ ExternalProject_Add(libsystemc
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         -DCMAKE_CXX_FLAGS=-fPIC
         -DBUILD_SHARED_LIBS=OFF 
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_STANDARD=14
         -DDISABLE_COPYRIGHT_MESSAGE=ON
         <SOURCE_DIR>
@@ -23,14 +25,19 @@ ExternalProject_Add(libsystemc
     )
 set(SystemC_INCLUDE_DIR ${LIBSYSTEMC_ROOT}/install/include)
 set(SystemC_LIBRARY ${LIBSYSTEMC_ROOT}/install/lib64/libsystemc.a)
-add_definitions(-Wall -std=c++14)
+
+include_directories( ${SystemC_INCLUDE_DIR} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
+
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+   add_definitions(-fsanitize=address)
+   add_link_options(-fsanitize=address)
+endif()
 
 find_package(Boost COMPONENTS log system filesystem iostreams)
 # Configuration macros.
 add_definitions( -DBOOST_LOG_DYN_LINK)
 
-include_directories( ${SystemC_INCLUDE_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
 add_definitions(-fPIC)
 
@@ -39,17 +46,16 @@ add_subdirectory(synapse)
 add_subdirectory(neuron)
 add_subdirectory(utility)
 add_subdirectory(engine)
-# add_subdirectory(network)
+add_subdirectory(network)
 
 set(STATIC_LIBRARIES 
     synapse
     neuron
     utility 
-    # network
+    network
     ${SystemC_LIBRARY}
     )
 set(SYSTEM_SHARED_LIBS ${Boost_LIBRARIES} )
-message(STATUS " Libraries to link ${STATIC_LIBRARIES}")
 
 # Build cython extention.
 if(GENERATE_PYTHON_BINDING)
@@ -58,6 +64,15 @@ if(GENERATE_PYTHON_BINDING)
 endif(GENERATE_PYTHON_BINDING)
 
 # Add main executable.
+=======
+
+# Build cython extention.
+# add_subdirectory(cython)
+# add_dependencies(pytantrika tantrika)
+
+# TANTRIKA library. Somehow using a SHARED lib and creating a whole-archive with
+# system C with libsystemc.a double free segv.
+>>>>>>> asn_error
 add_library(tantrika STATIC main.cpp)
 add_dependencies(tantrika libsystemc)
 if(APPLE)
@@ -73,7 +88,8 @@ else(APPLE)
         "-Wl,--no-whole-archive"
         )
 endif(APPLE)
-target_link_libraries(tantrika ${SYSTEM_SHARED_LIBS} ${CMAKE_DL_LIBS})
+target_link_libraries(tantrika ${SYSTEM_SHARED_LIBS} 
+    ${CMAKE_DL_LIBS})
 
 # Add test directory at the end
 enable_testing()

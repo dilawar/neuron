@@ -33,23 +33,13 @@ public:
     //-----------------------------------------------------------------------------
     //  Constructors.
     //-----------------------------------------------------------------------------
-    SynapseExp(sc_module_name name, double gbar, double tau, double Esyn);
+    SynapseExp(sc_module_name name, double gbar=1e-9, double tau=1e-3, double Esyn=0.0);
 
     /*-----------------------------------------------------------------------------
      *  At each tick, these process function computes the model.
      *-----------------------------------------------------------------------------*/
+    void exp_synapse_process();
     void process() override;
-
-
-#if 0
-    /* Alpha synapse */
-    SynapseExp(sc_module_name name, double gbar, double tau, double Esynl, bool isalpha=true);
-
-    /* Dual exp synapse (use ode solver) */
-    SynapseExp(sc_module_name name, double gbar, double tau1, double tau2, double Esyn
-               , double odedt=3e-5
-              );
-#endif
 
 };
 

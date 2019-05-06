@@ -18,23 +18,12 @@
 #include "../engine/engine.h"
 #include "../utility/data_util.h"
 
-using namespace std;
-using namespace boost;
-namespace odeint = boost::numeric::odeint;
-
-typedef odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
-
 SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau, double Esyn):
     name_(name) 
     , gbar_(gbar)
     , tau1_(tau)
     , Esyn_(Esyn)
 {
-#if 0
-    SC_METHOD(process)
-    sensitive << clock.pos();
-#endif
-
     SC_METHOD(monitor_spike);
     sensitive << spike;
 
@@ -56,48 +45,8 @@ std::string SynapseBase::repr()
 
 std::string SynapseBase::name()
 {
-    return name_;
+    return string(name_);
 }
-
-#if 0
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  A synapse which is solved by ODE solver. May be more efficient in
- * some cases.
- *
- * NOTE: Detect the spike in the same function. DO NOT use monitor_spike
- * function since it may execute in any order and we may not be able to store
- * the right value of spike in the vector.
- *
- * @Param name
- * @Param gbar
- * @Param tau1
- * @Param tau2
- * @Param Esyn
- * @Param dt
- */
-/* ----------------------------------------------------------------------------*/
-SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau1, double tau2, double Esyn): 
-    name_(name) 
-    , gbar_(gbar)
-    , tau1_(tau1)
-    , tau2_(tau2)
-    , Esyn_(Esyn)
-{
-    g_ = 0.0;
-    state_[0] = 0.0; 
-    state_[1] = 0.0; 
-
-    t_ = 0.0;
-    prevT_ = 0.0;
-
-    // Make it sensitive to spike as well. Otherwise we will not collect spikes.
-    SC_METHOD(processODE);
-    sensitive << spike;
-
-}
-#endif
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -121,62 +70,6 @@ void SynapseBase::injectCurrent( )
 }
 
 #if 0
-void SynapseBase::processSingleExp() 
-{
-    t_ = sc_time_stamp().to_seconds();
-    g_ = 0.0;
-
-    // Any spike which occured 10*tau_ before is not worth computing.
-    for (auto tSpike : boost::adaptors::reverse(t_spikes_))
-    {
-        if(tSpike < t_)
-        {
-            auto T = (t_-tSpike)/tau1_;
-            g_ += gbar_ * exp(-T);
-            if( T > 10)
-                break;
-        }
-    }
-
-    data_.push_back(std::make_pair(t_, g_));
-
-    injectCurrent();
-}
-
-void SynapseBase::processAlpha() 
-{
-    t_ = sc_time_stamp().to_seconds();
-    g_ = 0.0;
-
-    // Any spike which occured 10*tau_ before is not worth computing.
-    for (auto tSpike : boost::adaptors::reverse(t_spikes_))
-    {
-        if(tSpike < t_)
-        {
-            auto T = (t_-tSpike)/tau1_;
-            g_ += gbar_ * T * exp(-T);
-            if( T > 10)
-                break;
-        }
-    }
-
-    data_.push_back(std::make_pair(t_, g_));
-
-    injectCurrent();
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Start of simulation.
- */
-/* ----------------------------------------------------------------------------*/
-
-void SynapseBase::printODEData()
-{
-    for(auto v : data_)
-        cout << std::get<0>(v) << ' ' << std::get<1>(v) << endl;
-}
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Solve the simple using ODE solver. 
@@ -240,7 +133,7 @@ void SynapseBase::save_data(const std::string& filename)
 {
     string outfile(filename);
     if(filename.size() < 1)
-        outfile = name_ + ".csv";
+        outfile = name() + ".csv";
     write_to_csv(data_, outfile, "time, g");
 }
 

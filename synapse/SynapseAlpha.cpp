@@ -21,9 +21,13 @@
 SynapseAlpha::SynapseAlpha(sc_module_name name, double gbar, double tau, double Esyn) :
     SynapseBase(name, gbar, tau, Esyn)
 {
-    SC_METHOD(process);
+    SC_METHOD(alpha_synapse_process);
     sensitive << clock.pos();
+}
 
+void SynapseAlpha::alpha_synapse_process()
+{
+    process();
 }
 
 void SynapseAlpha::process()

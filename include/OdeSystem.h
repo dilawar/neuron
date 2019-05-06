@@ -102,7 +102,7 @@ struct SynapseODESystem
         dxdt[1] = (-x[0] - (tau1+tau2)*x[1] + gbar/_gscale*spikeVal)/tau1/tau2;
 
         if(spikeVal > 0)
-            BOOST_LOG_TRIVIAL(info) << "Spike @" << t << ' ' << spikeVal << endl;
+            BOOST_LOG_TRIVIAL(info) << "Spike @" << t << ' ' << spikeVal;
     }
 
     double gbar;

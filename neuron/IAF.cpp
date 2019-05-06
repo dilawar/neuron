@@ -14,28 +14,30 @@
 //
 // =====================================================================================
 
+#include <boost/format.hpp>
+
 #include "IAF.h"
-#include <systemc.h>
 #include "../utility/data_util.h"
 
-IAF::IAF(sc_module_name name, double em, double tau)
-    : name_(name) 
-      , Cm_(100e-12)                            // 100 pF
+
+IAF::IAF(sc_module_name name, double em, double tau) :
+      Cm_(100e-12)                            // 100 pF
       , Em_(em)
       , vm_(em)
       , tau_(tau)
 {
+    name_ = string(name);
     Rm_ = tau_/Cm_;
     init();
 }
 
 IAF::IAF(sc_module_name name, double em, double cm, double rm)
-    : name_(name) 
-      , Cm_(cm)
+    : Cm_(cm)
       , Em_(em)
       , Rm_(rm)
       , vm_(em)
 {
+    name_ = string(name);
     tau_ = Rm_*Cm_;
     init();
 }

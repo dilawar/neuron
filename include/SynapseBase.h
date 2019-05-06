@@ -14,13 +14,11 @@
 #ifndef SYNAPSEBASE_H
 #define SYNAPSEBASE_H
 
-#include <systemc.h>
 #include <vector>
 #include <tuple>
 #include <array>
 #include <memory>
-
-#include "OdeSystem.h"
+#include <systemc.h>
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -79,7 +77,7 @@ public:
 
 protected:
 
-    std::string name_;
+    sc_module_name name_;
     double g_, gbar_, leftover_;
     double tau1_, tau2_;            /* Decay contants. */
     double Esyn_;
@@ -92,7 +90,6 @@ protected:
     // Keep the spike timings.
     std::vector<double> t_spikes_;
 
-    state_type state_;
     std::vector<std::tuple<double, double>> injectVec_;
     std::vector<std::tuple<double, double>>  data_;
 };

@@ -19,6 +19,7 @@
 
 #include "IAF.h"
 #include "Synapse.h"
+#include "Network.h"
 
 namespace tantrika {
 

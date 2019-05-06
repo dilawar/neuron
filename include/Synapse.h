@@ -20,5 +20,33 @@
 #include "SynapseExp.h"
 #include "SynapseAlpha.h"
 
+#include <memory>
+#include <vector>
+
+using namespace std;
+
+class SynapseAlpha;
+class SynapseExp;
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Helper class to wrap various types of synapses. Also used in 
+ */
+/* ----------------------------------------------------------------------------*/
+class Synapse
+{
+    public:
+        Synapse();
+        Synapse(const string path);
+        Synapse(const string path, double gbar, double tau, double Em, const string type="alpha");
+        ~Synapse();
+
+    private:
+        /* data */
+        string path_;
+        string type_;
+        unique_ptr<SynapseBase> syn_;
+};
+
 
 #endif /* end of include guard: SYNAPSE_H */

@@ -39,7 +39,6 @@ class IAF : public sc_module
         //  Constructors.
         //-----------------------------------------------------------------------------
         IAF(sc_module_name name, double em=-65e-3, double tau=10e-3);
-
         IAF(sc_module_name name, double em, double cm, double rm);
 
         void init();
@@ -92,7 +91,7 @@ class IAF : public sc_module
 
     private:
         // Collect synapses.
-        std::string name_;
+        string name_;
         std::vector<std::tuple<double, double>> data_;
         std::vector<double> spikes_;            // Time of spikes.
         vector<shared_ptr<SynapseBase>> synapses_;
