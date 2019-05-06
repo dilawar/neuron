@@ -63,16 +63,8 @@ if(GENERATE_PYTHON_BINDING)
     add_dependencies(pytantrika tantrika)
 endif(GENERATE_PYTHON_BINDING)
 
-# Add main executable.
-=======
-
-# Build cython extention.
-# add_subdirectory(cython)
-# add_dependencies(pytantrika tantrika)
-
 # TANTRIKA library. Somehow using a SHARED lib and creating a whole-archive with
 # system C with libsystemc.a double free segv.
->>>>>>> asn_error
 add_library(tantrika STATIC main.cpp)
 add_dependencies(tantrika libsystemc)
 if(APPLE)
@@ -88,8 +80,7 @@ else(APPLE)
         "-Wl,--no-whole-archive"
         )
 endif(APPLE)
-target_link_libraries(tantrika ${SYSTEM_SHARED_LIBS} 
-    ${CMAKE_DL_LIBS})
+target_link_libraries(tantrika ${SYSTEM_SHARED_LIBS})
 
 # Add test directory at the end
 enable_testing()
