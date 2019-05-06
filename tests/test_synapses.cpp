@@ -28,10 +28,10 @@ SC_MODULE(TestExpSyn)
     sc_signal<double> post;
 
     // A voltage comes out of synapse.
-    sc_signal<double> injectExc;
     sc_signal<double> alphaExc;
-    sc_signal<double> injectInh;
     sc_signal<double> alphaInh;
+    sc_signal<double> expExc;
+    sc_signal<double> expInh;
 
     void gen_stim() 
     {
@@ -48,15 +48,14 @@ SC_MODULE(TestExpSyn)
         }
     }
 
-    void process()
+    void tb_process()
     {
         // Store to plot later.
         data["time"].push_back(sc_time_stamp().to_seconds());
         data["spike"].push_back(spike);
         data["post"].push_back(post);
-        data["exc"].push_back(injectExc);
-        data["inh"].push_back(injectInh);
-
+        data["expexc"].push_back(expExc);
+        data["expinh"].push_back(expInh);
         data["alphainh"].push_back(alphaInh);
         data["alphaexc"].push_back(alphaExc);
     }
@@ -65,15 +64,15 @@ SC_MODULE(TestExpSyn)
     {
         SC_THREAD(gen_stim);
 
-        SC_METHOD(process);
+        SC_METHOD(tb_process);
         sensitive << clock.neg();
 
         // Excitatory and inhibitory synapses.
-        dutExc_ = make_unique<SynapseExp>("exc", 1e-9, 1e-3, 0.0);
+        dutExc_ = make_unique<SynapseExp>("excExp", 1e-9, 1e-3, 0.0);
         dutExc_->clock(clock);
         dutExc_->spike(spike);
         dutExc_->post(post);
-        dutExc_->inject(injectExc);
+        dutExc_->inject(expExc);
 
         dutAlphaExc_ = make_unique<SynapseAlpha>("excAlpha", 1e-9, 1e-3, 0.0);
         dutAlphaExc_->clock(clock);
@@ -81,11 +80,11 @@ SC_MODULE(TestExpSyn)
         dutAlphaExc_->post(post);
         dutAlphaExc_->inject(alphaExc);
 
-        dutInh_ = make_unique<SynapseExp>("inh", 1e-9, 10e-3, -90e-3);
+        dutInh_ = make_unique<SynapseExp>("inhExp", 1e-9, 10e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->spike(spike);
         dutInh_->post(post);
-        dutInh_->inject(injectInh);
+        dutInh_->inject(expInh);
 
         dutAlphaInh_ = make_unique<SynapseAlpha>("inhAlpha", 1e-9, 10e-3, -90e-3);
         dutAlphaInh_->clock(clock);
@@ -123,15 +122,15 @@ int sc_main(int argc, char *argv[])
     // global clock is 0.1 ms.
     sc_clock clock("clock", 0.1, SC_MS);
 
-    TestExpSyn tb("TestBench");
+    TestExpSyn tb("tb");
     tb.clock(clock);
 
     sc_start(100, SC_MS);
 
     tb.save_data();
 
-    auto resExc = min_max_mean_std(tb.data["exc"]);
-    auto resInh = min_max_mean_std(tb.data["inh"]);
+    auto resExc     = min_max_mean_std(tb.data["expexc"]);
+    auto resInh     = min_max_mean_std(tb.data["expinh"]);
     auto resAutoExc = min_max_mean_std(tb.data["alphaexc"]);
     auto resAutoInh = min_max_mean_std(tb.data["alphainh"]);
 
@@ -142,11 +141,10 @@ int sc_main(int argc, char *argv[])
     valarray<double> inhAlphaExpected = {0, 2.57706e-11, 1.85562e-11, 8.45435e-12};
 
     std::cout << "Testing for equality ... " << std::endl;
-    std::cout << "Exp Exc: Got " << resExc << " Expected:" << excExpected << std::endl;
-    std::cout << "Exp Inh: Got " << resInh << " Expected:" << inhExpected << std::endl;
+    std::cout << "Exp   Exc: Got " << resExc << " Expected:" << excExpected << std::endl;
+    std::cout << "Exp   Inh: Got " << resInh << " Expected:" << inhExpected << std::endl;
     std::cout << "Alpha Inh: Got " << resAutoExc << " Expected:" << excAlphaExpected << std::endl;
     std::cout << "Alpha Inh: Got " << resAutoInh << " Expected:" << inhAlphaExpected << std::endl;
-
 
     for (size_t i = 0; i < excExpected.size(); i++) 
     {
@@ -156,15 +154,6 @@ int sc_main(int argc, char *argv[])
         ASSERT_EQ(resAutoInh[i], inhAlphaExpected[i], "Alpha Inh");
     }
 
-#if 0
-    ASSERT_EQ(std::get<0>(resInh), std::get<0>(inhExpected), "Inh");
-    ASSERT_EQ(std::get<1>(resInh), std::get<1>(inhExpected), "Inh");
-    ASSERT_EQ(std::get<2>(resInh), std::get<2>(inhExpected), "Inh");
-    ASSERT_EQ(std::get<3>(resInh), std::get<3>(inhExpected), "Inh");
-#endif
-
     std::cout << "\t\t.... PASSED." << std::endl;
-
-
     return 0;
 }

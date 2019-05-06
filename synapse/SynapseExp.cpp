@@ -18,11 +18,16 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-SynapseExp::SynapseExp(const std::string& name, double gbar, double tau, double Esyn) :
+SynapseExp::SynapseExp(const std::string name, double gbar, double tau, double Esyn) :
     SynapseBase(name.c_str(), gbar, tau, Esyn)
 {
     SC_METHOD(process);
     sensitive << clock.pos();
+}
+
+void SynapseExp::exp_synapse_process()
+{
+    process();
 }
 
 void SynapseExp::process()
