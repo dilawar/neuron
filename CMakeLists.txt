@@ -39,24 +39,41 @@ add_subdirectory(synapse)
 add_subdirectory(neuron)
 add_subdirectory(utility)
 add_subdirectory(engine)
+# add_subdirectory(network)
 
-set(LIBS_TO_LINKS 
+set(STATIC_LIBRARIES 
     synapse
     neuron
     utility 
-    ${Boost_LIBRARIES} 
+    # network
     ${SystemC_LIBRARY}
     )
+set(SYSTEM_SHARED_LIBS ${Boost_LIBRARIES} )
+message(STATUS " Libraries to link ${STATIC_LIBRARIES}")
+
+# Build cython extention.
+if(GENERATE_PYTHON_BINDING)
+    add_subdirectory(cython)
+    add_dependencies(pytantrika tantrika)
+endif(GENERATE_PYTHON_BINDING)
 
 # Add main executable.
-add_library(tantrika_static STATIC src/tantrika.cpp)
-add_library(tantrika SHARED src/tantrika.cpp)
+add_library(tantrika STATIC main.cpp)
 add_dependencies(tantrika libsystemc)
-
-set_target_properties(tantrika_static PROPERTIES LIBRARY_OUTPUT_NAME tantrika)
-target_link_libraries(tantrika_static ${LIBS_TO_LINKS})
-target_link_libraries(tantrika ${LIBS_TO_LINKS})
-
+if(APPLE)
+    target_link_libraries(tantrika
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        )
+else(APPLE)
+    target_link_libraries(tantrika
+        "-Wl,--whole-archive"
+        ${STATIC_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        )
+endif(APPLE)
+target_link_libraries(tantrika ${SYSTEM_SHARED_LIBS} ${CMAKE_DL_LIBS})
 
 # Add test directory at the end
 enable_testing()
@@ -64,7 +81,7 @@ add_subdirectory(tests)
 
 # install
 include(GNUInstallDirs)
-install(TARGETS tantrika_static tantrika
+install(TARGETS tantrika 
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 
