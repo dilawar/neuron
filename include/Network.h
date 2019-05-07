@@ -46,6 +46,7 @@ public:
 
     // Spike generation.
     void PoissonGroup(size_t N, double lambda);
+    void SpikeGeneratorGroup(size_t N, double period);
 
     vector<boost::any> getSynapses( );
     vector<boost::any> getSynapses(const string ctype);
@@ -64,9 +65,8 @@ private:
     string path_;
     double dt_;                     // Timeperiod of clock
 
-    unique_ptr<SpikeGenerator> spkGenerator_;
+    unique_ptr<SpikeGeneratorBase> spikeGen_;
 
-    /* data */
     vector<unique_ptr<Synapse> > synapses_;
     map<string, vector<boost::any> > elements_;
 

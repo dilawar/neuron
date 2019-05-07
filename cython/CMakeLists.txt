@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(pytantrika)
+project(cytantrika)
 
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
@@ -33,18 +33,15 @@ message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 set(TANTRIKA_MODULE tantrika${PYTHON_SO_EXTENSION})
 add_custom_command(OUTPUT ${TANTRIKA_MODULE}
-    DEPENDS tantrika
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
         build_ext -f --build-lib ${CMAKE_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating ${TANTRIKA_MODULE}"
     )
 
-add_custom_target(pytantrika ALL 
-    DEPENDS ${TANTRIKA_MODULE} tantrika
-    )
-add_dependencies(pytantrika tantrika)
-add_dependencies(pytantrika libsystemc)
+add_custom_target(cytantrika DEPENDS ${TANTRIKA_MODULE} tantrika)
+add_dependencies(cytantrika tantrika)
+add_dependencies(cytantrika libsystemc)
 
 enable_testing()
 file(GLOB _pytest_files "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py")

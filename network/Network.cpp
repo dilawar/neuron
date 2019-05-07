@@ -8,6 +8,7 @@
 
 #include "../include/Synapse.h"
 #include "../include/Network.h"
+
 #include "../external/spdlog/spdlog.h"
 
 Network::Network(sc_module_name name): 
@@ -99,5 +100,12 @@ void Network::SynapseGroup(size_t N
 // Spike generation.
 void Network::PoissonGroup(size_t N, double lambda)
 {
+}
 
+void Network::SpikeGeneratorGroup(size_t N, double period)
+{
+    string sname = path() + "#spikegen";
+    spikeGen_ = make_unique<PeriodicSpikeGenerator>(sname.c_str(), N);
+    spikeGen_->clock(clk_);
+    spdlog::info("Created SpikeGeneratorGroup with size {}", N);
 }

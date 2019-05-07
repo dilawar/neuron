@@ -40,9 +40,9 @@ endif()
 
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED)
-# Configuration macros.
-add_definitions( -DBOOST_LOG_DYN_LINK)
-add_definitions(-fPIC)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # subdirectories.
 add_subdirectory(synapse)
 add_subdirectory(neuron)
@@ -55,7 +55,7 @@ set(CMAKE_SHARED_LIBS ${Boost_LIBRARIES} )
 # Build cython extention.
 if(GENERATE_PYTHON_BINDING)
     add_subdirectory(cython)
-    add_dependencies(pytantrika tantrika)
+    add_dependencies(cytantrika tantrika libsystemc)
 endif(GENERATE_PYTHON_BINDING)
 
 # TANTRIKA library. Somehow using a SHARED lib and creating a whole-archive with
@@ -66,8 +66,8 @@ add_library(tantrika STATIC main.cpp
     $<TARGET_OBJECTS:utility>
     $<TARGET_OBJECTS:network>
     )
-add_dependencies(tantrika libsystemc)
 
+add_dependencies(tantrika libsystemc)
 target_link_libraries(tantrika ${SystemC_LIBRARY})
 target_link_libraries(tantrika ${CMAKE_SHARED_LIBS})
 

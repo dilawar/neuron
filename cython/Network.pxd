@@ -6,6 +6,7 @@ from libcpp.vector cimport vector
 
 cimport Synapse 
 
+
 cdef extern from "../include/Network.h":
 
     cdef cppclass Network:
@@ -17,3 +18,5 @@ cdef extern from "../include/Network.h":
 
         void SynapseGroup(int N, double gbar, double tau, double Esyn, string stype)  
         int start(double) 
+
+

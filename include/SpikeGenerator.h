@@ -1,6 +1,8 @@
 /***
- *    Description:  SpikeGenerator
+ *    Description:  Commong header.
  *
+ *        Created:  2019-05-07
+
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
  *   Organization:  NCBS Bangalore
  *        License:  MIT License
@@ -9,27 +11,20 @@
 #ifndef SPIKEGENERATOR_H
 #define SPIKEGENERATOR_H
 
-#include <systemc.h>
+#include "PeriodicSpikeGenerator.h"
 
-using namespace std;
-
-class SpikeGenerator : public sc_module
+class SpikeGenerator
 {
-    SC_HAS_PROCESS(SpikeGenerator);
-    
-    // ports.
-    sc_signal<bool> trigger;
-    sc_signal<bool> spike;
-
 public:
-    SpikeGenerator(sc_module_name name, double period);
+    SpikeGenerator()
+    {
+    }
 
-    void generateSpike( );
 
 private:
-    sc_module_name name_;
-    string path_;
-    double dt_; 
+    /* data */
+    unique_ptr<SpikeGeneratorBase> ref_;
 };
+
 
 #endif /* end of include guard: SPIKEGENERATOR_H */

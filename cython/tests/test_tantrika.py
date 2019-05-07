@@ -6,5 +6,7 @@ for i, x in enumerate([x for x in dir(_tantrika.Network) if '__' not in x]):
     i += 1
 
 n = _tantrika.Network('net1')
-n.SynapseGroup(10, 1e-9, 1e-3, 0.0)
+s2 = n.SpikeGeneratorGroup(10, 1e-3)
+s1 = n.SynapseGroup(10, 1e-9, 1e-3, 0.0)
+
 n.start(1)
