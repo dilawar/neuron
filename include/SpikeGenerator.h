@@ -11,13 +11,14 @@
 #ifndef SPIKEGENERATOR_H
 #define SPIKEGENERATOR_H
 
-#include "PeriodicSpikeGenerator.h"
+#include "../include/PeriodicSpikeGenerator.h"
 
 class SpikeGenerator
 {
 public:
     SpikeGenerator()
     {
+
     }
 
 

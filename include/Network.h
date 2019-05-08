@@ -15,13 +15,16 @@
 #include <memory>
 #include <vector>
 #include <map>
-#include <boost/any.hpp>
+#include <boost/variant.hpp>
 
-#include "SpikeGenerator.h"
+#include "../include/global.h"
+#include "../include/SpikeGenerator.h"
+#include "../include/SynapseGroup.h"
+#include "../utility/str_util.hpp"
 
-class Synapse;
 
 using namespace std;
+
 
 class Network : public sc_module 
 {
@@ -29,29 +32,45 @@ class Network : public sc_module
 
 public:
 
-    Network(sc_module_name path);
-
-    void addSynapse(const string path, const string = "alpha");
-    void addSynapse(const Synapse* ptr);
-
-    void addNeuron(const string path, const string& type="iaf");
+    Network(sc_module_name path, double dt);
+    ~Network( );
 
     // Groups 
-    void SynapseGroup(size_t N, 
-            double gbar, double tau, double Esyn
+    void addSynapseGroup(const string& path, size_t N
+            , double gbar, double tau, double Esyn
             , const string type="alpha"
             );
 
-    void NeuronGroup(size_t N, double );
+    void addNeuronGroup(size_t N, double );
 
     // Spike generation.
-    void PoissonGroup(size_t N, double lambda);
-    void SpikeGeneratorGroup(size_t N, double period);
-
-    vector<boost::any> getSynapses( );
-    vector<boost::any> getSynapses(const string ctype);
+    void addPoissonGroup(const string& path, size_t N, double lambda);
+    void addSpikeGeneratorGroup(const string& path, size_t N, const string type ...);
+    void addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay=0);
+    void addSpikeGeneratorPoissonGroup(const string& path, size_t N, double lambda);
 
     string path() const;
+
+    // Connect ports.
+    int connect(const string& src, const string& sPort, const string& tgt, const string& tPort);
+
+
+    template<typename T>
+    void addToMaps(const string type, T* const a)
+    {
+        assert( ! type.empty() );
+        assert( a );
+        assert( ! a->path().empty() );
+
+        network_variant_t ba = a;
+        typeMap_.insert({type, ba});
+        elemMap_.insert( {a->path(), ba} );
+
+    }
+
+    // ACCESSORS.
+    network_variant_t findElementByPath(const string& group);
+    void findElementsByType(const string& type, std::vector<network_variant_t>& collect);
 
     // 
     void record();
@@ -65,10 +84,15 @@ private:
     string path_;
     double dt_;                     // Timeperiod of clock
 
-    unique_ptr<SpikeGeneratorBase> spikeGen_;
+    // map of Type and vector of elements with those types. Store BaseClass as
+    // type info.
 
-    vector<unique_ptr<Synapse> > synapses_;
-    map<string, vector<boost::any> > elements_;
+    // multiple elements with same type.
+    multimap<string, network_variant_t> typeMap_;
+
+    // One element for a given path. Each element is of GroupType.
+    map<string, network_variant_t> elemMap_;
+
 
 public:
     sc_clock clk_{ "clock", 0.1, SC_MS };

@@ -50,5 +50,8 @@ cdef class Network:
                 syntype.encode('utf8') )
 
     def SynapseGroup(self, N, gbar=1e-9, tau=1e-3, Esyn=0.0, syntype="alpha"):
-        deref(self.thisptr).SynapseGroup(N, gbar, tau, Esyn,
-                syntype.encode('utf8') )
+        deref(self.thisptr).SynapseGroup(N, gbar, tau, Esyn, syntype.encode('utf8'))
+
+    def PeriodicSpikeGeneratorGroup(self, N, period, delay=0):
+        deref(self.thisptr).addSpikeGenerator(N, period, delay, 'uniform')
+

@@ -20,6 +20,8 @@
 #include <memory>
 #include <systemc.h>
 
+using namespace std;
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  SynapseBase class.
@@ -46,13 +48,13 @@ public:
     ~SynapseBase();
 
     /* Bool type. Incoming spike. */
-    sc_in<bool> spike;
+    sc_in<bool> spike{"spike"};
 
     /* Read only (post synaptic potential) */
-    sc_in<double> post;
+    sc_in<double> post{"post"};
 
     /* Post synaptic current. */
-    sc_out<double> inject;
+    sc_out<double> inject{"inject"};
 
     // Overridden in derived classes.
     virtual void process() = 0;
@@ -73,6 +75,29 @@ public:
     //-----------------------------------------------------------------------------
     std::string repr();
     std::string name();
+
+    // Find port when name is given.
+    template<typename T=sc_port_base>
+    T* findPort(const string& name, const string& kind)
+    {
+        for (sc_object* v : get_child_objects())
+        {
+            std::string pKind = v->kind(); 
+            if(string(v->basename()) == name && pKind==kind)
+            {
+                if(kind == "sc_in")
+                    return dynamic_cast<T*>(v);
+                else if(kind == "sc_out")
+                    return dynamic_cast<T*>(v);
+                else if(kind == "sc_inout")
+                    return dynamic_cast<T*>(v);
+                else
+                    return dynamic_cast<T*>(v);
+            }
+        }
+        return nullptr;
+    }
+
     const std::vector<std::tuple<double, double> >*  data() const;
 
 protected:

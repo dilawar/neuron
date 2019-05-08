@@ -20,12 +20,14 @@
 #define MAX_SYNAPSES 100
 
 #include <systemc.h>
-#include "Synapse.h"
 #include <vector>
 #include <tuple>
 #include <array>
 #include <memory>
 #include <random>
+
+#include "SynapseExp.h"
+#include "SynapseAlpha.h"
 
 using namespace std;
 

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 project(tantrika)
 
 option(GENERATE_PYTHON_BINDING "Generate Cython bindings" ON)
+option(ADDRESS_SANITIZE "Use address sanitizer" OFF)
+
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -34,8 +36,11 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/external)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-   add_definitions(-fsanitize=address)
-   add_link_options(-fsanitize=address)
+    if(ADDRESS_SANITIZE)
+        add_definitions(-fsanitize=address)
+        add_link_options(-fsanitize=address)
+    endif()
+    add_definitions(-DLOG_LEVEL=DEBUG)
 endif()
 
 set(Boost_USE_STATIC_LIBS ON)
@@ -47,6 +52,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(synapse)
 add_subdirectory(neuron)
 add_subdirectory(utility)
+add_subdirectory(stimulus)
 add_subdirectory(engine)
 add_subdirectory(network)
 
@@ -63,6 +69,7 @@ endif(GENERATE_PYTHON_BINDING)
 add_library(tantrika STATIC main.cpp
     $<TARGET_OBJECTS:synapse>
     $<TARGET_OBJECTS:neuron>
+    $<TARGET_OBJECTS:stimulus>
     $<TARGET_OBJECTS:utility>
     $<TARGET_OBJECTS:network>
     )

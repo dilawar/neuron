@@ -30,25 +30,34 @@ class SynapseExp;
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Helper class to wrap various types of synapses. Also used in 
+ * @Synopsis  Helper class to wrap various types of synapses. Also used in
  */
 /* ----------------------------------------------------------------------------*/
-class Synapse
+class SynapseGroup : public sc_module
 {
-    public:
-        Synapse();
-        Synapse(const string path, const string type="alpha");
-        Synapse(const string path, double gbar, double tau, double Em, const string type="alpha");
-        ~Synapse();
+public:
+    SC_HAS_PROCESS(SynapseGroup);
 
-        SynapseBase* get() const;
+    SynapseGroup(sc_module_name path, size_t N
+                 , double gbar, double tau, double Em
+                 , const string type="alpha"
+                );
 
-    private:
-        /* data */
-        string path_;
-        string type_;
-        unique_ptr<SynapseBase> syn_;
+    // Get a particular synapse.
+    SynapseBase* getSynapse(size_t i) const;
+
+    string path();
+    string type();
+    size_t size();
+
+private:
+    /* data */
+    string path_;
+    string type_;
+    size_t N_;
+    vector<unique_ptr<SynapseBase>> elements_;
 };
+
 
 
 #endif /* end of include guard: SYNAPSE_H */

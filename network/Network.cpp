@@ -6,14 +6,14 @@
  *        License:  MIT License
  */
 
-#include "../include/Synapse.h"
 #include "../include/Network.h"
+#include "../include/SynapseGroup.h"
 
-#include "../external/spdlog/spdlog.h"
+#include "spdlog/spdlog.h"
 
-Network::Network(sc_module_name name): 
+Network::Network(sc_module_name name, double dt): 
     name_(name)
-    , dt_(1e-4)
+    , dt_(dt)
 { 
     path_ = string((const char*)name_);
     spdlog::info("Creating network: {}", path_ );
@@ -21,35 +21,78 @@ Network::Network(sc_module_name name):
     sensitive << clk_;
 }
 
+Network::~Network()
+{
+}
+
 void Network::record()
 {
     std::cout << "Ticking " << std::endl;
 }
 
-// Alpha synapses.
-void Network::addSynapse(const string path, const string type)
+// Add synapse groups.
+void Network::addSynapseGroup(const string& path, size_t N
+        , double gbar, double tau, double Esyn
+        , const string type)
 {
-    Synapse* syn = new Synapse(path.c_str(), type);
-
-    // We need input spike train and output vm.
-    syn->get()->clock(clk_);
-
-    elements_["synapse.alpha"].push_back(boost::any(syn));
+    SynapseGroup* syn = new SynapseGroup(path.c_str(), N, gbar, tau, Esyn, type);
+    addToMaps<SynapseGroup>("SynapseGroup",  syn);
+    spdlog::info("Created SynapseGroup: {} of size {}", path, N);
 }
+
+
+// Add spike generator, Poisson Group.
+void Network::addPoissonGroup(const string& path, size_t N, double lambda)
+{
+}
+
+// Add a spikegenerator group.
+void Network::addSpikeGeneratorGroup(const string& path, size_t N, const string type, ...)
+{
+}
+
+void Network::addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay)
+{
+    SpikeGeneratorBase* spikeGen_ = new PeriodicSpikeGenerator(path.c_str(), N);
+    spikeGen_->clock(clk_); // Bind clock.
+    addToMaps<SpikeGeneratorBase>("SpikeGeneratorPeriodicGroup", spikeGen_);
+
+    spdlog::info("Created SpikeGeneratorGroup {} with size {}", path, N);
+}
+
 
 string Network::path() const
 {
     return path_;
 }
 
-vector<boost::any> Network::getSynapses( )
+network_variant_t Network::findElementByPath(const string& path)
 {
-    return elements_["synapse.alpha"];
+    return elemMap_.find(path)->second; 
 }
 
-vector<boost::any> Network::getSynapses(const string ctype)
+// Find by type.
+void Network::findElementsByType(const string& type, std::vector<network_variant_t>& collect)
 {
-    return elements_["synapse." + ctype];
+    auto range = typeMap_.equal_range(type); 
+    for( auto i = range.first; i != range.second; i++)
+        collect.push_back(i->second);
+}
+
+int Network::connect(const string& srcPath, const string& srcPort
+        , const string& tgtPath , const string& tgtPort)
+{
+    spdlog::info("Connecting {}.{} --> {}.{}", srcPath, srcPort, tgtPath, tgtPort);
+
+    auto src = findElementByPath(srcPath);
+    auto tgt = findElementByPath(tgtPath);
+
+    if(SpikeGeneratorBase* spk = boost::get<SpikeGeneratorBase*>(src) )
+        return spk->connect(srcPort, tgt, tgtPort);
+    else
+        spdlog::error("This function is not available for {}", srcPath);
+
+    return -1;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -76,6 +119,7 @@ int Network::start(double runtime)
 
         cerr << "Failed to run." << endl;
         cerr << e.what() << endl;
+        
         throw e;
     }
 #endif 
@@ -83,29 +127,3 @@ int Network::start(double runtime)
     return 0;
 }
 
-
-void Network::SynapseGroup(size_t N
-        , double gbar, double tau, double Esyn
-        , const string type)
-{
-    for (size_t i = 0; i < N; i++) 
-    {
-        string synapseName = path() + "#synapse#" + to_string(i);
-        spdlog::info("Creating synapse: {}", synapseName);
-        synapses_.push_back(make_unique<Synapse>( synapseName, gbar, tau, Esyn, type));
-    }
-}
-
-
-// Spike generation.
-void Network::PoissonGroup(size_t N, double lambda)
-{
-}
-
-void Network::SpikeGeneratorGroup(size_t N, double period)
-{
-    string sname = path() + "#spikegen";
-    spikeGen_ = make_unique<PeriodicSpikeGenerator>(sname.c_str(), N);
-    spikeGen_->clock(clk_);
-    spdlog::info("Created SpikeGeneratorGroup with size {}", N);
-}

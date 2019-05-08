@@ -9,7 +9,7 @@
 #include <map>
 #include <cmath>
 
-#include "../include/Synapse.h"
+#include "../include/tantrika.h"
 #include "../utility/data_util.h"
 #include "../utility/numeric.hpp"
 #include "../external/prettyprint.hpp"

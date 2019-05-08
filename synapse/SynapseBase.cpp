@@ -125,6 +125,7 @@ void SynapseBase::processODE()
 }
 #endif
 
+
 void SynapseBase::save_data(const std::string& filename)
 {
     string outfile(filename);
@@ -132,6 +133,7 @@ void SynapseBase::save_data(const std::string& filename)
         outfile = name() + ".csv";
     write_to_csv(data_, outfile, "time, g");
 }
+
 
 const std::vector<std::tuple<double, double> >* SynapseBase::data() const
 {
