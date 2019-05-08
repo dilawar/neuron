@@ -41,7 +41,6 @@ void SpikeGeneratorBase::generateSpike( )
 
 int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort)
 {
-
     // If target is SynapseGroup.
     if(SynapseGroup* syns = boost::get<SynapseGroup*>(tgt))
     {
@@ -53,7 +52,7 @@ int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const
         {
             // find target port.
             auto syn = syns->getSynapse(i);
-            auto pTgtPort = syn->findPort(tgtPort, "sc_in");
+            auto pTgtPort = syn->findPort<sc_in<bool> >(tgtPort, "sc_in");
             if(! pTgtPort)
             {
                 spdlog::warn( "Could not find {}.{}", syn->name(), pTgtPort->basename());
@@ -61,7 +60,7 @@ int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const
             }
 
             // Bind ports.
-            // pTgtPort->bind( *(spike_[i].get()) );
+            pTgtPort->bind( *(spike_[i].get()) );
         }
     }
 
