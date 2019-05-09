@@ -33,7 +33,6 @@ NeuronGroup::NeuronGroup(sc_module_name name, size_t N, double rm, double cm, do
     {
         string nrnName = (const char*)name + '[' + to_string(i) + ']';
         unique_ptr<IAF> iaf( make_unique<IAF>(nrnName.c_str(), rm, cm, Em) );
-
         iaf->clock(clock);
 
         //iaf->vm(*vm_[i]);

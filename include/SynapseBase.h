@@ -22,6 +22,8 @@
 #include <systemc.h>
 #include "tantrika_ports.hpp"
 
+#include "../include/sc_ports.hpp"
+
 using namespace std;
 
 /* --------------------------------------------------------------------------*/

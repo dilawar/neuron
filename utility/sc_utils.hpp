@@ -20,7 +20,7 @@ using namespace std;
 // Find port when name is given.
 
     template<typename T=sc_port_base>
-T* findPort(sc_object const* obj, const string& name, const string& kind) 
+T* findPort(sc_object* obj, const string& name, const string& kind) 
 {
     for (sc_object* v : obj->get_child_objects())
     {

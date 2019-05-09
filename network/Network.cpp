@@ -28,10 +28,6 @@ Network::Network(sc_module_name name, double dt):
     sensitive << clock;
 }
 
-Network::~Network()
-{
-}
-
 void Network::record()
 {
     std::cout << "Ticking " << std::endl;
@@ -55,7 +51,7 @@ void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm,
     ng->clock(clock);
 
     addToMaps<NeuronGroup>("NeuronGroup", ng);
-    spdlog::info("Created SynapseGroup: {} of size {}", path, N);
+    spdlog::info("Created NeuronGroup: {} of size {}", path, N);
 }
 
 
@@ -108,6 +104,17 @@ int Network::connect(const string& srcPath, const string& srcPort
     return boost::apply_visitor(
             std::bind(NetworkConnectionVisitor(), std::placeholders::_1, srcPort, tgt, tgtPort)
             , src);
+}
+
+int Network::monitor( const string& path, const string& port)
+{
+    // Monitor this port.
+    spdlog::info( "Creating monitor for {}.{}", path, port);
+    auto src = findElementByPath(path);
+    return boost::apply_visitor( 
+            std::bind( MonitorVisitor(), std::placeholders::_1, port, this)
+            , src
+            );
 }
 
 /* --------------------------------------------------------------------------*/

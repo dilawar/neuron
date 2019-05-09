@@ -105,7 +105,7 @@ public:
         {
             // find target port.
             auto src = srcGroup->getNeuron(i);
-            auto pSrcPort = findPort<sc_out<double> >(src, srcPort, "sc_out");
+            sc_out<double>* pSrcPort = findPort<sc_out<double> >(src, srcPort, "sc_out");
             if(! pSrcPort)
             {
                 spdlog::warn( "Could not find {}.{}. Available {}. Ignoring rest.", src->path()
@@ -115,7 +115,7 @@ public:
             }
 
             auto tgt = synGroup->getSynapse(i);
-            auto pTgtPort = findPort<sc_in<double> >(tgt, tgtPort, "sc_in");
+            sc_in<double>* pTgtPort = findPort<sc_in<double>>(tgt, tgtPort, "sc_in");
             if(! pTgtPort)
             {
                 spdlog::warn( "Could not find {}.{}. Availble ports {}.", tgt->path(), srcPort
@@ -130,6 +130,30 @@ public:
 
         spdlog::debug("\t\t ... SUCCESS.");
         return 0;
+    }
+};
+
+// This is visitor for connecting 
+class MonitorVisitor : public boost::static_visitor<int>
+{
+public:
+    int operator()(SpikeGeneratorBase* ptr, const string& port, Network* net) const
+    {
+        spdlog::error( "+ (NOT IMPLEMENTED) SpikeGenerator connect .{}", port);
+        return -1;
+    }
+    
+    int operator()(NeuronGroup* ptr, const string& port, Network* net) const
+    {
+        spdlog::error( "+ (NOT IMPLEMENTED) NeuronGroup connect .{}", port);
+        return -1;
+    }
+
+    int operator()(SynapseGroup* ptr, const string& port, Network* net) const
+    {
+        spdlog::debug( "+ SynapseGroup monitor .{}", port);
+        // auto tgtPort = findPort(ptr, port, "sc_out");
+        return -1;
     }
 };
 

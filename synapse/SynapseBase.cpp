@@ -62,7 +62,7 @@ void SynapseBase::monitor_spike( )
 
 void SynapseBase::injectCurrent( )
 {
-    psc.write(g_*(vPost_-Esyn_));
+    psc->write(g_*(vPost_-Esyn_));
 }
 
 #if 0
