@@ -71,8 +71,7 @@ public:
                 spdlog::warn( "Could not find {}.{}. Ignoring rest ...", syn->name(), pTgtPort->basename());
                 return -1;
             }
-            else
-                pTgtPort->bind( *(ptr->getSpikePort(i)) );
+            pTgtPort->bind( *(ptr->getSpikePort(i)) );
         }
 
         spdlog::debug("\t\t ... SUCCESS.");
@@ -125,8 +124,8 @@ public:
                 return -1;
             }
 
-            // else
-                // pSrcPort->bind( *(pTgtPort) );
+            spdlog::debug("\t Connected {} and {}", srcPort, tgtPort);
+            pTgtPort->bind(*pSrcPort);
         }
 
         spdlog::debug("\t\t ... SUCCESS.");

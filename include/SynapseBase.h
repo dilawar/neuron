@@ -44,7 +44,7 @@ class SynapseBase: public sc_module
 
 public:
     SC_HAS_PROCESS(SynapseBase);
-    sc_in_clk clock;
+    sc_in_clk clock{"clock"};
 
     SynapseBase(sc_module_name name, double gbar, double tau, double Esyn);
     ~SynapseBase();

@@ -51,7 +51,9 @@ void Network::addSynapseGroup(const string& path, size_t N
 void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm, double Em)
 {
     NeuronGroup* ng = new NeuronGroup(path.c_str(), N, rm, cm, Em);
+
     ng->clock(clock);
+
     addToMaps<NeuronGroup>("NeuronGroup", ng);
     spdlog::info("Created SynapseGroup: {} of size {}", path, N);
 }
