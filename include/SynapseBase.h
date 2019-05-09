@@ -14,11 +14,13 @@
 #ifndef SYNAPSEBASE_H
 #define SYNAPSEBASE_H
 
+
 #include <vector>
 #include <tuple>
 #include <array>
 #include <memory>
 #include <systemc.h>
+#include "tantrika_ports.hpp"
 
 using namespace std;
 
@@ -54,7 +56,7 @@ public:
     sc_in<double> post{"post"};
 
     /* Post synaptic current. */
-    sc_out<double> psc{"psc"};
+    sc_out_opt<double> psc{"psc"};
 
     // Overridden in derived classes.
     virtual void process() = 0;
