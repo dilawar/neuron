@@ -21,24 +21,24 @@
 #include "../utility/data_util.h"
 
 
-IAF::IAF(sc_module_name name, double em, double tau) :
-      Cm_(100e-12)                            // 100 pF
-      , Em_(em)
-      , vm_(em)
-      , tau_(tau)
+IAF::IAF(sc_module_name path, double em, double tau) :
+    path_((const char*)path)
+    , Cm_(100e-12)                            // 100 pF
+    , Em_(em)
+    , vm_(em)
+    , tau_(tau)
 {
-    name_ = string(name);
     Rm_ = tau_/Cm_;
     init();
 }
 
-IAF::IAF(sc_module_name name, double em, double cm, double rm)
-    : Cm_(cm)
-      , Em_(em)
-      , Rm_(rm)
-      , vm_(em)
+IAF::IAF(sc_module_name path, double em, double cm, double rm)
+    : path_((const char*)path)
+    , Cm_(cm)
+    , Em_(em)
+    , Rm_(rm)
+    , vm_(em)
 {
-    name_ = string(name);
     tau_ = Rm_*Cm_;
     init();
 }
@@ -89,8 +89,8 @@ void IAF::setNoise( double eps)
 std::string IAF::repr()
 {
     std::stringstream ss;
-    ss << boost::format("IAF:%1%, Em=%2%, cm=%3% rm=%4% tau=%5% refactory=%6% threshold=%7%") 
-        % name_ % Em_ % Cm_ % Rm_ % tau_ % refactory_ % threshold_;
+    ss << boost::format("IAF:%1%, Em=%2%, cm=%3% rm=%4% tau=%5% refactory=%6% threshold=%7%")
+       % path_ % Em_ % Cm_ % Rm_ % tau_ % refactory_ % threshold_;
     return ss.str();
 }
 
@@ -150,7 +150,7 @@ void IAF::decay()
 
     // Collect currents from synspases.
     sum_all_synapse_inject_ = 0.0;
-    for (size_t i = 0; i < synapses_.size(); i++) 
+    for (size_t i = 0; i < synapses_.size(); i++)
         sum_all_synapse_inject_ += synapse_inject[i].read();
 
     if(sum_all_synapse_inject_ != 0.0)
@@ -180,10 +180,10 @@ void IAF::handleInjection()
 
 void IAF::addSynapse(shared_ptr<SynapseBase> syn)
 {
-    // BOOST_LOG_TRIVIAL(debug) << "Added synapse " << syn << " to " << name_;
+    // BOOST_LOG_TRIVIAL(debug) << "Added synapse " << syn << " to " << path_;
     syn->post(vm);
     syn->clock(clock);
-    syn->inject(synapse_inject[synapses_.size()]);
+    syn->psc(synapse_inject[synapses_.size()]);
     synapses_.push_back(syn);
 }
 
@@ -194,10 +194,15 @@ std::vector<std::tuple<double, double>> IAF::data() const
 
 void IAF::save_data(const string& outfile)
 {
-    // If outfile is empty, then write to nauron name.
+    // If outfile is empty, then write to nauron path.
     string filename(outfile);
     if(outfile.size() == 0)
-        filename = name_ + ".csv";
+        filename = path_ + ".csv";
 
     write_to_csv(data_, filename, "time, vm");
+}
+
+string IAF::path() const
+{
+    return path_;
 }

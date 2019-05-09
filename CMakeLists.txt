@@ -40,7 +40,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         add_definitions(-fsanitize=address)
         add_link_options(-fsanitize=address)
     endif()
-    add_definitions(-DLOG_LEVEL=DEBUG)
+    add_definitions(-DLOG_LEVEL=debug)
 endif()
 
 set(Boost_USE_STATIC_LIBS ON)

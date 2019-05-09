@@ -17,7 +17,7 @@
 
 using namespace std;
 
-struct TestExpSyn: public sc_module 
+struct TestExpSyn: public sc_module
 {
     SC_HAS_PROCESS(TestExpSyn);
 
@@ -33,7 +33,7 @@ struct TestExpSyn: public sc_module
     sc_signal<double> expExc;
     sc_signal<double> expInh;
 
-    void gen_stim() 
+    void gen_stim()
     {
         spike.write(false);
         // Post is always at Erest.
@@ -72,25 +72,25 @@ struct TestExpSyn: public sc_module
         dutExc_->clock(clock);
         dutExc_->spike(spike);
         dutExc_->post(post);
-        dutExc_->inject(expExc);
+        dutExc_->psc(expExc);
 
         dutAlphaExc_ = make_unique<SynapseAlpha>("excAlpha", 1e-9, 1e-3, 0.0);
         dutAlphaExc_->clock(clock);
         dutAlphaExc_->spike(spike);
         dutAlphaExc_->post(post);
-        dutAlphaExc_->inject(alphaExc);
+        dutAlphaExc_->psc(alphaExc);
 
         dutInh_ = make_unique<SynapseExp>("inhExp", 1e-9, 10e-3, -90e-3);
         dutInh_->clock(clock);
         dutInh_->spike(spike);
         dutInh_->post(post);
-        dutInh_->inject(expInh);
+        dutInh_->psc(expInh);
 
         dutAlphaInh_ = make_unique<SynapseAlpha>("inhAlpha", 1e-9, 10e-3, -90e-3);
         dutAlphaInh_->clock(clock);
         dutAlphaInh_->spike(spike);
         dutAlphaInh_->post(post);
-        dutAlphaInh_->inject(alphaInh);
+        dutAlphaInh_->psc(alphaInh);
 
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
@@ -101,7 +101,7 @@ struct TestExpSyn: public sc_module
     {
         map2csv(data, "exp_syn1.csv");
     }
-    
+
     // Data members.
     std::random_device rd_;
     std::mt19937 gen_;
@@ -146,7 +146,7 @@ int sc_main(int argc, char *argv[])
     std::cout << "Alpha Inh: Got " << resAutoExc << " Expected:" << excAlphaExpected << std::endl;
     std::cout << "Alpha Inh: Got " << resAutoInh << " Expected:" << inhAlphaExpected << std::endl;
 
-    for (size_t i = 0; i < excExpected.size(); i++) 
+    for (size_t i = 0; i < excExpected.size(); i++)
     {
         ASSERT_EQ(resExc[i], excExpected[i], "Exp Exc");
         ASSERT_EQ(resInh[i], inhExpected[i], "Exp Inh");

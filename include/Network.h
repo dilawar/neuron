@@ -20,11 +20,10 @@
 #include "../include/global.h"
 #include "../include/SpikeGenerator.h"
 #include "../include/SynapseGroup.h"
+#include "../include/NeuronGroup.h"
 #include "../utility/str_util.hpp"
 
-
 using namespace std;
-
 
 class Network : public sc_module 
 {
@@ -41,7 +40,9 @@ public:
             , const string type="alpha"
             );
 
-    void addNeuronGroup(size_t N, double );
+    void addNeuronGroup(const string& path, size_t N
+            , double rm = 100e3, double cm = 100e-12, double Em = -65e-3
+            );
 
     // Spike generation.
     void addPoissonGroup(const string& path, size_t N, double lambda);
@@ -53,6 +54,9 @@ public:
 
     // Connect ports.
     int connect(const string& src, const string& sPort, const string& tgt, const string& tPort);
+
+    // Monitor given target.
+    int monitor(const string& tgt, const string& port);
 
 
     template<typename T>
@@ -93,9 +97,11 @@ private:
     // One element for a given path. Each element is of GroupType.
     map<string, network_variant_t> elemMap_;
 
+    // All the ports which are out port should be connected to these signals.
+    vector<sc_signal<bool>> records_;
 
 public:
-    sc_clock clk_{ "clock", 0.1, SC_MS };
+    sc_clock clock{ "clock", 0.1, SC_MS };
     sc_signal<bool> event_;
 
 };

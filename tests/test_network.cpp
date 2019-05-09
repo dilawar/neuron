@@ -16,12 +16,14 @@ int main(int argc, const char *argv[])
     Network net("A", 1e-3);
 
     // Add input.
-    net.addSpikeGeneratorPeriodicGroup("g1", 10, 1e-3, 0.0);
+    net.addSpikeGeneratorPeriodicGroup("A/i1", 10, 1e-3, 0.0);
 
     // Add synapses.
-    net.addSynapseGroup("s1", 10, 1e-9, 1e-3, 0.0);
+    net.addSynapseGroup("A/s1", 10, 1e-9, 1e-3, 0.0);
+    net.addNeuronGroup("A/n1", 10);
 
-    net.connect("g1", "output", "s1", "spike");
+    net.connect("A/i1", "output", "A/s1", "spike");
+    net.connect("A/n1", "vm", "A/s1", "post");  // neuron vm are connected to synapse post.
 
     net.start(10);
     

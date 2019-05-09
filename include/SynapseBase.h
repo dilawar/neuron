@@ -54,7 +54,7 @@ public:
     sc_in<double> post{"post"};
 
     /* Post synaptic current. */
-    sc_out<double> inject{"inject"};
+    sc_out<double> psc{"psc"};
 
     // Overridden in derived classes.
     virtual void process() = 0;
@@ -74,35 +74,13 @@ public:
     //  Getters
     //-----------------------------------------------------------------------------
     std::string repr();
-    std::string name();
-
-    // Find port when name is given.
-    template<typename T=sc_port_base>
-    T* findPort(const string& name, const string& kind)
-    {
-        for (sc_object* v : get_child_objects())
-        {
-            std::string pKind = v->kind(); 
-            if(string(v->basename()) == name && pKind==kind)
-            {
-                if(kind == "sc_in")
-                    return dynamic_cast<T*>(v);
-                else if(kind == "sc_out")
-                    return dynamic_cast<T*>(v);
-                else if(kind == "sc_inout")
-                    return dynamic_cast<T*>(v);
-                else
-                    return dynamic_cast<T*>(v);
-            }
-        }
-        return nullptr;
-    }
+    std::string path();
 
     const std::vector<std::tuple<double, double> >*  data() const;
 
 protected:
+    string path_;
 
-    sc_module_name name_;
     double g_, gbar_, leftover_;
     double tau1_, tau2_;            /* Decay contants. */
     double Esyn_;

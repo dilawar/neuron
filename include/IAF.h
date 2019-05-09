@@ -33,89 +33,91 @@ using namespace std;
 
 class IAF : public sc_module
 {
-    public:
-        SC_HAS_PROCESS(IAF);
+public:
+    SC_HAS_PROCESS(IAF);
 
 
-        //-----------------------------------------------------------------------------
-        //  Constructors.
-        //-----------------------------------------------------------------------------
-        IAF(sc_module_name name, double em=-65e-3, double tau=10e-3);
-        IAF(sc_module_name name, double em, double cm, double rm);
+    //-----------------------------------------------------------------------------
+    //  Constructors.
+    //-----------------------------------------------------------------------------
+    IAF(sc_module_name path, double em=-65e-3, double tau=10e-3);
+    IAF(sc_module_name path, double em, double cm, double rm);
 
-        void init();
+    void init();
 
-        //-----------------------------------------------------------------------------
-        //  Ports
-        //-----------------------------------------------------------------------------
-        sc_in_clk clock;                        // Incoming clock. 
-        sc_out<double> vm;                      // Neuron membrane potential.
-        sc_in<double> inject;                   // Injection of current by users.
-        
-        sc_signal<double> synapse_inject[MAX_SYNAPSES];     // Currents from all synapses.
+    //-----------------------------------------------------------------------------
+    //  Ports
+    //-----------------------------------------------------------------------------
+    sc_in_clk clock{"clock"};                       // Incoming clock.
+    sc_out<double> vm{"vm"};                        // Neuron membrane potential.
+    sc_in<double> inject{"inject"};                 // Injection of current by users.
 
-        //-----------------------------------------------------------------------------
-        //  Events.
-        //-----------------------------------------------------------------------------
-        sc_event nonZeroInject;                 // If non-zero injection of current.
-        sc_event nonZeroSynCurrent;             // If non-zero injection via synapses.
-        sc_event onFire;                        // If this neuron has fired.
+    sc_signal<double> synapse_inject[MAX_SYNAPSES]; // Currents from all synapses.
 
-        void decay();
-        void record();
-        void handleInjection();                 // Tick when there is inject
-        void handleSynapticInjection();
-        void handleOnFire();
+    //-----------------------------------------------------------------------------
+    //  Events.
+    //-----------------------------------------------------------------------------
+    sc_event nonZeroInject;                 // If non-zero injection of current.
+    sc_event nonZeroSynCurrent;             // If non-zero injection via synapses.
+    sc_event onFire;                        // If this neuron has fired.
 
-        void model(const double &vm, double &dvdt, const double t);
+    void decay();
+    void record();
+    void handleInjection();                 // Tick when there is inject
+    void handleSynapticInjection();
+    void handleOnFire();
 
-        //-----------------------------------------------------------------------------
-        //  Mutators.
-        //-----------------------------------------------------------------------------
-        void addSynapse(shared_ptr<SynapseBase> syn);
-        void setRefactory(double t);
-        void setTau(double t);
-        void setNoise(double eps);
-        void setThreshold(double t);
-        
-        //-----------------------------------------------------------------------------
-        //  Accessor.
-        //-----------------------------------------------------------------------------
-        std::vector<std::tuple<double, double>> data( ) const;
+    void model(const double &vm, double &dvdt, const double t);
 
-        //-----------------------------------------------------------------------------
-        //  Helper
-        //-----------------------------------------------------------------------------
-        string repr();
-        double noise();
+    //-----------------------------------------------------------------------------
+    //  Mutators.
+    //-----------------------------------------------------------------------------
+    void addSynapse(shared_ptr<SynapseBase> syn);
+    void setRefactory(double t);
+    void setTau(double t);
+    void setNoise(double eps);
+    void setThreshold(double t);
 
-        void save_data(const string& outfile="");
+    //-----------------------------------------------------------------------------
+    //  Accessor.
+    //-----------------------------------------------------------------------------
+    std::vector<std::tuple<double, double>> data( ) const;
+    string path() const;
 
-    private:
-        // Collect synapses.
-        string name_;
-        std::vector<std::tuple<double, double>> data_;
-        std::vector<double> spikes_;            // Time of spikes.
-        vector<shared_ptr<SynapseBase>> synapses_;
+    //-----------------------------------------------------------------------------
+    //  Helper
+    //-----------------------------------------------------------------------------
+    string repr();
+    double noise();
 
-        double Cm_;
-        double Em_;
-        double Rm_;
-        double vm_;
-        double tau_;
-        double threshold_;
-        double refactory_;
-        bool fired_;
+    void save_data(const string& outfile="");
 
-        // Helper variables.
-        double t_, prevT_;
-        double dt_;
-        double sum_all_synapse_inject_;
+private:
+    // Collect synapses.
+    string path_;
 
-        // noise source.
-        std::default_random_engine gen_;
-        std::uniform_real_distribution<double>  dist_{-1, 1};
-        double noise_;
+    std::vector<std::tuple<double, double>> data_;
+    std::vector<double> spikes_;            // Time of spikes.
+    vector<shared_ptr<SynapseBase>> synapses_;
+
+    double Cm_;
+    double Em_;
+    double Rm_;
+    double vm_;
+    double tau_;
+    double threshold_;
+    double refactory_;
+    bool fired_;
+
+    // Helper variables.
+    double t_, prevT_;
+    double dt_;
+    double sum_all_synapse_inject_;
+
+    // noise source.
+    std::default_random_engine gen_;
+    std::uniform_real_distribution<double>  dist_{-1, 1};
+    double noise_;
 };
 
 #endif /* end of include guard: IAF_H */

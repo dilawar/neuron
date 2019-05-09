@@ -8,8 +8,7 @@
 
 #include "../include/SpikeGenerator.h"
 #include "../include/SynapseGroup.h"
-
-#include "spdlog/spdlog.h"
+#include "../network/Connectors.hh"
 
 SpikeGeneratorBase::SpikeGeneratorBase(sc_module_name name, size_t N, double dt):
     name_(name)
@@ -41,32 +40,15 @@ void SpikeGeneratorBase::generateSpike( )
 
 int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort)
 {
-    // If target is SynapseGroup.
-    if(SynapseGroup* syns = boost::get<SynapseGroup*>(tgt))
-    {
-        spdlog::info("Connecting .{} to Synapses.{}", port, tgtPort);
-        cout << "Total synapase " << syns->size() << endl;
-
-        // Find the way to find the object
-        for (size_t i = 0; i < syns->size(); i++) 
-        {
-            // find target port.
-            auto syn = syns->getSynapse(i);
-            auto pTgtPort = syn->findPort<sc_in<bool> >(tgtPort, "sc_in");
-            if(! pTgtPort)
-            {
-                spdlog::warn( "Could not find {}.{}", syn->name(), pTgtPort->basename());
-                continue;
-            }
-
-            // Bind ports.
-            pTgtPort->bind( *(spike_[i].get()) );
-        }
-    }
-
-    return 0;
+    return boost::apply_visitor(
+            std::bind(SpikeGneneratorBaseConnectionVisitor(), this, port, std::placeholders::_1, tgtPort)
+            , tgt);
 }
 
+sc_signal<bool>* SpikeGeneratorBase::getSpikePort(size_t i)
+{
+    return spike_[i].get();
+}
 
 string SpikeGeneratorBase::path()
 {

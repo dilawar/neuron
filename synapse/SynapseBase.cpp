@@ -15,8 +15,8 @@
 #include "../engine/engine.h"
 #include "../utility/data_util.h"
 
-SynapseBase::SynapseBase(sc_module_name name, double gbar, double tau, double Esyn):
-    name_(name) 
+SynapseBase::SynapseBase(sc_module_name path, double gbar, double tau, double Esyn):
+    path_((const char*)path) 
     , gbar_(gbar)
     , tau1_(tau)
     , Esyn_(Esyn)
@@ -35,13 +35,13 @@ std::string SynapseBase::repr()
 {
     std::stringstream ss;
     ss << boost::format("SYNAPSE:%1%, gbar=%2%, Esyn=%3% tau1=%4% tau2=%5%\n") 
-        % name_ % gbar_ % Esyn_ % tau1_ % tau2_;
+        % path_ % gbar_ % Esyn_ % tau1_ % tau2_;
     return ss.str();
 }
 
-std::string SynapseBase::name()
+std::string SynapseBase::path()
 {
-    return string(name_);
+    return path_;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -62,7 +62,7 @@ void SynapseBase::monitor_spike( )
 
 void SynapseBase::injectCurrent( )
 {
-    inject.write(g_*(vPost_-Esyn_));
+    psc.write(g_*(vPost_-Esyn_));
 }
 
 #if 0
@@ -130,7 +130,7 @@ void SynapseBase::save_data(const std::string& filename)
 {
     string outfile(filename);
     if(filename.size() < 1)
-        outfile = name() + ".csv";
+        outfile = path() + ".csv";
     write_to_csv(data_, outfile, "time, g");
 }
 

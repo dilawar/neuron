@@ -23,10 +23,6 @@
 #include "SynapseGroup.h"
 #include "Network.h"
 
-// This is from cmake.
-#ifdef LOG_LEVEL
-#define SPDLOG_ACTIVE_LEVEL SPD_LOG_ ## LOG_LEVEL
-#endif
 
 namespace tantrika {
 

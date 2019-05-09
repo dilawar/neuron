@@ -6,19 +6,26 @@
  *        License:  MIT License
  */
 
+
 #include "../include/Network.h"
 #include "../include/SynapseGroup.h"
+#include "../include/NeuronGroup.h"
 
-#include "spdlog/spdlog.h"
+#include "Connectors.hh"
 
 Network::Network(sc_module_name name, double dt): 
     name_(name)
     , dt_(dt)
 { 
+
+#ifdef LOG_LEVEL
+    spdlog::set_level(spdlog::level::LOG_LEVEL);
+#endif
+
     path_ = string((const char*)name_);
     spdlog::info("Creating network: {}", path_ );
     SC_METHOD(record);
-    sensitive << clk_;
+    sensitive << clock;
 }
 
 Network::~Network()
@@ -40,6 +47,15 @@ void Network::addSynapseGroup(const string& path, size_t N
     spdlog::info("Created SynapseGroup: {} of size {}", path, N);
 }
 
+// Neuron group.
+void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm, double Em)
+{
+    NeuronGroup* ng = new NeuronGroup(path.c_str(), N, rm, cm, Em);
+    ng->clock(clock);
+    addToMaps<NeuronGroup>("NeuronGroup", ng);
+    spdlog::info("Created SynapseGroup: {} of size {}", path, N);
+}
+
 
 // Add spike generator, Poisson Group.
 void Network::addPoissonGroup(const string& path, size_t N, double lambda)
@@ -54,7 +70,7 @@ void Network::addSpikeGeneratorGroup(const string& path, size_t N, const string 
 void Network::addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay)
 {
     SpikeGeneratorBase* spikeGen_ = new PeriodicSpikeGenerator(path.c_str(), N);
-    spikeGen_->clock(clk_); // Bind clock.
+    spikeGen_->clock(clock); // Bind clock.
     addToMaps<SpikeGeneratorBase>("SpikeGeneratorPeriodicGroup", spikeGen_);
 
     spdlog::info("Created SpikeGeneratorGroup {} with size {}", path, N);
@@ -82,17 +98,14 @@ void Network::findElementsByType(const string& type, std::vector<network_variant
 int Network::connect(const string& srcPath, const string& srcPort
         , const string& tgtPath , const string& tgtPort)
 {
-    spdlog::info("Connecting {}.{} --> {}.{}", srcPath, srcPort, tgtPath, tgtPort);
+
+    spdlog::info("Connecting {}.{} --> {}.{} ...", srcPath, srcPort, tgtPath, tgtPort);
 
     auto src = findElementByPath(srcPath);
     auto tgt = findElementByPath(tgtPath);
-
-    if(SpikeGeneratorBase* spk = boost::get<SpikeGeneratorBase*>(src) )
-        return spk->connect(srcPort, tgt, tgtPort);
-    else
-        spdlog::error("This function is not available for {}", srcPath);
-
-    return -1;
+    return boost::apply_visitor(
+            std::bind(NetworkConnectionVisitor(), std::placeholders::_1, srcPort, tgt, tgtPort)
+            , src);
 }
 
 /* --------------------------------------------------------------------------*/

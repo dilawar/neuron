@@ -6,6 +6,7 @@
  *        License:  MIT License
  */
 
+#include "../include/global.h"
 #include "../include/SynapseGroup.h"
 
 SynapseGroup::SynapseGroup(sc_module_name path, size_t N
@@ -16,7 +17,8 @@ SynapseGroup::SynapseGroup(sc_module_name path, size_t N
 {
     for (size_t i = 0; i < N; i++) 
     {
-        string synPath = path + '[' + to_string(i) + ']';
+        string synPath = (boost::format("%1%[%2%]")%path%i).str();
+
         if(type == "alpha")
             elements_.push_back(make_unique<SynapseAlpha>(synPath.c_str(), gbar, tau, Em));
         else
@@ -42,4 +44,9 @@ string SynapseGroup::type()
 size_t SynapseGroup::size()
 {
     return N_;
+}
+
+int SynapseGroup::connect(const string& port, network_variant_t tgt, const string& tgtPort)
+{
+    spdlog::error("Not implemented.");
 }

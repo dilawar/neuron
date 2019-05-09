@@ -33,16 +33,20 @@ public:
 
     virtual void process() = 0;
 
+    sc_signal<bool>* getSpikePort(size_t i);
+
     string path();
 
 private:
     sc_module_name name_;
     size_t N_;
-
-    std::vector<unique_ptr<sc_signal<bool> > > spike_;
-
     string path_;
     double dt_; 
+
+    // Connectors.h connects to it.
+    std::vector<unique_ptr<sc_signal<bool> > > spike_;
+
+
 };
 
 #endif /* end of include guard: SPIKEGENERATOR_BASE_H */

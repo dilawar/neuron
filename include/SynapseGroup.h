@@ -17,6 +17,7 @@
 #ifndef SYNAPSE_H
 #define SYNAPSE_H
 
+#include "global.h"
 #include "SynapseExp.h"
 #include "SynapseAlpha.h"
 
@@ -25,8 +26,6 @@
 
 using namespace std;
 
-class SynapseAlpha;
-class SynapseExp;
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -46,6 +45,8 @@ public:
     // Get a particular synapse.
     SynapseBase* getSynapse(size_t i) const;
 
+    int connect(const string& port, network_variant_t tgt, const string& tgtPort);
+
     string path();
     string type();
     size_t size();
@@ -55,6 +56,8 @@ private:
     string path_;
     string type_;
     size_t N_;
+
+    // Keeps all elements.
     vector<unique_ptr<SynapseBase>> elements_;
 };
 

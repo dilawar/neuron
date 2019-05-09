@@ -67,10 +67,10 @@ SC_MODULE(TestIAF)
 
         // Store to plot later.
         data["time"].push_back(t);
-        double syn = syn1->inject.read() + syn3->inject.read();
+        double syn = syn1->psc.read() + syn3->psc.read();
         data["syn"].push_back(syn);
-        data["exc"].push_back(syn1->inject.read());
-        data["inh"].push_back(syn3->inject.read());
+        data["exc"].push_back(syn1->psc.read());
+        data["inh"].push_back(syn3->psc.read());
         data["vm"].push_back(vm);
     }
 
