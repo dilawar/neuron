@@ -25,6 +25,9 @@ int main(int argc, const char *argv[])
     net.connect("A/i1", "output", "A/s1", "spike");
     net.connect("A/n1", "vm", "A/s1", "post");  // neuron vm are connected to synapse post.
 
+    // Monitor PSC current.
+    net.monitor("A/s1", "psc");
+
     net.start(10);
     
     return 0;

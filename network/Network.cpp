@@ -108,6 +108,17 @@ int Network::connect(const string& srcPath, const string& srcPort
             , src);
 }
 
+int Network::monitor( const string& path, const string& port)
+{
+    // Monitor this port.
+    spdlog::info( "Creating monitor for {}.{}", path, port);
+    auto src = findElementByPath(path);
+    return boost::apply_visitor( 
+            std::bind( MonitorVisitor(), std::placeholders::_1, port, this)
+            , src
+            );
+}
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  sc_main/main function. This function is called when user simulate

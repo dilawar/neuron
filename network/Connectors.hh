@@ -134,5 +134,28 @@ public:
     }
 };
 
+// This is visitor for connecting 
+class MonitorVisitor : public boost::static_visitor<int>
+{
+public:
+    int operator()(SpikeGeneratorBase* ptr, const string& port, Network* net) const
+    {
+        spdlog::error( "+ (NOT IMPLEMENTED) SpikeGenerator connect .{}", port);
+        return -1;
+    }
+    
+    int operator()(NeuronGroup* ptr, const string& port, Network* net) const
+    {
+        spdlog::error( "+ (NOT IMPLEMENTED) NeuronGroup connect .{}", port);
+        return -1;
+    }
+
+    int operator()(SynapseGroup* ptr, const string& port, Network* net) const
+    {
+        spdlog::debug( "+ SynapseGroup monitor .{}", port);
+        auto tgtPort = findPort(ptr, port, "sc_out");
+    }
+};
+
 
 #endif /* end of include guard: CONNECTORS_H */

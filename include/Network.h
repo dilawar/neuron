@@ -58,7 +58,6 @@ public:
     // Monitor given target.
     int monitor(const string& tgt, const string& port);
 
-
     template<typename T>
     void addToMaps(const string type, T* const a)
     {
@@ -97,8 +96,8 @@ private:
     // One element for a given path. Each element is of GroupType.
     map<string, network_variant_t> elemMap_;
 
-    // All the ports which are out port should be connected to these signals.
-    vector<sc_signal<bool>> records_;
+    // What to monitor?
+    map<string, sc_signal<double>> records_;
 
 public:
     sc_clock clock{ "clock", 0.1, SC_MS };
