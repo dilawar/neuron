@@ -43,11 +43,6 @@ public:
     // Ports
     sc_in_clk clock {"clock"};
 
-    // Collect data from neurons here.
-    vector<unique_ptr<sc_signal<double>>> vm_;
-    vector<unique_ptr<sc_signal<double>>> inject_;
-    
-
 private:
     /* data */
     sc_module_name name_;

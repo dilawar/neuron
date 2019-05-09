@@ -20,6 +20,8 @@
 #include <memory>
 #include <systemc.h>
 
+#include "../include/sc_ports.hpp"
+
 using namespace std;
 
 /* --------------------------------------------------------------------------*/
@@ -54,7 +56,9 @@ public:
     sc_in<double> post{"post"};
 
     /* Post synaptic current. */
-    sc_out<double> psc{"psc"};
+    // sc_out<double> psc{"psc"};
+    // sc_port<sc_signal_inout_if<double>, 1, SC_ZERO_OR_MORE_BOUND> psc{"psc"};
+    sc_out_optional<double> psc{"psc"};
 
     // Overridden in derived classes.
     virtual void process() = 0;

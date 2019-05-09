@@ -145,7 +145,7 @@ void IAF::decay()
         return;
 
     // Inject only when fired_ is set to false or inject value is non-zero.
-    if((inject != 0.0) && (! fired_))
+    if((inject.read() != 0.0) && (! fired_))
         nonZeroInject.notify();
 
     // Collect currents from synspases.
@@ -156,7 +156,7 @@ void IAF::decay()
     if(sum_all_synapse_inject_ != 0.0)
         nonZeroSynCurrent.notify();
 
-    vm_ += dt_*(-vm+Em_+noise())/tau_;
+    vm_ += dt_*(-vm.read()+Em_+noise())/tau_;
     if(vm_ >= threshold_)
     {
         vm_ = 40e-3;
@@ -175,7 +175,7 @@ void IAF::handleSynapticInjection()
 
 void IAF::handleInjection()
 {
-    vm_ += (inject * dt_)/Cm_;
+    vm_ += (inject.read() * dt_)/Cm_;
 }
 
 void IAF::addSynapse(shared_ptr<SynapseBase> syn)

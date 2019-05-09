@@ -28,10 +28,6 @@ Network::Network(sc_module_name name, double dt):
     sensitive << clock;
 }
 
-Network::~Network()
-{
-}
-
 void Network::record()
 {
     std::cout << "Ticking " << std::endl;
@@ -53,7 +49,7 @@ void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm,
     NeuronGroup* ng = new NeuronGroup(path.c_str(), N, rm, cm, Em);
     ng->clock(clock);
     addToMaps<NeuronGroup>("NeuronGroup", ng);
-    spdlog::info("Created SynapseGroup: {} of size {}", path, N);
+    spdlog::info("Created NeuronGroup: {} of size {}", path, N);
 }
 
 

@@ -106,7 +106,7 @@ public:
         {
             // find target port.
             auto src = srcGroup->getNeuron(i);
-            auto pSrcPort = findPort<sc_out<double> >(src, srcPort, "sc_out");
+            sc_out<double>* pSrcPort = findPort<sc_out<double> >(src, srcPort, "sc_out");
             if(! pSrcPort)
             {
                 spdlog::warn( "Could not find {}.{}. Available {}. Ignoring rest.", src->path()
@@ -116,7 +116,7 @@ public:
             }
 
             auto tgt = synGroup->getSynapse(i);
-            auto pTgtPort = findPort<sc_in<double> >(tgt, tgtPort, "sc_in");
+            sc_in<double>* pTgtPort = findPort<sc_in<double>>(tgt, tgtPort, "sc_in");
             if(! pTgtPort)
             {
                 spdlog::warn( "Could not find {}.{}. Availble ports {}.", tgt->path(), srcPort
@@ -124,9 +124,7 @@ public:
                         );
                 return -1;
             }
-
-            // else
-                // pSrcPort->bind( *(pTgtPort) );
+            pTgtPort->bind(*pSrcPort);
         }
 
         spdlog::debug("\t\t ... SUCCESS.");
@@ -153,7 +151,8 @@ public:
     int operator()(SynapseGroup* ptr, const string& port, Network* net) const
     {
         spdlog::debug( "+ SynapseGroup monitor .{}", port);
-        auto tgtPort = findPort(ptr, port, "sc_out");
+        // auto tgtPort = findPort(ptr, port, "sc_out");
+        return -1;
     }
 };
 

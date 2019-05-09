@@ -28,6 +28,7 @@
 
 #include "SynapseExp.h"
 #include "SynapseAlpha.h"
+#include "../include/sc_ports.hpp"
 
 using namespace std;
 
@@ -49,8 +50,9 @@ public:
     //  Ports
     //-----------------------------------------------------------------------------
     sc_in_clk clock{"clock"};                       // Incoming clock.
-    sc_out<double> vm{"vm"};                        // Neuron membrane potential.
-    sc_in<double> inject{"inject"};                 // Injection of current by users.
+
+    sc_out_optional<double> vm{"vm"};               // Neuron membrane potential.
+    sc_in_optional<double> inject{"inject"};        // Injection of current by users.
 
     sc_signal<double> synapse_inject[MAX_SYNAPSES]; // Currents from all synapses.
 

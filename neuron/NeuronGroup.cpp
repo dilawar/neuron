@@ -18,24 +18,12 @@ NeuronGroup::NeuronGroup(sc_module_name name, size_t N, double rm, double cm, do
 {
     // Now construct the neurons.
     string mPath = string((const char*)name);
-    for (size_t i = 0; i < N; i++) 
-    {
-        string vName = mPath + "/vm[" + to_string(i) + "]";
-        string iName = mPath + "/injec[" + to_string(i) + "]";
-
-        vm_.push_back( make_unique<sc_signal<double>>(vName.c_str(), 0.0));
-        inject_.push_back( make_unique<sc_signal<double>>(iName.c_str(), 0.0));
-    }
 
     for (size_t i = 0; i < N; i++) 
     {
         string nrnName = (const char*)name + '[' + to_string(i) + ']';
         unique_ptr<IAF> iaf( make_unique<IAF>(nrnName.c_str(), rm, cm, Em) );
-
         iaf->clock(clock);
-        iaf->vm(*vm_[i]);
-        iaf->inject(*inject_[i]);
-
         // Now keep it in vector.
         vecNeurons_.push_back( std::move(iaf) );
     }

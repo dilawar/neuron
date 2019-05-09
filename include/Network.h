@@ -32,7 +32,7 @@ class Network : public sc_module
 public:
 
     Network(sc_module_name path, double dt);
-    ~Network( );
+
 
     // Groups 
     void addSynapseGroup(const string& path, size_t N
@@ -57,6 +57,7 @@ public:
 
     // Monitor given target.
     int monitor(const string& tgt, const string& port);
+
 
     template<typename T>
     void addToMaps(const string type, T* const a)
