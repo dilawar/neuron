@@ -170,7 +170,7 @@ void Network::bindPortSpikeGeneratorBase(SpikeGeneratorBase* spk)
 
     for (size_t i = 0; i < spk->size(); i++) 
     {
-        string sigName = (boost::format("%1%[%2%]")%spk->name()%i).str();
+        string sigName = (boost::format("%1%[%2%]")%spk->path()%i).str();
         auto sig = make_unique<sc_signal<bool>>(sigName.c_str(), false);
         spk->getSpikePort(i)->bind(*sig);
         addBoolSignal(sigName, std::move(sig));

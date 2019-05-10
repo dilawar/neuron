@@ -16,18 +16,13 @@
 
 using namespace std;
 
-class SpikeGeneratorBase : public sc_module
+class SpikeGeneratorBase 
 {
 public:
-    SC_HAS_PROCESS(SpikeGeneratorBase);
-    SpikeGeneratorBase(sc_module_name name, size_t N, double period=1e-3);
-
-    std::vector<unique_ptr<sc_out<bool> > > spike_;
+    SpikeGeneratorBase(const string& name, size_t N);
 
     // Connect to other objects.
     int connect(const string& port, network_variant_t tgt, const string& tgtPort);
-
-    void generateSpike( );
 
     virtual void process() = 0;
 
@@ -45,9 +40,9 @@ public:
 public:
     // Incoming clock.
     sc_in_clk clock{"clock"};
+    std::vector<unique_ptr<sc_out<bool> > > spike_;
 
-
-private:
+protected:
     string path_;
     size_t N_;
     sc_time dt_; 

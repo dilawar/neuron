@@ -10,33 +10,15 @@
 #include "../include/SynapseGroup.h"
 #include "../network/Connectors.hh"
 
-SpikeGeneratorBase::SpikeGeneratorBase(sc_module_name name, size_t N, double dt)
-    : path_((const char*)name)
+SpikeGeneratorBase::SpikeGeneratorBase(const string& path, size_t N)
+    : path_(path)
     , N_(N)
-    , dt_(sc_time(dt, SC_SEC))
 {
 
-    spdlog::debug( "++ SpikeGenerator has timeperiod of {} s", dt_.to_seconds() );
     for (size_t i = 0; i < N_; i++) 
         spike_.push_back( make_unique<sc_out<bool> >() );
 
-    SC_THREAD(generateSpike);
-}
-
-
-void SpikeGeneratorBase::generateSpike( )
-{
-    wait(delay_ + globalDt_);
-    while(true)
-    {
-        wait(dt_ - globalDt_);
-        for (size_t i = 0; i < spike_.size(); i++) 
-            spike_[i]->write(true);
-
-        wait(globalDt_);
-        for (size_t i = 0; i < spike_.size(); i++) 
-            spike_[i]->write(false);
-    }
+    //SC_THREAD(generateSpike);
 }
 
 int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort)

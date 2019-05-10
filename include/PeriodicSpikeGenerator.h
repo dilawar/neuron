@@ -13,14 +13,19 @@
 
 #include "SpikeGeneratorBase.h"
 
-class PeriodicSpikeGenerator: public SpikeGeneratorBase
+class PeriodicSpikeGenerator: sc_module, public SpikeGeneratorBase
 {
 public:
+    SC_HAS_PROCESS(PeriodicSpikeGenerator);
     PeriodicSpikeGenerator(sc_module_name name, size_t N, double period=1e-3);
 
-private:
     /* data */
     void process( ) override;
+    void generateSpike();
+
+private:
+    sc_time period_;
+
 };
 
 
