@@ -34,7 +34,13 @@ Network::~Network()
 
 void Network::record()
 {
-    std::cout << "Ticking " << std::endl;
+    std::cout << to_string(sc_time_stamp().to_seconds()) << " ";
+    for (auto& s : signals_)
+        cout << s.second->read() << ' ';
+    for (auto& s : boolSignals_)
+        cout << s.second->read() << ' ';
+    cout << endl;
+
 }
 
 void Network::before_end_of_elaboration()
