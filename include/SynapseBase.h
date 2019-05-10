@@ -56,7 +56,7 @@ public:
     sc_in<double> post{"post"};
 
     /* Post synaptic current. */
-    sc_out_opt<double> psc{"psc"};
+    sc_out<double> psc{"psc"};
 
     // Overridden in derived classes.
     virtual void process() = 0;

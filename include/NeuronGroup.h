@@ -33,18 +33,13 @@ public:
 
     int connect(const string& port, network_variant_t tgt, const string& tgtPort);
 
-    void addClock(sc_clock clk);
-
     template<typename T=IAF>
     T* getNeuron(size_t i)
     {
         return vecNeurons_[i].get();
     }
 
-public:
-    // Ports
-    sc_in_clk clock {"clock"};
-    
+    size_t size() const;
 
 private:
     /* data */

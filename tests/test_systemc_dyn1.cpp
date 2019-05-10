@@ -34,6 +34,8 @@ struct TestExpSyn: public sc_module
     sc_signal<double> expExc;
     sc_signal<double> expInh;
 
+    sc_signal<double> a, b;
+
     void gen_stim()
     {
         // spike.write(false);
@@ -76,7 +78,9 @@ struct TestExpSyn: public sc_module
         dutExc_ = make_unique<SynapseExp>("excExp", 1e-9, 1e-3, 0.0);
         dutExc_->clock.bind(clock);
         dutExc_->spike.bind(*pSpike);
+
         dutExc_->post(post);
+
         dutExc_->psc(expExc);
 
         dutInh_ = make_unique<SynapseExp>("inhExp", 1e-9, 10e-3, -90e-3);

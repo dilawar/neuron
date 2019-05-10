@@ -15,6 +15,30 @@
 #include "../include/tantrika.h"
 #include "../utility/sc_utils.hpp"
 
+// This is visitor for binding port.  
+class NetworkPortBinderVisitor : public boost::static_visitor<int>
+{
+public:
+    int operator()(SpikeGeneratorBase* ptr, Network* net) const
+    {
+        spdlog::debug( "+ Binding port of SpikeGeneratorBase {}", ptr->path());
+        return 0;
+    }
+    
+    int operator()(NeuronGroup* ptr, Network* net) const
+    {
+        spdlog::debug( "+ Binding port of NeuronGroup {}", ptr->path());
+        return 0;
+    }
+
+    int operator()(SynapseGroup* ptr, Network* net) const
+    {
+        spdlog::debug( "+ Binding port of SynapseGroup {}", ptr->path());
+        return 0;
+    }
+};
+
+
 // This is visitor for connecting 
 class NetworkConnectionVisitor : public boost::static_visitor<int>
 {

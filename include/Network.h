@@ -53,12 +53,8 @@ public:
     string path() const;
     void before_end_of_elaboration();
 
-    // Connect ports.
-    int connect(const string& src, const string& sPort, const string& tgt, const string& tPort);
-
     // Monitor given target.
     int monitor(const string& tgt, const string& port);
-
 
     template<typename T>
     void addToMaps(const string type, T* const a)
@@ -70,8 +66,10 @@ public:
         network_variant_t ba = a;
         typeMap_.insert({type, ba});
         elemMap_.insert( {a->path(), ba} );
-
     }
+
+    // It uses boost::variant 
+    int bindPorts( );
 
     // ACCESSORS.
     network_variant_t findElementByPath(const string& group);
@@ -103,6 +101,7 @@ private:
 
     // Create map of signal to bind.
     map<string, unique_ptr<sc_signal<double>> > signals_;
+    map<string, unique_ptr<sc_signal<bool>> > binarySignals_;
 
 public:
     sc_clock clock{ "clock", 0.1, SC_MS };

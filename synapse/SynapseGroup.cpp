@@ -18,7 +18,6 @@ SynapseGroup::SynapseGroup(sc_module_name path, size_t N
     for (size_t i = 0; i < N; i++) 
     {
         string synPath = (boost::format("%1%[%2%]")%path%i).str();
-
         if(type == "alpha")
             elements_.push_back(make_unique<SynapseAlpha>(synPath.c_str(), gbar, tau, Em));
         else
