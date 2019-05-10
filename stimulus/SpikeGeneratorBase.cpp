@@ -13,23 +13,27 @@
 SpikeGeneratorBase::SpikeGeneratorBase(sc_module_name name, size_t N, double dt)
     : path_((const char*)name)
     , N_(N)
-    , dt_(dt)
+    , dt_(sc_time(dt, SC_SEC))
 {
+
+    spdlog::debug( "++ SpikeGenerator has timeperiod of {} s", dt_.to_seconds() );
     for (size_t i = 0; i < N_; i++) 
         spike_.push_back( make_unique<sc_out<bool> >() );
 
     SC_THREAD(generateSpike);
 }
 
+
 void SpikeGeneratorBase::generateSpike( )
 {
+    wait(delay_ + globalDt_);
     while(true)
     {
-        wait(dt_-1e-6, SC_SEC);
+        wait(dt_ - globalDt_);
         for (size_t i = 0; i < spike_.size(); i++) 
             spike_[i]->write(true);
 
-        wait(1e-6, SC_SEC);
+        wait(globalDt_);
         for (size_t i = 0; i < spike_.size(); i++) 
             spike_[i]->write(false);
     }
@@ -42,7 +46,7 @@ int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const
             , tgt);
 }
 
-sc_out<bool>* SpikeGeneratorBase::getSpikePort(size_t i)
+sc_out<bool>* SpikeGeneratorBase::getSpikePort(size_t i) const
 {
     return spike_[i].get();
 }
@@ -56,4 +60,14 @@ string SpikeGeneratorBase::path() const
 size_t SpikeGeneratorBase::size() const
 {
     return spike_.size();
+}
+
+void SpikeGeneratorBase::setDelay(double delay)
+{
+    delay_ = sc_time(delay, SC_SEC);
+}
+
+double SpikeGeneratorBase::getDelay(void) const
+{
+    return delay_.to_seconds();
 }

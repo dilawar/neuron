@@ -9,15 +9,11 @@
 #include "../include/PeriodicSpikeGenerator.h"
 #include "spdlog/spdlog.h"
 
-PeriodicSpikeGenerator::PeriodicSpikeGenerator(sc_module_name name, size_t N)
-    : SpikeGeneratorBase((const char*)name, N)
+PeriodicSpikeGenerator::PeriodicSpikeGenerator(sc_module_name name, size_t N, double period)
+    : SpikeGeneratorBase((const char*)name, N, period)
 {
     
 }
 
 void PeriodicSpikeGenerator::process()
-{
-    std::cout << "Process " << std::endl;
-}
-
-
+{}

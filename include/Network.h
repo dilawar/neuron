@@ -31,7 +31,7 @@ class Network : public sc_module
 
 public:
 
-    Network(sc_module_name path, double dt);
+    Network(sc_module_name path, double dt=1e-6);
     ~Network( );
 
     // Groups 
@@ -90,7 +90,7 @@ public:
 private:
     sc_module_name name_;
     string path_;
-    double dt_;                     // Timeperiod of clock
+    sc_time dt_;                     // Timeperiod of clock
 
     // map of Type and vector of elements with those types. Store BaseClass as
     // type info.
@@ -109,7 +109,9 @@ private:
     map<string, unique_ptr<sc_signal<bool>> > boolSignals_;
 
 public:
-    sc_clock clock{ "clock", 0.1, SC_MS };
+    // sc_clock clock{ "clock", 0.1, SC_MS };
+    unique_ptr<sc_clock> clock_;
+
     sc_signal<bool> event_;
 
 };

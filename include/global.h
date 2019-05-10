@@ -11,6 +11,8 @@ class SynapseGroup;
 class SpikeGeneratorBase;
 class NeuronGroup;
 
+extern sc_core::sc_time globalDt_;
+
 typedef boost::variant<
             SynapseGroup*
             , SpikeGeneratorBase*   // SpikeGeneratorBase.h

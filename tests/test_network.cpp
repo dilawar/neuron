@@ -13,7 +13,7 @@
 
 int main(int argc, const char *argv[])
 {
-    Network net("A", 1e-3);
+    Network net("A", 1e-4);
 
     // Add input.
     net.addSpikeGeneratorPeriodicGroup("i1", 2, 1e-3, 0.0);
@@ -25,7 +25,7 @@ int main(int argc, const char *argv[])
     //net.connect("i1", "output", "s1", "spike");
     //net.connect("n1", "vm", "s1", "post");  // neuron vm are connected to synapse post.
 
-    net.start(1);
+    net.start(5e-3);
     
     return 0;
 }

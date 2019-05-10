@@ -13,19 +13,29 @@
 
 #include "Connectors.hh"
 
+// Global 
+sc_time globalDt_;
+
 Network::Network(sc_module_name name, double dt): 
     name_(name)
-    , dt_(dt)
+    , dt_(sc_time(dt, SC_SEC))
 { 
 
 #ifdef LOG_LEVEL
     spdlog::set_level(spdlog::level::LOG_LEVEL);
 #endif
 
+    globalDt_ = dt_;
+
     path_ = string((const char*)name_);
     spdlog::info("Creating network: {}", path_ );
+
+    // setup clock.
+    clock_ = make_unique<sc_clock>("clock", dt_, SC_SEC);
+    spdlog::info("Global clock dt {} s", clock_->period().to_seconds() );
+
     SC_METHOD(record);
-    sensitive << clock;
+    sensitive << clock_->posedge_event();
 }
 
 Network::~Network()
@@ -34,7 +44,7 @@ Network::~Network()
 
 void Network::record()
 {
-    std::cout << to_string(sc_time_stamp().to_seconds()) << " ";
+    std::cout << sc_time_stamp().to_seconds() << " ";
     for (auto& s : signals_)
         cout << s.second->read() << ' ';
     for (auto& s : boolSignals_)
@@ -82,7 +92,7 @@ void Network::addSynapseGroup(const string& path, size_t N
         addSignal(sigName, std::move(pscSig));
 
         // bind clock.
-        s->clock(clock);
+        s->clock(*clock_);
     }
 }
 
@@ -98,7 +108,7 @@ void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm,
     for (size_t i = 0; i < N; i++) 
     {
         IAF* n = ng->getNeuron(i);
-        n->clock(clock);
+        n->clock(*clock_);
 
         // Connect vm.
         sigName = string(n->vm.name());
@@ -143,7 +153,8 @@ void Network::addSpikeGeneratorGroup(const string& path, size_t N, const string 
 
 void Network::addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay)
 {
-    SpikeGeneratorBase* spikeGen_ = new PeriodicSpikeGenerator(path.c_str(), N);
+    SpikeGeneratorBase* spikeGen_ = new PeriodicSpikeGenerator(path.c_str(), N, period);
+    spikeGen_->setDelay(delay);
 
     addToMaps<SpikeGeneratorBase>("SpikeGeneratorPeriodicGroup", spikeGen_);
     spdlog::info("Created SpikeGeneratorGroup {} with size {}", path, N);
@@ -154,8 +165,9 @@ void Network::addSpikeGeneratorPeriodicGroup(const string& path, size_t N, doubl
 
 void Network::bindPortSpikeGeneratorBase(SpikeGeneratorBase* spk)
 {
-    // Bind clock.
-    spk->clock(clock);
+    // DO NOT BIND CLOCK. Stimulus generator works in SC_THREAD.
+    spk->clock(*clock_);
+
     for (size_t i = 0; i < spk->size(); i++) 
     {
         string sigName = (boost::format("%1%[%2%]")%spk->name()%i).str();

@@ -20,12 +20,9 @@ class SpikeGeneratorBase : public sc_module
 {
 public:
     SC_HAS_PROCESS(SpikeGeneratorBase);
+    SpikeGeneratorBase(sc_module_name name, size_t N, double period=1e-3);
 
-    // Incoming clock.
-    sc_in_clk clock{"clock"};
     std::vector<unique_ptr<sc_out<bool> > > spike_;
-
-    SpikeGeneratorBase(sc_module_name name, size_t N, double period = 1);
 
     // Connect to other objects.
     int connect(const string& port, network_variant_t tgt, const string& tgtPort);
@@ -34,18 +31,27 @@ public:
 
     virtual void process() = 0;
 
-    sc_out<bool>* getSpikePort(size_t i);
+    // setter
+    void setDelay(double delay);
+
+    // Getter
+    sc_out<bool>* getSpikePort(size_t i) const;
+    double getDelay( ) const;
 
     string path() const;
 
     size_t size() const;
 
+public:
+    // Incoming clock.
+    sc_in_clk clock{"clock"};
+
+
 private:
     string path_;
     size_t N_;
-    double dt_; 
-
-
+    sc_time dt_; 
+    sc_time delay_;
 
 };
 

@@ -17,9 +17,7 @@ class SpikeGenerator
 {
 public:
     SpikeGenerator()
-    {
-
-    }
+    { }
 
 
 private:
