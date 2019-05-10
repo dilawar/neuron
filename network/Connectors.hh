@@ -34,7 +34,7 @@ public:
     int operator()(SynapseGroup* ptr, Network* net) const
     {
         spdlog::debug( "+ Binding port of SynapseGroup {}", ptr->path());
-        return 0;
+        return 1;
     }
 };
 

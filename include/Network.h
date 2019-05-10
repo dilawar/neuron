@@ -50,6 +50,8 @@ public:
     void addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay=0);
     void addSpikeGeneratorPoissonGroup(const string& path, size_t N, double lambda);
 
+    void bindPortSpikeGeneratorBase(SpikeGeneratorBase* ptr);
+
     string path() const;
     void before_end_of_elaboration();
 
@@ -68,11 +70,14 @@ public:
         elemMap_.insert( {a->path(), ba} );
     }
 
+    void addSignal(const string& name, unique_ptr<sc_signal<double>> sig);
+    void addBoolSignal(const string& name, unique_ptr<sc_signal<bool>> sig);
+
     // It uses boost::variant 
-    int bindPorts( );
+    int bindPorts(network_variant_t elem);
 
     // ACCESSORS.
-    network_variant_t findElementByPath(const string& group);
+    network_variant_t findGroup(const string& group);
     void findElementsByType(const string& type, std::vector<network_variant_t>& collect);
 
     // 
@@ -101,7 +106,7 @@ private:
 
     // Create map of signal to bind.
     map<string, unique_ptr<sc_signal<double>> > signals_;
-    map<string, unique_ptr<sc_signal<bool>> > binarySignals_;
+    map<string, unique_ptr<sc_signal<bool>> > boolSignals_;
 
 public:
     sc_clock clock{ "clock", 0.1, SC_MS };

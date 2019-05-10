@@ -22,7 +22,8 @@ public:
     SC_HAS_PROCESS(SpikeGeneratorBase);
 
     // Incoming clock.
-    sc_in_clk clock;
+    sc_in_clk clock{"clock"};
+    std::vector<unique_ptr<sc_out<bool> > > spike_;
 
     SpikeGeneratorBase(sc_module_name name, size_t N, double period = 1);
 
@@ -33,18 +34,17 @@ public:
 
     virtual void process() = 0;
 
-    sc_signal<bool>* getSpikePort(size_t i);
+    sc_out<bool>* getSpikePort(size_t i);
 
-    string path();
+    string path() const;
+
+    size_t size() const;
 
 private:
-    sc_module_name name_;
-    size_t N_;
     string path_;
+    size_t N_;
     double dt_; 
 
-    // Connectors.h connects to it.
-    std::vector<unique_ptr<sc_signal<bool> > > spike_;
 
 
 };
