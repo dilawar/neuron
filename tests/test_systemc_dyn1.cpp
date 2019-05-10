@@ -25,7 +25,7 @@ struct TestExpSyn: public sc_module
 
     // Spike goes into synapse.
     // sc_signal<bool> spike;
-    sc_signal<bool>* pSpike;
+    unique_ptr<sc_signal<bool>> pSpike;
 
     sc_signal<double> post;
 
@@ -65,7 +65,7 @@ struct TestExpSyn: public sc_module
 
     TestExpSyn(sc_module_name tb)
     {
-        pSpike = new sc_signal<bool>();
+        pSpike = make_unique<sc_signal<bool>>();
 
         SC_THREAD(gen_stim);
 
