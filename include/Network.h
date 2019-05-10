@@ -51,6 +51,7 @@ public:
     void addSpikeGeneratorPoissonGroup(const string& path, size_t N, double lambda);
 
     string path() const;
+    void before_end_of_elaboration();
 
     // Connect ports.
     int connect(const string& src, const string& sPort, const string& tgt, const string& tPort);

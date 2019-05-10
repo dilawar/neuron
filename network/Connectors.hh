@@ -105,27 +105,28 @@ public:
         {
             // find target port.
             auto src = srcGroup->getNeuron(i);
-            auto pSrcPort = findPort<sc_out<double> >(src, srcPort, "sc_out");
+            auto pSrcPort = findPort<sc_out<double> >(src, srcPort);
             if(! pSrcPort)
             {
-                spdlog::warn( "Could not find {}.{}. Available {}. Ignoring rest.", src->path()
-                        , srcPort, availablePortsCSV(src, "sc_out")
+                spdlog::warn( "Could not find {}.{}. Available: {}. Ignoring rest.", src->path()
+                        , srcPort, availablePortsCSV(src)
                         );
                 return -1;
             }
 
             auto tgt = synGroup->getSynapse(i);
-            auto pTgtPort = findPort<sc_in<double> >(tgt, tgtPort, "sc_in");
+            sc_in<double>* pTgtPort = findPort<sc_in<double> >(tgt, tgtPort);
             if(! pTgtPort)
             {
-                spdlog::warn( "Could not find {}.{}. Availble ports {}.", tgt->path(), srcPort
-                        , availablePortsCSV(tgt, "sc_in")
+                spdlog::warn( "Could not find {}.{}. Availble: {}.", tgt->path(), tgtPort
+                        , availablePortsCSV(tgt)
                         );
                 return -1;
             }
 
-            spdlog::debug("\t Connected {} and {}", srcPort, tgtPort);
             pTgtPort->bind(*pSrcPort);
+            spdlog::debug("+++ Bound {} to {}", pTgtPort->name(), pSrcPort->name());
+            // (*pTgtPort)(*pSrcPort);
         }
 
         spdlog::debug("\t\t ... SUCCESS.");

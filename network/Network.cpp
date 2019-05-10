@@ -37,6 +37,15 @@ void Network::record()
     std::cout << "Ticking " << std::endl;
 }
 
+void Network::before_end_of_elaboration()
+{
+    spdlog::debug( "Bind rest of the ports here.");
+
+    // List ports which are not bound.
+    // spdlog::info( "Dumping hierarchy of module." );
+    // cout << printHeir(this);
+}
+
 // Add synapse groups.
 void Network::addSynapseGroup(const string& path, size_t N
         , double gbar, double tau, double Esyn

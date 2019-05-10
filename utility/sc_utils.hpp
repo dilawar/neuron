@@ -14,52 +14,67 @@
 #include <systemc>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 using namespace std;
 
 // Find port when name is given.
 
-    template<typename T=sc_port_base>
-T* findPort(sc_object const* obj, const string& name, const string& kind) 
+    template<typename T=sc_core::sc_port_base>
+T* findPort(sc_core::sc_object const* obj, const string& name, const string& kind="") 
 {
-    for (sc_object* v : obj->get_child_objects())
+    for (sc_core::sc_object* v : obj->get_child_objects())
     {
-        std::string pKind = v->kind(); 
-        if(string(v->basename()) == name && pKind==kind)
+        if(string(v->basename()) == name)
         {
-            if(kind == "sc_in")
-                return dynamic_cast<T*>(v);
-            else if(kind == "sc_out")
-                return dynamic_cast<T*>(v);
-            else if(kind == "sc_inout")
+            if(kind.empty())
                 return dynamic_cast<T*>(v);
             else
-                return dynamic_cast<T*>(v);
+            {
+                if(string(v->kind()) == kind)
+                    return dynamic_cast<T*>(v);
+            }
         }
     }
     return nullptr;
 }
 
-    template<typename T=sc_port_base>
-vector<T*> findPorts(sc_object const* obj, const string& kind) 
+    template<typename T=sc_core::sc_port_base>
+vector<T*> getPorts(sc_core::sc_object const* obj, const string& kind) 
 {
     std::vector<T*> res;
-    for (sc_object* v : obj->get_child_objects())
+    for (sc_core::sc_object* v : obj->get_child_objects())
         if(string(v->kind())==kind)
             res.push_back(dynamic_cast<T*>(v));
     return res;
 }
 
-    template<typename T=sc_port_base>
-string availablePortsCSV(sc_object const* obj, const string& kind) 
+    template<typename T=sc_core::sc_port_base>
+void findPorts(sc_core::sc_object const* obj, const string& kind, vector<string>& names) 
+{
+    for (const sc_core::sc_object* v : obj->get_child_objects())
+        if(string(v->kind())==kind)
+            names.push_back((boost::format("%1%(%2%)")%v->basename()%kind).str());
+}
+
+
+
+    template<typename T=sc_core::sc_port_base>
+string availablePortsCSV(sc_core::sc_object const* obj, const string& kind="") 
 {
     vector<string> sports;
-    for (sc_object* v : obj->get_child_objects())
-        if(string(v->kind())==kind)
-            sports.push_back(v->basename());
+    if(! kind.empty()) {
+        findPorts(obj, kind, sports);
+    }
+    else {
+        findPorts(obj, "sc_in", sports);
+        findPorts(obj, "sc_inout", sports);
+        findPorts(obj, "sc_out", sports);
+    }
     return boost::algorithm::join(sports, ", ");
 }
 
+std::string printHeir(sc_core::sc_object const* obj, size_t level=0);
 
 #endif /* end of include guard: SC_UTILS_H */
 

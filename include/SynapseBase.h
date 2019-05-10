@@ -20,7 +20,7 @@
 #include <array>
 #include <memory>
 #include <systemc.h>
-#include "tantrika_ports.hpp"
+#include "../utility/sc_ports.hpp"
 
 using namespace std;
 
