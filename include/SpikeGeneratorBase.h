@@ -16,13 +16,15 @@
 
 using namespace std;
 
+class Network;
+
 class SpikeGeneratorBase 
 {
 public:
     SpikeGeneratorBase(const string& name, size_t N);
 
     // Connect to other objects.
-    int connect(const string& port, network_variant_t tgt, const string& tgtPort);
+    int connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net);
 
     virtual void process() = 0;
 
@@ -30,7 +32,7 @@ public:
     void setDelay(double delay);
 
     // Getter
-    sc_out<bool>* getSpikePort(size_t i) const;
+    sc_out2<bool> getSpikePort(size_t i) const;
     double getDelay( ) const;
 
     string path() const;
@@ -40,7 +42,7 @@ public:
 public:
     // Incoming clock.
     sc_in_clk clock{"clock"};
-    std::vector<unique_ptr<sc_out<bool> > > spike_;
+    std::vector< sc_out2<bool> > spike_;
 
 protected:
     string path_;

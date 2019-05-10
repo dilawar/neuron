@@ -21,12 +21,12 @@ os.environ['CXX'] = "/usr/bin/c++"
 
 extensions = [
         Extension("_tantrika", ["tantrika.pyx"],
-            include_dirs = [ '/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/external/install/include', '/usr/include/python3.7m' ],
+            include_dirs = [ '/home/dilawars/Work/GITHUB/DILAWAR/tantrika/external/install/include', '/usr/include/python3.7m' ],
             libraries = [ ],
-            library_dirs = [ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
+            library_dirs = [ "/home/dilawars/Work/GITHUB/DILAWAR/tantrika/_build" ],
             extra_compile_args = [ "-std=c++14" ],
-            extra_objects=[ "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build/libtantrika.a"
-                , "/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/external/install/lib64/libsystemc.a"
+            extra_objects=[ "/home/dilawars/Work/GITHUB/DILAWAR/tantrika/_build/libtantrika.a"
+                , "/home/dilawars/Work/GITHUB/DILAWAR/tantrika/external/install/lib64/libsystemc.a"
                 ]
             ),
         ]
@@ -36,7 +36,7 @@ setup(
         author= "Dilawar Singh <dilawars@ncbs.res.in>",
         ext_modules = cythonize(extensions
             , compiler_directives= {'language_level': 3}
-            , build_dir="/home1/dilawars/Work/GITHUB/DILAWAR/tantrika/_build",
+            , build_dir="/home/dilawars/Work/GITHUB/DILAWAR/tantrika/_build",
             ),
         )
 

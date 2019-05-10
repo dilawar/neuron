@@ -173,7 +173,7 @@ void Network::bindPortSpikeGeneratorBase(SpikeGeneratorBase* spk)
 
     for (size_t i = 0; i < spk->size(); i++) 
     {
-        string sigName = (boost::format("%1%[%2%]")%spk->path()%i).str();
+        string sigName = (boost::format("%1%.spike[%2%]")%spk->path()%i).str();
         auto sig = make_unique<sc_signal<bool>>(sigName.c_str(), false);
         spk->getSpikePort(i)->bind(*sig);
         addBoolSignal(sigName, std::move(sig));
@@ -214,10 +214,29 @@ int Network::connect(const string& srcPath, const string& srcPort
     auto src = findGroup(srcPath);
     auto tgt = findGroup(tgtPath);
     return boost::apply_visitor(
-            std::bind(NetworkConnectionVisitor(), std::placeholders::_1, srcPort, tgt, tgtPort)
+            std::bind(NetworkConnectionVisitor(), std::placeholders::_1, srcPort, tgt, tgtPort, this)
             , src);
 }
  
+
+// Find signal.
+sc_signal<double>* Network::getSignal(const string& signame)
+{
+    // for(auto& v : signals_)
+        // cout << v.first << ' ';
+    // cout << endl;
+
+    return signals_[signame].get();
+}
+
+sc_signal<bool>* Network::getBoolSignal(const string& signame)
+{
+    // cout << "=== ";
+    // for(auto& v : boolSignals_)
+        // cout << v.first << ' ';
+    // cout << endl;
+    return boolSignals_[signame].get();
+}
 
 
 

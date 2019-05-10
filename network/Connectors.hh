@@ -22,6 +22,7 @@ public:
     int operator()(SpikeGeneratorBase* ptr, Network* net) const
     {
         spdlog::debug( "+ Binding port of SpikeGeneratorBase {}", ptr->path());
+
         return 0;
     }
     
@@ -43,21 +44,28 @@ class NetworkConnectionVisitor : public boost::static_visitor<int>
 {
 public:
     int operator()(SpikeGeneratorBase* ptr, const string& port
-            , network_variant_t tgt , const string tgtPortName) const
+            , network_variant_t tgt , const string tgtPortName
+            , Network* net
+            ) const
     {
         spdlog::debug( "+ SpikeGenerator connect .{} to .{}", port, tgtPortName);
+        return ptr->connect(port, tgt, tgtPortName, net);
         return 1;
     }
     
     int operator()(NeuronGroup* ptr, const string& port
-            , network_variant_t tgt , const string tgtPortName) const
+            , network_variant_t tgt , const string tgtPortName
+            , Network* net
+            ) const
     {
         spdlog::debug( "+ NeuronGroup connect .{} to .{}", port, tgtPortName);
         return 1;
     }
 
     int operator()(SynapseGroup* ptr, const string& port
-            , network_variant_t tgt , const string tgtPortName) const
+            , network_variant_t tgt , const string tgtPortName
+            , Network* net
+            ) const
     {
         spdlog::debug( "+ SynapseGroup connect .{} to .{}", port, tgtPortName);
         return 1;
@@ -65,52 +73,29 @@ public:
 };
 
 
-
-// This is visitor for connecting 
-class NetworkConnectionVisitorOld : public boost::static_visitor<int>
-{
-public:
-    int operator()(SpikeGeneratorBase* ptr, const string& port
-            , network_variant_t tgt , const string tgtPortName) const
-    {
-        spdlog::debug( "+ SpikeGenerator connect .{} to .{}", port, tgtPortName);
-        return ptr->connect(port, tgt, tgtPortName);
-    }
-    
-    int operator()(NeuronGroup* ptr, const string& port
-            , network_variant_t tgt , const string tgtPortName) const
-    {
-        spdlog::debug( "+ NeuronGroup connect .{} to .{}", port, tgtPortName);
-        return ptr->connect(port, tgt, tgtPortName);
-    }
-
-    int operator()(SynapseGroup* ptr, const string& port
-            , network_variant_t tgt , const string tgtPortName) const
-    {
-        spdlog::debug( "+ SynapseGroup connect .{} to .{}", port, tgtPortName);
-        return ptr->connect(port, tgt, tgtPortName);
-    }
-};
 
 class SpikeGneneratorBaseConnectionVisitor: public boost::static_visitor<int>
 {
 public:
     int operator()(SpikeGeneratorBase* ptr, const string& port
-            , const SpikeGeneratorBase* tgt, const string tgtPortName) const
+            , const SpikeGeneratorBase* tgt, const string tgtPortName, Network* net
+            ) const
     {
         spdlog::error( "+ SpikeGeneratorBase to SpikeGeneratorBase is not supported..");
         return -1;
     }
     
     int operator()(SpikeGeneratorBase* ptr, const string& port
-            , const NeuronGroup* tgt , const string tgtPortName) const
+            , const NeuronGroup* tgt , const string tgtPortName, Network* net
+            ) const
     {
         spdlog::error( "+ SpikeGeneratorBase to NeuronGroup is not implemented yet..");
         return -1;
     }
 
     int operator()(SpikeGeneratorBase* ptr, const string& port
-            , SynapseGroup* syns, string tgtPort) const
+            , SynapseGroup* syns, string tgtPort, Network* net
+            ) const
     {
         for (size_t i = 0; i < syns->size(); i++) 
         {
@@ -122,7 +107,12 @@ public:
                 spdlog::warn( "Could not find {}.{}. Ignoring rest ...", syn->name(), pTgtPort->basename());
                 return -1;
             }
-            pTgtPort->bind( *(ptr->getSpikePort(i)) );
+
+            sc_out2<bool> pSrcPort = ptr->getSpikePort(i);
+            spdlog::debug( "   Binding {} to {}", pTgtPort->name(), pSrcPort.name());
+
+            // Check if there is already a signal bound to pSrcPort
+            pTgtPort->bind(pSrcPort);
         }
 
         spdlog::debug("\t\t ... SUCCESS.");

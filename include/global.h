@@ -21,6 +21,21 @@ typedef boost::variant<
 
 typedef boost::variant<sc_core::sc_signal<bool>, sc_core::sc_signal<double>> signal_variant_t;
 
+// My ports.
+template<typename T>
+using sc_in0 = sc_core::sc_port<sc_core::sc_signal_in_if<T>, 1, sc_core::SC_ZERO_OR_MORE_BOUND>;
+template<typename T>
+using sc_inout0 = sc_core::sc_port<sc_core::sc_signal_inout_if<T>, 1, sc_core::SC_ZERO_OR_MORE_BOUND>;
+template<typename T>
+using sc_out0 = sc_core::sc_port<sc_core::sc_signal_inout_if<T>, 1, sc_core::SC_ZERO_OR_MORE_BOUND>;
+
+template<typename T>
+using sc_in2 = sc_core::sc_port<sc_core::sc_signal_in_if<T>, 2, sc_core::SC_ONE_OR_MORE_BOUND>;
+template<typename T>
+using sc_inout2 = sc_core::sc_port<sc_core::sc_signal_inout_if<T>, 2, sc_core::SC_ONE_OR_MORE_BOUND>;
+template<typename T>
+using sc_out2 = sc_core::sc_port<sc_core::sc_signal_inout_if<T>, 2, sc_core::SC_ONE_OR_MORE_BOUND>;
+
 // Not implemented.
 class NotImplemented : public std::logic_error
 {

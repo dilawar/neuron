@@ -16,21 +16,19 @@ SpikeGeneratorBase::SpikeGeneratorBase(const string& path, size_t N)
 {
 
     for (size_t i = 0; i < N_; i++) 
-        spike_.push_back( make_unique<sc_out<bool> >() );
-
-    //SC_THREAD(generateSpike);
+        spike_.push_back( sc_out2<bool>((boost::format("spike[%1%]")%i).str().c_str()) );
 }
 
-int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort)
+int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net)
 {
     return boost::apply_visitor(
-            std::bind(SpikeGneneratorBaseConnectionVisitor(), this, port, std::placeholders::_1, tgtPort)
+            std::bind(SpikeGneneratorBaseConnectionVisitor(), this, port, std::placeholders::_1, tgtPort, net)
             , tgt);
 }
 
-sc_out<bool>* SpikeGeneratorBase::getSpikePort(size_t i) const
+sc_out2<bool> SpikeGeneratorBase::getSpikePort(size_t i) const
 {
-    return spike_[i].get();
+    return spike_[i];
 }
 
 string SpikeGeneratorBase::path() const

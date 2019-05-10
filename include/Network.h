@@ -68,6 +68,9 @@ public:
     void findElementsByType(const string& type, std::vector<network_variant_t>& collect);
     string path() const;
 
+    sc_signal<double>* getSignal(const string& signame);
+    sc_signal<bool>* getBoolSignal(const string& signame);
+
     // Mutator.
     void addSignal(const string& name, unique_ptr<sc_signal<double>> sig);
     void addBoolSignal(const string& name, unique_ptr<sc_signal<bool>> sig);
@@ -92,6 +95,7 @@ public:
         typeMap_.insert({type, ba});
         elemMap_.insert( {a->path(), ba} );
     }
+
 
 private:
     sc_module_name name_;
