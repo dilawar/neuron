@@ -54,6 +54,16 @@ void Network::addSynapseGroup(const string& path, size_t N
     SynapseGroup* syn = new SynapseGroup(path.c_str(), N, gbar, tau, Esyn, type);
     addToMaps<SynapseGroup>("SynapseGroup",  syn);
     spdlog::info("Created SynapseGroup: {} of size {}", path, N);
+
+    // Now bind ports.
+    for (size_t i = 0; i < syn->size(); i++) 
+    {
+        auto * s = syn->getSynapse(i);
+        string sigName(s->spike.name());
+        auto sig = make_unique<sc_signal<double>>(sigName.c_str(), 0.0);
+        // s->spike.bind(*sig);
+        // signals_.insert({sigName,std::move(sig)});
+    }
 }
 
 // Neuron group.

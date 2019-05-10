@@ -101,6 +101,9 @@ private:
     // All the ports which are out port should be connected to these signals.
     vector<sc_signal<bool>> records_;
 
+    // Create map of signal to bind.
+    map<string, unique_ptr<sc_signal<double>> > signals_;
+
 public:
     sc_clock clock{ "clock", 0.1, SC_MS };
     sc_signal<bool> event_;
