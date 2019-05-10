@@ -41,7 +41,8 @@ public:
             );
 
     void addNeuronGroup(const string& path, size_t N
-            , double rm = 100e3, double cm = 100e-12, double Em = -65e-3
+            , double rm = 100e3, double cm = 100e-12
+            , double Em = -65e-3
             );
 
     // Spike generation.
@@ -50,14 +51,36 @@ public:
     void addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay=0);
     void addSpikeGeneratorPoissonGroup(const string& path, size_t N, double lambda);
 
+    // Port binding.
     void bindPortSpikeGeneratorBase(SpikeGeneratorBase* ptr);
-
-    string path() const;
     void before_end_of_elaboration();
 
     // Monitor given target.
     int monitor(const string& tgt, const string& port);
 
+    int connect(const string& a, const string& aport, const string& b, const string& bport);
+
+    // It uses boost::variant 
+    int bindPorts(network_variant_t elem);
+
+    // Getter.
+    network_variant_t findGroup(const string& group);
+    void findElementsByType(const string& type, std::vector<network_variant_t>& collect);
+    string path() const;
+
+    // Mutator.
+    void addSignal(const string& name, unique_ptr<sc_signal<double>> sig);
+    void addBoolSignal(const string& name, unique_ptr<sc_signal<bool>> sig);
+
+    // Functions.
+    void record();
+    void gen_clock();
+
+    // TODO: return error code 
+    int start(double runtime);
+    
+
+    // Templated functions.
     template<typename T>
     void addToMaps(const string type, T* const a)
     {
@@ -69,23 +92,6 @@ public:
         typeMap_.insert({type, ba});
         elemMap_.insert( {a->path(), ba} );
     }
-
-    void addSignal(const string& name, unique_ptr<sc_signal<double>> sig);
-    void addBoolSignal(const string& name, unique_ptr<sc_signal<bool>> sig);
-
-    // It uses boost::variant 
-    int bindPorts(network_variant_t elem);
-
-    // ACCESSORS.
-    network_variant_t findGroup(const string& group);
-    void findElementsByType(const string& type, std::vector<network_variant_t>& collect);
-
-    // 
-    void record();
-    void gen_clock();
-
-    // TODO: return error code 
-    int start(double runtime);
 
 private:
     sc_module_name name_;

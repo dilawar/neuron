@@ -21,7 +21,7 @@
 #include "../utility/data_util.h"
 
 
-IAF::IAF(sc_module_name path, double em, double tau) :
+IAF::IAF(sc_module_name path, double tau, double em) :
     path_((const char*)path)
     , Cm_(100e-12)                            // 100 pF
     , Em_(em)
@@ -32,7 +32,7 @@ IAF::IAF(sc_module_name path, double em, double tau) :
     init();
 }
 
-IAF::IAF(sc_module_name path, double em, double cm, double rm)
+IAF::IAF(sc_module_name path, double cm, double rm, double em)
     : path_((const char*)path)
     , Cm_(cm)
     , Em_(em)
@@ -76,8 +76,7 @@ void IAF::init()
 
 void IAF::record( void )
 {
-    t_ = sc_time_stamp().to_seconds();
-    data_.push_back( make_tuple(t_, vm.read()));
+    // Nothing to record.
 }
 
 void IAF::setNoise( double eps)
@@ -135,7 +134,6 @@ double IAF::noise()
 void IAF::decay()
 {
     t_ = sc_time_stamp().to_seconds();
-
     dt_ = t_ - prevT_;
     if(dt_ == 0.0)
         return;
@@ -156,15 +154,15 @@ void IAF::decay()
     if(sum_all_synapse_inject_ != 0.0)
         nonZeroSynCurrent.notify();
 
-    vm_ += dt_*(-vm+Em_+noise())/tau_;
+    vm_ += dt_*(-vm_+Em_+noise())/tau_;
     if(vm_ >= threshold_)
     {
         vm_ = 40e-3;
         spikes_.push_back(t_);
         onFire.notify();
     }
-    vm.write(vm_);
     prevT_ = t_;
+    vm.write(vm_);
 }
 
 void IAF::handleSynapticInjection()

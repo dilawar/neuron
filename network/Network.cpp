@@ -99,9 +99,12 @@ void Network::addSynapseGroup(const string& path, size_t N
 // Neuron group.
 void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm, double Em)
 {
+
     NeuronGroup* ng = new NeuronGroup(path.c_str(), N, rm, cm, Em);
-    spdlog::info("Created NeuronGroup: {} of size {}", path, N);
     addToMaps<NeuronGroup>("NeuronGroup", ng);
+
+    spdlog::info("Created NeuronGroup: {} of size {}. rm={}, cm={}, Em={}"
+            , path, N, rm, cm, Em);
 
    // Now bind ports.
     string sigName;
@@ -202,6 +205,20 @@ void Network::findElementsByType(const string& type, std::vector<network_variant
     for( auto i = range.first; i != range.second; i++)
         collect.push_back(i->second);
 }
+
+// Connect port.
+int Network::connect(const string& srcPath, const string& srcPort
+        , const string& tgtPath , const string& tgtPort)
+{
+    spdlog::info("Connecting {}.{} --> {}.{} ...", srcPath, srcPort, tgtPath, tgtPort);
+    auto src = findGroup(srcPath);
+    auto tgt = findGroup(tgtPath);
+    return boost::apply_visitor(
+            std::bind(NetworkConnectionVisitor(), std::placeholders::_1, srcPort, tgt, tgtPort)
+            , src);
+}
+ 
+
 
 
 /* --------------------------------------------------------------------------*/

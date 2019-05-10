@@ -40,8 +40,8 @@ public:
     //-----------------------------------------------------------------------------
     //  Constructors.
     //-----------------------------------------------------------------------------
-    IAF(sc_module_name path, double em=-65e-3, double tau=10e-3);
-    IAF(sc_module_name path, double em, double cm, double rm);
+    IAF(sc_module_name path, double tau=10e-3, double em=-65e-3);
+    IAF(sc_module_name path, double cm, double rm, double em);
 
     void init();
 

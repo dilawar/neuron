@@ -38,9 +38,36 @@ public:
     }
 };
 
-
 // This is visitor for connecting 
 class NetworkConnectionVisitor : public boost::static_visitor<int>
+{
+public:
+    int operator()(SpikeGeneratorBase* ptr, const string& port
+            , network_variant_t tgt , const string tgtPortName) const
+    {
+        spdlog::debug( "+ SpikeGenerator connect .{} to .{}", port, tgtPortName);
+        return 1;
+    }
+    
+    int operator()(NeuronGroup* ptr, const string& port
+            , network_variant_t tgt , const string tgtPortName) const
+    {
+        spdlog::debug( "+ NeuronGroup connect .{} to .{}", port, tgtPortName);
+        return 1;
+    }
+
+    int operator()(SynapseGroup* ptr, const string& port
+            , network_variant_t tgt , const string tgtPortName) const
+    {
+        spdlog::debug( "+ SynapseGroup connect .{} to .{}", port, tgtPortName);
+        return 1;
+    }
+};
+
+
+
+// This is visitor for connecting 
+class NetworkConnectionVisitorOld : public boost::static_visitor<int>
 {
 public:
     int operator()(SpikeGeneratorBase* ptr, const string& port
