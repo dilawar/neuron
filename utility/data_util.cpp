@@ -11,6 +11,7 @@
 #include <boost/range/combine.hpp>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -72,6 +73,35 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
     }
     csvF.close();
 }
+
+string map2str(const map<string, vector<double>>& data, const string& delim)
+{
+    stringstream ss;
+    vector<string> header;
+    size_t nVals = 10000000;
+
+    // Write header.
+    for(auto v : data)
+    {
+        header.push_back(v.first);
+        nVals = min(v.second.size(), nVals);
+    }
+
+    // Make sure "time" is at the front.
+    header.erase(std::remove(header.begin(), header.end(), "time"), header.end());
+    header.insert(header.begin(), "time");
+
+    ss << boost::algorithm::join(header, delim) << endl;
+    for (size_t i = 0; i < nVals; i++) 
+    {
+        for(const string v: header)
+            ss << data.at(v)[i] << delim;
+        ss.seekp(-1, std::ios_base::cur);     // Remove last delim
+        ss << endl;                           
+    }
+    return ss.str();
+}
+
 
 /* --------------------------------------------------------------------------*/
 /**

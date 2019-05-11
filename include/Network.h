@@ -13,15 +13,19 @@
 
 #include <systemc>
 #include <memory>
+#include <type_traits>
+#include <exception>
 #include <vector>
 #include <map>
 #include <boost/variant.hpp>
+
+#include "../utility/str_util.hpp"
+#include "../utility/sc_utils.hpp"
 
 #include "../include/global.h"
 #include "../include/SpikeGenerator.h"
 #include "../include/SynapseGroup.h"
 #include "../include/NeuronGroup.h"
-#include "../utility/str_util.hpp"
 
 using namespace std;
 
@@ -51,6 +55,10 @@ public:
     void addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay=0);
     void addSpikeGeneratorPoissonGroup(const string& path, size_t N, double lambda);
 
+    // fixme: Templated function? Had lot of issue with inserting into maps.
+    void addSignal(unique_ptr<sc_signal<bool>> sig);
+    void addSignal(unique_ptr<sc_signal<double>> sig);
+
     // Port binding.
     void bindPortSpikeGeneratorBase(SpikeGeneratorBase* ptr);
     void before_end_of_elaboration();
@@ -58,9 +66,10 @@ public:
     // Monitor given target.
     int monitor(const string& tgt, const string& port);
 
-    int connect(const string& a, const string& aport, const string& b, const string& bport);
-
+    // Connect and bind.
     // It uses boost::variant 
+    int connect(const string& a, const string& aport, const string& b, const string& bport);
+    void bindUnboundPorts(void);
     int bindPorts(network_variant_t elem);
 
     // Getter.
@@ -68,17 +77,13 @@ public:
     void findElementsByType(const string& type, std::vector<network_variant_t>& collect);
     string path() const;
 
-    // Mutator.
-    void addSignal(const string& name, unique_ptr<sc_signal<double>> sig);
-    void addBoolSignal(const string& name, unique_ptr<sc_signal<bool>> sig);
-
     // Functions.
     void record();
     void gen_clock();
+    void dumpData(const string& which="", const string& sep=" ");
 
     // TODO: return error code 
     int start(double runtime);
-    
 
     // Templated functions.
     template<typename T>
@@ -91,6 +96,23 @@ public:
         network_variant_t ba = a;
         typeMap_.insert({type, ba});
         elemMap_.insert( {a->path(), ba} );
+    }
+
+
+
+    // connect port.
+    template<typename T=double, typename PortType=sc_core::sc_in<T> >
+    void connectPort(PortType* port)
+    {
+        if(port->bind_count() == 0)
+        {
+            string sigName(port->name());
+            sigName = sanitizePath(sigName);
+            unique_ptr<sc_signal<T>> sig = make_unique<sc_signal<T>>(sigName.c_str(), (T)0);
+            port->bind(*sig);
+            addSignal(std::move(sig));
+            spdlog::debug( "\t+ Connected unbound port {}", port->name());
+        }
     }
 
 private:
@@ -107,12 +129,12 @@ private:
     // One element for a given path. Each element is of GroupType.
     map<string, network_variant_t> elemMap_;
 
-    // All the ports which are out port should be connected to these signals.
-    vector<sc_signal<bool>> records_;
-
     // Create map of signal to bind.
     map<string, unique_ptr<sc_signal<double>> > signals_;
     map<string, unique_ptr<sc_signal<bool>> > boolSignals_;
+
+    // Store data.
+    map<string, vector<double>> data_;
 
 public:
     // sc_clock clock{ "clock", 0.1, SC_MS };

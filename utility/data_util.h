@@ -12,8 +12,6 @@
 #include <map>
 #include <tuple>
 
-using namespace std;
-
 void plot_vectors(const std::vector<double>& t, const std::vector<double>& y);
 
 void plot_data(const std::vector<std::tuple<double, double> >& data
@@ -27,6 +25,12 @@ void map2csv( const std::map<std::string, std::vector<double>>& data
         , const char delim = ','
         );
 
-void write_to_csv(const vector<tuple<double,double>>& data, const string outfile, const string header="");
+std::string map2str( const std::map<std::string, std::vector<double>>& data
+        , const std::string& delim = " "
+        );
+
+void write_to_csv(const std::vector<std::tuple<double,double>>& data
+        , const std::string outfile, const std::string header=""
+        );
 
 #endif /* end of include guard: PLOT_UTIL_H */

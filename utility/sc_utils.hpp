@@ -39,17 +39,19 @@ T* findPort(sc_core::sc_object const* obj, const string& name, const string& kin
     return nullptr;
 }
 
-    template<typename T=sc_core::sc_port_base>
-vector<T*> getPorts(sc_core::sc_object const* obj, const string& kind) 
+template<typename T=sc_core::sc_port_base>
+vector<T*> getPorts(sc_core::sc_object const* obj, const string& kind="") 
 {
     std::vector<T*> res;
-    for (sc_core::sc_object* v : obj->get_child_objects())
-        if(string(v->kind())==kind)
+    for (sc_core::sc_object* v : obj->get_child_objects()) {
+        if(kind.empty() || string(v->kind())==kind) {
             res.push_back(dynamic_cast<T*>(v));
+        }
+    }
     return res;
 }
 
-    template<typename T=sc_core::sc_port_base>
+template<typename T=sc_core::sc_port_base>
 void findPorts(sc_core::sc_object const* obj, const string& kind, vector<string>& names) 
 {
     for (const sc_core::sc_object* v : obj->get_child_objects())
@@ -74,7 +76,11 @@ string availablePortsCSV(sc_core::sc_object const* obj, const string& kind="")
     return boost::algorithm::join(sports, ", ");
 }
 
+// Print hierarchy.
 std::string printHeir(sc_core::sc_object const* obj, size_t level=0);
+
+// Remove characters from the path which systemc does not like.
+string sanitizePath(const string& path);
 
 #endif /* end of include guard: SC_UTILS_H */
 

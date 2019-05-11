@@ -204,59 +204,6 @@ namespace simpletest {
         "TRACE", "DEBUG", "INFO", "WARNING", "FIXME" , "ERROR", "FATAL", "FAILED" 
     };
 
-    /* 
-     * ===  FUNCTION  ==============================================================
-     *         Name:  mapToString
-     *  Description:  GIven a map, return a string representation of it.
-     *
-     *  If the second argument is true then print the value with key. But default it
-     *  is true.
-     * ==============================================================================
-     */
-
-    template<typename A, typename B>
-        string mapToString(const map<A, B>& m, bool value=true)
-        {
-            unsigned int width = 81;
-            unsigned int mapSize = m.size();
-            unsigned int size = 0;
-
-            vector<string> row;
-
-            /* Get the maximum size of any entry in map */
-            stringstream ss;
-            typename map<A, B>::const_iterator it;
-            for(it = m.begin(); it != m.end(); it++)
-            {
-                ss.str("");
-                ss << it->first;
-                if(value)
-                    ss << ": " << it->second;
-                row.push_back(ss.str());
-                if(ss.str().size() > size)
-                    size = ss.str().size()+1;
-            }
-
-            unsigned int colums = width / size;
-            ss.str("");
-
-            size_t i = 0;
-            for(unsigned int ii = 0; ii < row.size(); ii++)
-            {
-                if(i < colums)
-                {
-                    ss << setw(size+1) << row[ii];
-                    i++;
-                }
-                else
-                {
-                    ss << endl;
-                    i = 0;
-                }
-            }
-            return ss.str();
-        }
-
     inline string colored(string msg)
     {
         stringstream ss;

@@ -21,6 +21,34 @@ typedef boost::variant<
 
 typedef boost::variant<sc_core::sc_signal<bool>, sc_core::sc_signal<double>> signal_variant_t;
 
+// Extract filename.
+constexpr auto* getFileName(const char* const path)
+{
+    const auto* startPosition = path;
+    for (const auto* currentCharacter = path;*currentCharacter != '\0'; ++currentCharacter)
+    {
+        if (*currentCharacter == '\\' || *currentCharacter == '/')
+        {
+            startPosition = currentCharacter;
+        }
+    }
+
+    if (startPosition != path)
+    {
+        ++startPosition;
+    }
+
+    return startPosition;
+}
+
+#define TantrikaNotImplemented() \
+    std::logic_error( (boost::format("Not implemented: %1%:%2%")%getFileName(__FILE__)%__FUNCTION__).str() );
+
+
+    
+
+#if 0
+namespace tantrika {
 // Not implemented.
 class NotImplemented : public std::logic_error
 {
@@ -28,8 +56,7 @@ private:
 
     std::string _text;
 
-    NotImplemented(const char* message, const char* function)
-        :
+    NotImplemented(const char* message, const char* function) :
         std::logic_error("Not Implemented")
     {
         _text = message;
@@ -52,5 +79,9 @@ public:
         return _text.c_str();
     }
 };
+}
+
+#endif
+
 
 #endif /* end of include guard: GLOBAL_H */

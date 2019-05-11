@@ -16,7 +16,10 @@ SpikeGeneratorBase::SpikeGeneratorBase(const string& path, size_t N)
 {
 
     for (size_t i = 0; i < N_; i++) 
-        spike_.push_back( make_unique<sc_out<bool> >() );
+    {
+        string portName = (boost::format("spike[%1%]")%i).str();
+        spike_.push_back( make_unique<sc_out<bool> >(portName.c_str()) );
+    }
 
     //SC_THREAD(generateSpike);
 }

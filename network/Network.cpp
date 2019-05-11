@@ -10,6 +10,7 @@
 #include "../include/Network.h"
 #include "../include/SynapseGroup.h"
 #include "../include/NeuronGroup.h"
+#include "../utility/data_util.h"
 
 #include "Connectors.hh"
 
@@ -42,20 +43,29 @@ Network::~Network()
 {
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Record all signals.
+ */
+/* ----------------------------------------------------------------------------*/
 void Network::record()
 {
-    std::cout << sc_time_stamp().to_seconds() << " ";
-    for (auto& s : signals_)
-        cout << s.second->read() << ' ';
-    for (auto& s : boolSignals_)
-        cout << s.second->read() << ' ';
-    cout << endl;
-
+    // Put data into vectors.
+    data_["time"].push_back(sc_time_stamp().to_seconds());
+    for(auto& s: signals_)
+        data_[s.second->name()].push_back(s.second->read());
+    for(auto& s: boolSignals_)
+        data_[s.second->name()].push_back(s.second->read());
 }
 
 void Network::before_end_of_elaboration()
 {
     //
+}
+
+void Network::dumpData(const string& which, const string& sep)
+{
+    cout << map2str(data_, sep);
 }
 
 // Add synapse groups.
@@ -73,6 +83,10 @@ void Network::addSynapseGroup(const string& path, size_t N
     {
         SynapseBase* s = syn->getSynapse(i);
 
+        // bind clock.
+        s->clock(*clock_);
+
+#ifdef BIND_PORT_WITH_LOCAL_SIGNAL
         // Connect spike.
         sigName = string(s->spike.name());
         auto spkSig = make_unique<sc_signal<bool>>();
@@ -83,16 +97,15 @@ void Network::addSynapseGroup(const string& path, size_t N
         sigName = string(s->post.name());
         auto postSig = make_unique<sc_signal<double>>();
         s->post.bind(*postSig);
-        addSignal(sigName, std::move(postSig));
+        addSignal<double>(std::move(postSig));
 
         // Connect psc 
         sigName = string(s->psc.name());
         auto pscSig = make_unique<sc_signal<double>>();
         s->psc.bind(*pscSig);
-        addSignal(sigName, std::move(pscSig));
+        addSignal<double>(std::move(pscSig));
+#endif
 
-        // bind clock.
-        s->clock(*clock_);
     }
 }
 
@@ -113,45 +126,46 @@ void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm,
         IAF* n = ng->getNeuron(i);
         n->clock(*clock_);
 
+#ifdef BIND_PORT_WITH_LOCAL_SIGNAL
         // Connect vm.
         sigName = string(n->vm.name());
         auto vmSig = make_unique<sc_signal<double>>();
         n->vm.bind(*vmSig);
-        addSignal(sigName, std::move(vmSig));
+        addSignal<double>(std::move(vmSig));
 
         // Connect inject 
         sigName = string(n->inject.name());
         auto injectSig = make_unique<sc_signal<double>>();
         n->inject.bind(*injectSig);
-        addSignal(sigName, std::move(injectSig));
+        addSignal<double>(std::move(injectSig));
+#endif
 
     }
     spdlog::info("Created NeuronGroup: {} of size {}", path, N);
 }
 
-void Network::addSignal(const string& name, unique_ptr<sc_signal<double>> sig)
+void Network::addSignal(unique_ptr<sc_signal<bool>> sig)
 {
-    signals_.insert( {name, std::move(sig)} );
+    boolSignals_[sig->name()] = std::move(sig);
 }
 
-void Network::addBoolSignal(const string& name, unique_ptr<sc_signal<bool>> sig)
+void Network::addSignal(unique_ptr<sc_signal<double>> sig)
 {
-    boolSignals_.insert( {name, std::move(sig) } );
+    signals_[sig->name()] = std::move(sig);
 }
-
 
 // Add spike generator, Poisson Group.
 void Network::addPoissonGroup(const string& path, size_t N, double lambda)
 {
     spdlog::error( "Network::addSpikeGeneratorGroup is not implemented yet." );
-    throw NotImplemented();
+    throw TantrikaNotImplemented();
 }
 
 // Add a spikegenerator group.
 void Network::addSpikeGeneratorGroup(const string& path, size_t N, const string type, ...)
 {
     spdlog::error( "Network::addSpikeGeneratorGroup is not implemented yet." );
-    throw NotImplemented();
+    throw TantrikaNotImplemented();
 }
 
 void Network::addSpikeGeneratorPeriodicGroup(const string& path, size_t N, double period, double delay)
@@ -168,9 +182,9 @@ void Network::addSpikeGeneratorPeriodicGroup(const string& path, size_t N, doubl
 
 void Network::bindPortSpikeGeneratorBase(SpikeGeneratorBase* spk)
 {
-    // DO NOT BIND CLOCK. Stimulus generator works in SC_THREAD.
     spk->clock(*clock_);
 
+#ifdef BIND_PORT_WITH_LOCAL_SIGNAL
     for (size_t i = 0; i < spk->size(); i++) 
     {
         string sigName = (boost::format("%1%[%2%]")%spk->path()%i).str();
@@ -178,14 +192,28 @@ void Network::bindPortSpikeGeneratorBase(SpikeGeneratorBase* spk)
         spk->getSpikePort(i)->bind(*sig);
         addBoolSignal(sigName, std::move(sig));
     }
+#endif
+
 }
 
 int Network::bindPorts(network_variant_t elem)
 {
-    spdlog::info( "Connecting ports. " );
     return boost::apply_visitor(std::bind(NetworkPortBinderVisitor(), std::placeholders::_1, this), elem);
 }
 
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Bind all the ports with local signal which has not been bound by
+ * user.
+ */
+/* ----------------------------------------------------------------------------*/
+void Network::bindUnboundPorts(void)
+{
+    spdlog::info( "Connecting unbound ports .. " );
+    for(auto& v : elemMap_)
+        bindPorts(v.second);
+}
 
 
 string Network::path() const
@@ -233,8 +261,14 @@ int Network::connect(const string& srcPath, const string& srcPort
 /* ----------------------------------------------------------------------------*/
 int Network::start(double runtime)
 {
+    // Bind all ports which are still not bound by user. 
+    bindUnboundPorts();
+
     // Turn them to US.
     sc_start(runtime, SC_SEC);
+    spdlog::info("Simulation over.");
+    dumpData();
+
 #if 0
     try
     {

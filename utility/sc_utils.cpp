@@ -9,6 +9,7 @@
  */
 
 #include "sc_utils.hpp"
+#include <boost/range/algorithm_ext/erase.hpp>
 #include <systemc>
 
 string printHeir(sc_core::sc_object const* obj, size_t level)
@@ -28,5 +29,13 @@ string printHeir(sc_core::sc_object const* obj, size_t level)
     }
 
     return s;
+}
+
+// Remove special char which systemc does not like.
+string sanitizePath(const string& path)
+{
+    string res(path.c_str());
+    res = boost::remove_erase_if(res, boost::is_any_of(".+"));
+    return res;
 }
 

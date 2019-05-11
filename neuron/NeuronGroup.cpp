@@ -20,8 +20,9 @@ NeuronGroup::NeuronGroup(sc_module_name name, size_t N, double rm, double cm, do
     string mPath = string((const char*)name);
     for (size_t i = 0; i < N; i++) 
     {
-        string nrnName = (const char*)name + '[' + to_string(i) + ']';
-        unique_ptr<IAF> iaf( make_unique<IAF>(nrnName.c_str(), rm, cm, Em) );
+        unique_ptr<IAF> iaf( make_unique<IAF>(
+                    (boost::format("%1%[%2%]")%name%i).str().c_str(), rm, cm, Em) 
+                );
 
         // Now keep it in vector.
         vecNeurons_.push_back( std::move(iaf) );

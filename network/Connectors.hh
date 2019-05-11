@@ -15,26 +15,63 @@
 #include "../include/tantrika.h"
 #include "../utility/sc_utils.hpp"
 
+template<typename T=double>
+unique_ptr<sc_signal<T>> connectPorts(sc_out<T>* in, sc_in<T>* out)
+{
+    string sigName = sanitizePath((boost::format("%1%##%2%")%in->name()%out->name()).str());
+    unique_ptr<sc_signal<T>> sig = make_unique<sc_signal<T>>(sigName.c_str(), (T)0);
+    in->bind(*sig);
+    out->bind(*sig);
+    return std::move(sig);
+}
+
 // This is visitor for binding port.  
 class NetworkPortBinderVisitor : public boost::static_visitor<int>
 {
 public:
     int operator()(SpikeGeneratorBase* ptr, Network* net) const
     {
-        spdlog::debug( "+ Binding port of SpikeGeneratorBase {}", ptr->path());
+        spdlog::debug( "+ Binding unbound ports of SpikeGeneratorBase {}", ptr->path());
+
+        // Find ports which are not bound and bind them to Network::signals.
+        for (size_t i = 0; i < ptr->size(); i++) 
+        {
+            sc_out<bool>* sPort = ptr->getSpikePort(i); 
+            net->connectPort<bool, sc_out<bool>>(sPort);
+        }
         return 0;
     }
     
     int operator()(NeuronGroup* ptr, Network* net) const
     {
-        spdlog::debug( "+ Binding port of NeuronGroup {}", ptr->path());
+        spdlog::debug( "+ Binding unbound ports of NeuronGroup {}", ptr->path());
+
+        for (size_t i = 0; i < ptr->size(); i++) 
+        {
+            IAF* n = ptr->getNeuron(i);
+ 
+            // List ports manually.
+            net->connectPort<double, sc_out<double>>(&n->vm);
+            net->connectPort<double, sc_in<double>>(&n->inject);
+        }
         return 0;
     }
 
     int operator()(SynapseGroup* ptr, Network* net) const
     {
-        spdlog::debug( "+ Binding port of SynapseGroup {}", ptr->path());
-        return 1;
+        spdlog::debug( "+ Binding unbound ports of SynapseGroup {}", ptr->path());
+
+        for (size_t i = 0; i < ptr->size(); i++) 
+        {
+            SynapseBase* n = ptr->getSynapse(i);
+
+            // List ports manually.
+            net->connectPort<bool, sc_in<bool>>(&n->spike);
+            net->connectPort<double, sc_in<double>>(&n->post);
+            net->connectPort<double, sc_out<double>>(&n->psc);
+        }
+
+        return 0;
     }
 };
 
@@ -71,14 +108,14 @@ public:
             , const SpikeGeneratorBase* tgt, const string tgtPortName, Network* net) const
     {
         spdlog::error( "+ SpikeGeneratorBase to SpikeGeneratorBase is not supported..");
-        return -1;
+        throw TantrikaNotImplemented();
     }
     
     int operator()(SpikeGeneratorBase* ptr, const string& port
             , const NeuronGroup* tgt , const string tgtPortName, Network* net) const
     {
         spdlog::error( "+ SpikeGeneratorBase to NeuronGroup is not implemented yet..");
-        return -1;
+        throw TantrikaNotImplemented();
     }
 
     int operator()(SpikeGeneratorBase* ptr, const string& port
@@ -94,9 +131,13 @@ public:
                 spdlog::warn( "Could not find {}.{}. Ignoring rest ...", syn->name(), pTgtPort->basename());
                 return -1;
             }
-            pTgtPort->bind( *(ptr->getSpikePort(i)) );
-        }
+            auto pSrcPort = ptr->getSpikePort(i);
+            spdlog::debug( "++ Connecting {} and {}", pTgtPort->name(), pSrcPort->name());
 
+            // Create an intermediate signal.
+            auto pSig = connectPorts<bool>(pSrcPort, pTgtPort);
+            net->addSignal(std::move(pSig));
+        }
         spdlog::debug("\t\t ... SUCCESS.");
         return 0;
     }
@@ -110,14 +151,14 @@ public:
             , const SpikeGeneratorBase* tgtGroup, const string tgtPortName) const
     {
         spdlog::error( "+ NeuronGroup to SpikeGeneratorBase is not supported..");
-        return -1;
+        throw TantrikaNotImplemented();
     }
     
     int operator()(NeuronGroup* srcGroup, const string& srcPort
             , const NeuronGroup* tgtGroup, const string tgtPortName) const
     {
         spdlog::error( "+ NeuronGroup to NeuronGroup is not implemented yet..");
-        return -1;
+        throw TantrikaNotImplemented();
     }
 
     int operator()(NeuronGroup* srcGroup, const string& srcPort
@@ -128,7 +169,7 @@ public:
         {
             // find target port.
             auto src = srcGroup->getNeuron(i);
-            auto pSrcPort = findPort<sc_out<double> >(src, srcPort);
+            auto pSrcPort = findPort<sc_out<double>>(src, srcPort);
             if(! pSrcPort)
             {
                 spdlog::warn( "Could not find {}.{}. Available: {}. Ignoring rest.", src->path()
@@ -149,7 +190,7 @@ public:
 
             pTgtPort->bind(*pSrcPort);
             spdlog::debug("+++ Bound {} to {}", pTgtPort->name(), pSrcPort->name());
-            // (*pTgtPort)(*pSrcPort);
+            (*pTgtPort)(*pSrcPort);
         }
 
         spdlog::debug("\t\t ... SUCCESS.");
