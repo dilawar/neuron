@@ -117,7 +117,6 @@ private:
 public:
     // sc_clock clock{ "clock", 0.1, SC_MS };
     unique_ptr<sc_clock> clock_;
-
     sc_signal<bool> event_;
 
 };
