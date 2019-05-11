@@ -24,6 +24,9 @@
 #include <memory>
 #include <vector>
 
+// Forward declaration
+class Network;
+
 using namespace std;
 
 
@@ -45,7 +48,7 @@ public:
     // Get a particular synapse.
     SynapseBase* getSynapse(size_t i) const;
 
-    int connect(const string& port, network_variant_t tgt, const string& tgtPort);
+    int connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net);
 
     string path();
     string type();

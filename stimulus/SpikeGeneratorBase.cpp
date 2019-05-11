@@ -21,10 +21,10 @@ SpikeGeneratorBase::SpikeGeneratorBase(const string& path, size_t N)
     //SC_THREAD(generateSpike);
 }
 
-int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort)
+int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net)
 {
     return boost::apply_visitor(
-            std::bind(SpikeGneneratorBaseConnectionVisitor(), this, port, std::placeholders::_1, tgtPort)
+            std::bind(SpikeGneneratorBaseConnectionVisitor(), this, port, std::placeholders::_1, tgtPort, net)
             , tgt);
 }
 

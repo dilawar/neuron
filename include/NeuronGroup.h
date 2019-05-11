@@ -20,6 +20,9 @@
 
 using namespace std;
 
+// Forward declaration.
+class Network;
+
 class NeuronGroup: public sc_module
 {
 public:
@@ -31,7 +34,7 @@ public:
 
     string path() const;
 
-    int connect(const string& port, network_variant_t tgt, const string& tgtPort);
+    int connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net);
 
     template<typename T=IAF>
     T* getNeuron(size_t i)

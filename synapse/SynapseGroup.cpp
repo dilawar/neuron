@@ -45,7 +45,7 @@ size_t SynapseGroup::size()
     return N_;
 }
 
-int SynapseGroup::connect(const string& port, network_variant_t tgt, const string& tgtPort)
+int SynapseGroup::connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net)
 {
     spdlog::error("Not implemented.");
 }

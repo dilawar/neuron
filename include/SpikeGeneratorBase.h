@@ -16,13 +16,17 @@
 
 using namespace std;
 
+// Forward declaration
+class Network;
+
+
 class SpikeGeneratorBase 
 {
 public:
     SpikeGeneratorBase(const string& name, size_t N);
 
     // Connect to other objects.
-    int connect(const string& port, network_variant_t tgt, const string& tgtPort);
+    int connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net);
 
     virtual void process() = 0;
 

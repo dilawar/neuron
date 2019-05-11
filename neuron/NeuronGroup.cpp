@@ -29,7 +29,7 @@ NeuronGroup::NeuronGroup(sc_module_name name, size_t N, double rm, double cm, do
     }
 }
 
-int NeuronGroup::connect(const string& port, network_variant_t tgt, const string& tgtPort)
+int NeuronGroup::connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net)
 {
     // See Connections.hh and boost::variant static visitor.
     return boost::apply_visitor(

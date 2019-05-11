@@ -214,7 +214,7 @@ int Network::connect(const string& srcPath, const string& srcPort
     auto src = findGroup(srcPath);
     auto tgt = findGroup(tgtPath);
     return boost::apply_visitor(
-            std::bind(NetworkConnectionVisitor(), std::placeholders::_1, srcPort, tgt, tgtPort)
+            std::bind(NetworkConnectionVisitor(), std::placeholders::_1, srcPort, tgt, tgtPort, this)
             , src);
 }
  
