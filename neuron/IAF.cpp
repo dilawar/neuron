@@ -143,22 +143,22 @@ void IAF::decay()
 
     // Inject only when fired_ is set to false or inject value is non-zero.
     if((inject != 0.0) && (! fired_))
-        nonZeroInject.notify();
+        nonZeroInject.notify(SC_ZERO_TIME);
 
     // Collect currents from synspases.
     sum_all_synapse_inject_ = 0.0;
-    for (size_t i = 0; i < numSynapses_; i++)
+    for (size_t i = 0; i < psc.size(); i++)
         sum_all_synapse_inject_ += psc[i]->read();
 
     if(sum_all_synapse_inject_ != 0.0)
-        nonZeroSynCurrent.notify();
+        nonZeroSynCurrent.notify(SC_ZERO_TIME);
 
     vm_ += dt_*(-vm_+Em_+noise())/tau_;
     if(vm_ >= threshold_)
     {
         vm_ = 40e-3;
         spikes_.push_back(t_);
-        onFire.notify();
+        onFire.notify(SC_ZERO_TIME);
     }
     prevT_ = t_;
 
@@ -167,7 +167,6 @@ void IAF::decay()
 
 void IAF::handleSynapticInjection()
 {
-    // cout << " total injection " << sum_all_synapse_inject_ << endl;
     vm_ += (-sum_all_synapse_inject_ * dt_)/Cm_;
 }
 
@@ -177,17 +176,34 @@ void IAF::bindSynapse(sc_signal<double>* sig)
     // Find we need to create temporary signals.
     
     string pName = (boost::format("%2%.psc[%1%]")%psc.size()%path_).str();
-    auto p = make_unique<sc_in<double>>(pName.c_str());
-    add_child_object(p.get());
-    p->bind(*sig);
-    psc.push_back(std::move(p));
-    numSynapses_ += 1;
+    psc_temp_.push_back( sig );
+
+    //auto p = make_unique<sc_in<double>>(pName.c_str());
+    //add_child_object(p.get());
+    //p->bind(*sig);
+    //psc.push_back(std::move(p));
+
 }
 
 void IAF::handleInjection()
 {
     // cout <<"Checking for injection " <<  inject << endl;
     vm_ += (inject * dt_)/Cm_;
+}
+
+// actually do the binding now.
+void IAF::before_end_of_elaboration()
+{
+    // create the ports.
+    psc.init( psc_temp_.size() );
+    for (size_t i = 0; i < psc_temp_.size(); i++) 
+        psc[i].bind(*psc_temp_[i]);
+
+    // Now clear the temporary.
+    psc_temp_.clear();
+
+    // There is no base class.
+
 }
 
 std::vector<std::tuple<double, double>> IAF::data() const

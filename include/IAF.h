@@ -53,7 +53,10 @@ public:
 
     // Let make it optional.
     sc_in<double> inject{"inject"};                 // Injection of current by users.
-    std::vector<unique_ptr<sc_in<double> >> psc;    // PSC injection.
+    sc_vector<sc_in<double>> psc;                   // post synaptic current.
+
+    // Deferred binding
+    virtual void before_end_of_elaboration();
 
     //-----------------------------------------------------------------------------
     //  Events.
@@ -122,6 +125,9 @@ private:
     std::default_random_engine gen_;
     std::uniform_real_distribution<double>  dist_{-1, 1};
     double noise_;
+
+    // temporary signals to save the incoming psc binding (if any).
+    vector<sc_signal<double>*> psc_temp_;
 };
 
 #endif /* end of include guard: IAF_H */
