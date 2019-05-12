@@ -22,7 +22,7 @@ void plot_data(const std::vector<std::tuple<double, double> >& data
 
 void map2csv( const std::map<std::string, std::vector<double>>& data
         , const std::string& csvname
-        , const char delim = ','
+        , const std::string delim = ","
         );
 
 std::string map2str( const std::map<std::string, std::vector<double>>& data

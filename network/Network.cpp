@@ -63,9 +63,9 @@ void Network::before_end_of_elaboration()
     //
 }
 
-void Network::dumpData(const string& which, const string& sep)
+void Network::saveData(const string& which, const string& sep)
 {
-    cout << map2str(data_, sep);
+    map2csv(data_, path()+".csv", sep);
 }
 
 // Add synapse groups.

@@ -45,8 +45,9 @@ public:
             );
 
     void addNeuronGroup(const string& path, size_t N
-            , double rm = 100e3, double cm = 100e-12
-            , double Em = -65e-3
+            , double rm = 100e6       // 100 mega-ohm usually.
+            , double cm = 100e-12     // 100 pF 
+            , double Em = -65e-3      // 65 mV.
             );
 
     // Spike generation.
@@ -80,7 +81,7 @@ public:
     // Functions.
     void record();
     void gen_clock();
-    void dumpData(const string& which="", const string& sep=" ");
+    void saveData(const string& which="", const string& sep=" ");
 
     // TODO: return error code 
     int start(double runtime);

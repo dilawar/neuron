@@ -46,10 +46,8 @@ void plot_data(const vector<std::tuple<double, double>>& data
  * @Param delim
  */
 /* ----------------------------------------------------------------------------*/
-void map2csv( const map<string, vector<double>>& data, const string& csvname, const char delim)
+void map2csv( const map<string, vector<double>>& data, const string& csvname, const string delim)
 {
-    std::string delimStr(1, delim); // for boost join.
-
     std::ofstream csvF;
     csvF.open(csvname);
 
@@ -63,12 +61,12 @@ void map2csv( const map<string, vector<double>>& data, const string& csvname, co
         nVals = min(v.second.size(), nVals);
     }
 
-    csvF << boost::algorithm::join(header, delimStr) << endl;
+    csvF << boost::algorithm::join(header, delim) << endl;
     for (size_t i = 0; i < nVals; i++) 
     {
         for(auto v : data)
             csvF << v.second[i] << delim;
-        csvF.seekp(-1, std::ios_base::cur);     // Remove last delim
+        csvF.seekp(- delim.size(), std::ios_base::cur);     // Remove last delim
         csvF << endl;                           
     }
     csvF.close();

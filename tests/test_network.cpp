@@ -13,7 +13,7 @@
 
 int main(int argc, const char *argv[])
 {
-    Network net("A", 1e-4);
+    Network net("A", 1e-5);
 
     // Add input.
     net.addSpikeGeneratorPeriodicGroup("i1", 2, 1e-3, 0.0);
@@ -31,8 +31,8 @@ int main(int argc, const char *argv[])
     // psc of SpikeGenerator goes to inject of neuron.
     net.connect("s1", "psc", "n1", "inject");
 
-    net.start(5e-3);
-    net.dumpData();
+    net.start(100e-3);
+    net.saveData();
     
     return 0;
 }
