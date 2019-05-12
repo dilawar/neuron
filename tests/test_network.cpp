@@ -30,6 +30,7 @@ int main(int argc, const char *argv[])
     net.connect("n1", "vm", "s1", "post");  // neuron vm are connected to synapse post.
 
     net.start(5e-3);
+    net.dumpData();
     
     return 0;
 }

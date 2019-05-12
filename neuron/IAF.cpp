@@ -172,7 +172,7 @@ void IAF::handleSynapticInjection()
 
 void IAF::handleInjection()
 {
-    cout <<"Checking for injection " <<  inject << endl;
+    // cout <<"Checking for injection " <<  inject << endl;
     vm_ += (inject * dt_)/Cm_;
 }
 
