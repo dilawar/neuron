@@ -11,6 +11,8 @@
 #include "../include/NeuronGroup.h"
 #include "../network/Connectors.hh"
 
+#include "spdlog/spdlog.h"
+
 NeuronGroup::NeuronGroup(sc_module_name name, size_t N, double rm, double cm, double Em):
     name_(name)
     , path_((const char*)name)
@@ -23,6 +25,8 @@ NeuronGroup::NeuronGroup(sc_module_name name, size_t N, double rm, double cm, do
         unique_ptr<IAF> iaf( make_unique<IAF>(
                     (boost::format("%1%[%2%]")%name%i).str().c_str(), rm, cm, Em) 
                 );
+
+        spdlog::debug( "++ Created neuron {}", iaf->repr() );
 
         // Now keep it in vector.
         vecNeurons_.push_back( std::move(iaf) );

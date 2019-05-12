@@ -36,7 +36,6 @@ class Network : public sc_module
 public:
 
     Network(sc_module_name path, double dt=1e-6);
-    ~Network( );
 
     // Groups 
     void addSynapseGroup(const string& path, size_t N

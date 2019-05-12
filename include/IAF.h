@@ -53,7 +53,9 @@ public:
 
     // Let make it optional.
     sc_in<double> inject{"inject"};                 // Injection of current by users.
-    sc_vector<sc_in<double>> psc;                   // post synaptic current.
+
+    // sc_vector<sc_in<double>> psc;                   // post synaptic current.
+    std::vector<unique_ptr<sc_in<double>>> psc;      // post synaptic current.
 
     // Deferred binding
     virtual void before_end_of_elaboration();

@@ -19,6 +19,7 @@
 
 #include "IAF.h"
 #include "../utility/data_util.h"
+#include "spdlog/spdlog.h"
 
 
 IAF::IAF(sc_module_name path, double tau, double em) :
@@ -177,12 +178,6 @@ void IAF::bindSynapse(sc_signal<double>* sig)
     
     string pName = (boost::format("%2%.psc[%1%]")%psc.size()%path_).str();
     psc_temp_.push_back( sig );
-
-    //auto p = make_unique<sc_in<double>>(pName.c_str());
-    //add_child_object(p.get());
-    //p->bind(*sig);
-    //psc.push_back(std::move(p));
-
 }
 
 void IAF::handleInjection()
@@ -195,12 +190,20 @@ void IAF::handleInjection()
 void IAF::before_end_of_elaboration()
 {
     // create the ports.
-    psc.init( psc_temp_.size() );
+
     for (size_t i = 0; i < psc_temp_.size(); i++) 
-        psc[i].bind(*psc_temp_[i]);
+    {
+        string portName = (boost::format("psc[%1%]")%i).str();
+        unique_ptr<sc_in<double>> p = make_unique<sc_in<double>>(portName.c_str());
+        p->bind(*psc_temp_[i]);
+        psc.push_back(std::move(p));
+    }
 
     // Now clear the temporary.
     psc_temp_.clear();
+    spdlog::debug( "Calling before_end_of_elaboration function. Total synapses: {}"
+            , psc.size()
+            );
 
     // There is no base class.
 

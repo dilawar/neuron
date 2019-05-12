@@ -39,9 +39,6 @@ Network::Network(sc_module_name name, double dt):
     sensitive << clock_->posedge_event();
 }
 
-Network::~Network()
-{
-}
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -94,18 +91,13 @@ void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm,
     NeuronGroup* ng = new NeuronGroup(path.c_str(), N, rm, cm, Em);
     addToMaps<NeuronGroup>("NeuronGroup", ng);
 
-    spdlog::info("Created NeuronGroup: {} of size {}. rm={}, cm={}, Em={}"
-            , path, N, rm, cm, Em);
-
    // Now bind ports.
     string sigName;
     for (size_t i = 0; i < N; i++) 
     {
         IAF* n = ng->getNeuron(i);
         n->clock(*clock_);
-
     }
-    spdlog::info("Created NeuronGroup: {} of size {}", path, N);
 }
 
 void Network::addSignal(unique_ptr<sc_signal<bool>> sig)

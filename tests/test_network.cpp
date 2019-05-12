@@ -29,9 +29,9 @@ int main(int argc, const char *argv[])
     net.connect("n1", "vm", "s1", "post"); 
 
     // psc of SpikeGenerator goes to inject of neuron.
-    net.connect("s1", "psc", "n1", "inject");
+    net.connect("s1", "psc", "n1", "psc");
 
-    net.start(100e-3);
+    net.start(10e-3);
     net.saveData();
     
     return 0;
