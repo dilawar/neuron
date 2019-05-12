@@ -173,8 +173,12 @@ void IAF::handleSynapticInjection()
 
 void IAF::bindSynapse(sc_signal<double>* sig)
 {
-    string pName = (boost::format("psc[%1%]")%psc.size()).str();
+    // See here for details: http://forums.accellera.org/topic/1662-binding-sca_in-ports-in-a-vector/
+    // Find we need to create temporary signals.
+    
+    string pName = (boost::format("%2%.psc[%1%]")%psc.size()%path_).str();
     auto p = make_unique<sc_in<double>>(pName.c_str());
+    add_child_object(p.get());
     p->bind(*sig);
     psc.push_back(std::move(p));
     numSynapses_ += 1;
