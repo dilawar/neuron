@@ -100,10 +100,6 @@ SC_MODULE(TestIAF)
         syn1->spike(spike1);
         syn3->spike(spike1);
         
-        // Add to DUT.
-        dut->addSynapse(syn1);
-        dut->addSynapse(syn3);
-
         gen_.seed(rd_());
         dist_.param(std::poisson_distribution<int>::param_type {50});
     }

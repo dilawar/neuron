@@ -147,8 +147,8 @@ void IAF::decay()
 
     // Collect currents from synspases.
     sum_all_synapse_inject_ = 0.0;
-    for (size_t i = 0; i < synapses_.size(); i++)
-        sum_all_synapse_inject_ += synapse_inject[i].read();
+    for (size_t i = 0; i < numSynapses_; i++)
+        sum_all_synapse_inject_ += psc[i]->read();
 
     if(sum_all_synapse_inject_ != 0.0)
         nonZeroSynCurrent.notify();
@@ -161,6 +161,7 @@ void IAF::decay()
         onFire.notify();
     }
     prevT_ = t_;
+
     vm.write(vm_);
 }
 
@@ -170,19 +171,19 @@ void IAF::handleSynapticInjection()
     vm_ += (-sum_all_synapse_inject_ * dt_)/Cm_;
 }
 
+void IAF::bindSynapse(sc_signal<double>* sig)
+{
+    string pName = (boost::format("psc[%1%]")%psc.size()).str();
+    auto p = make_unique<sc_in<double>>(pName.c_str());
+    p->bind(*sig);
+    psc.push_back(std::move(p));
+    numSynapses_ += 1;
+}
+
 void IAF::handleInjection()
 {
     // cout <<"Checking for injection " <<  inject << endl;
     vm_ += (inject * dt_)/Cm_;
-}
-
-void IAF::addSynapse(shared_ptr<SynapseBase> syn)
-{
-    // BOOST_LOG_TRIVIAL(debug) << "Added synapse " << syn << " to " << path_;
-    syn->post(vm);
-    syn->clock(clock);
-    syn->psc(synapse_inject[synapses_.size()]);
-    synapses_.push_back(syn);
 }
 
 std::vector<std::tuple<double, double>> IAF::data() const

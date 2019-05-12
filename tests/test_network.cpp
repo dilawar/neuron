@@ -25,9 +25,11 @@ int main(int argc, const char *argv[])
     // Spike of SpikeGenerator goes into spike of SynapseGroup 
     net.connect("i1", "output", "s1", "spike");
 
+    // neuron vm are connected to synapse post.
+    net.connect("n1", "vm", "s1", "post"); 
+
     // psc of SpikeGenerator goes to inject of neuron.
     net.connect("s1", "psc", "n1", "inject");
-    net.connect("n1", "vm", "s1", "post");  // neuron vm are connected to synapse post.
 
     net.start(5e-3);
     net.dumpData();

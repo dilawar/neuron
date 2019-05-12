@@ -53,8 +53,7 @@ public:
 
     // Let make it optional.
     sc_in<double> inject{"inject"};                 // Injection of current by users.
-
-    sc_signal<double> synapse_inject[MAX_SYNAPSES]; // Currents from all synapses.
+    std::vector<unique_ptr<sc_in<double> >> psc;    // PSC injection.
 
     //-----------------------------------------------------------------------------
     //  Events.
@@ -71,10 +70,12 @@ public:
 
     void model(const double &vm, double &dvdt, const double t);
 
+    // Add synapse.
+    void bindSynapse(sc_signal<double>* sig);
+
     //-----------------------------------------------------------------------------
     //  Mutators.
     //-----------------------------------------------------------------------------
-    void addSynapse(shared_ptr<SynapseBase> syn);
     void setRefactory(double t);
     void setTau(double t);
     void setNoise(double eps);
@@ -100,7 +101,6 @@ private:
 
     std::vector<std::tuple<double, double>> data_;
     std::vector<double> spikes_;            // Time of spikes.
-    vector<shared_ptr<SynapseBase>> synapses_;
 
     double Cm_;
     double Em_;
@@ -115,6 +115,8 @@ private:
     double t_, prevT_;
     double dt_;
     double sum_all_synapse_inject_;
+
+    size_t numSynapses_ {0};
 
     // noise source.
     std::default_random_engine gen_;

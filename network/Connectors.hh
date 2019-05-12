@@ -15,6 +15,7 @@
 #include "../include/tantrika.h"
 #include "../utility/sc_utils.hpp"
 
+
 template<typename T=double>
 unique_ptr<sc_signal<T>> connectPorts(sc_out<T>* in, sc_in<T>* out)
 {
@@ -25,7 +26,12 @@ unique_ptr<sc_signal<T>> connectPorts(sc_out<T>* in, sc_in<T>* out)
     return std::move(sig);
 }
 
-// This is visitor for binding port.  
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis Port binder. This is the top-level visitor called by Network to
+ * bind ports which are yet not bound.
+ */
+/* ----------------------------------------------------------------------------*/
 class NetworkPortBinderVisitor : public boost::static_visitor<int>
 {
 public:
@@ -75,7 +81,11 @@ public:
     }
 };
 
-// This is visitor for connecting 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  This class is the top-level class to bind ports.
+ */
+/* ----------------------------------------------------------------------------*/
 class NetworkConnectionVisitor : public boost::static_visitor<int>
 {
 public:
@@ -101,7 +111,11 @@ public:
     }
 };
 
-// SynapseGroupConnectionVisitor 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Bind SynapseGroup port.
+ */
+/* ----------------------------------------------------------------------------*/
 class SynapseGroupConnectionVisitor: public boost::static_visitor<int>
 {
 public:
@@ -116,7 +130,8 @@ public:
             , NeuronGroup* tgtGroup , const string tgtPort, Network* net) const
     {
         spdlog::error( "+ SynapseGroup to NeuronGroup is not implemented yet..");
-        // Find the way to find the object
+
+        // Find the way to find the object. Bind 1 to 1.
         for (size_t i = 0; i < srcGroup->size(); i++) 
         {
             auto src = srcGroup->getSynapse(i);
@@ -140,8 +155,12 @@ public:
             }
 
             // Create an intermediate signal.
-            auto pSig = connectPorts<double>(pSrcPort, pTgtPort);
-            net->addSignal(std::move(pSig));
+            unique_ptr<sc_signal<double>> ps = make_unique<sc_signal<double>>();
+            pSrcPort->bind(*ps);
+
+            tgt->bindSynapse(ps.get());
+
+            net->addSignal(std::move(ps));
 
             spdlog::debug("+++ Bound {} to {}", pTgtPort->name(), pSrcPort->name());
         }

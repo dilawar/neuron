@@ -82,30 +82,8 @@ void Network::addSynapseGroup(const string& path, size_t N
     for (size_t i = 0; i < syn->size(); i++) 
     {
         SynapseBase* s = syn->getSynapse(i);
-
         // bind clock.
         s->clock(*clock_);
-
-#ifdef BIND_PORT_WITH_LOCAL_SIGNAL
-        // Connect spike.
-        sigName = string(s->spike.name());
-        auto spkSig = make_unique<sc_signal<bool>>();
-        s->spike.bind(*spkSig);
-        addBoolSignal(sigName, std::move(spkSig));
-
-        // Connect post 
-        sigName = string(s->post.name());
-        auto postSig = make_unique<sc_signal<double>>();
-        s->post.bind(*postSig);
-        addSignal<double>(std::move(postSig));
-
-        // Connect psc 
-        sigName = string(s->psc.name());
-        auto pscSig = make_unique<sc_signal<double>>();
-        s->psc.bind(*pscSig);
-        addSignal<double>(std::move(pscSig));
-#endif
-
     }
 }
 
@@ -125,20 +103,6 @@ void Network::addNeuronGroup(const string& path, size_t N, double rm, double cm,
     {
         IAF* n = ng->getNeuron(i);
         n->clock(*clock_);
-
-#ifdef BIND_PORT_WITH_LOCAL_SIGNAL
-        // Connect vm.
-        sigName = string(n->vm.name());
-        auto vmSig = make_unique<sc_signal<double>>();
-        n->vm.bind(*vmSig);
-        addSignal<double>(std::move(vmSig));
-
-        // Connect inject 
-        sigName = string(n->inject.name());
-        auto injectSig = make_unique<sc_signal<double>>();
-        n->inject.bind(*injectSig);
-        addSignal<double>(std::move(injectSig));
-#endif
 
     }
     spdlog::info("Created NeuronGroup: {} of size {}", path, N);
@@ -183,17 +147,6 @@ void Network::addSpikeGeneratorPeriodicGroup(const string& path, size_t N, doubl
 void Network::bindPortSpikeGeneratorBase(SpikeGeneratorBase* spk)
 {
     spk->clock(*clock_);
-
-#ifdef BIND_PORT_WITH_LOCAL_SIGNAL
-    for (size_t i = 0; i < spk->size(); i++) 
-    {
-        string sigName = (boost::format("%1%[%2%]")%spk->path()%i).str();
-        auto sig = make_unique<sc_signal<bool>>(sigName.c_str(), false);
-        spk->getSpikePort(i)->bind(*sig);
-        addBoolSignal(sigName, std::move(sig));
-    }
-#endif
-
 }
 
 int Network::bindPorts(network_variant_t elem)
