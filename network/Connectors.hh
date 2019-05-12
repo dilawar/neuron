@@ -101,6 +101,67 @@ public:
     }
 };
 
+// SynapseGroupConnectionVisitor 
+class SynapseGroupConnectionVisitor: public boost::static_visitor<int>
+{
+public:
+    int operator()(SynapseGroup* ptr, const string& port
+            , const SpikeGeneratorBase* tgt, const string tgtPortName, Network* net) const
+    {
+        spdlog::error( "+ SynapseGroup to SpikeGeneratorBase is not supported..");
+        throw TantrikaNotImplemented();
+    }
+    
+    int operator()(SynapseGroup* srcGroup, const string& srcPort
+            , NeuronGroup* tgtGroup , const string tgtPort, Network* net) const
+    {
+        spdlog::error( "+ SynapseGroup to NeuronGroup is not implemented yet..");
+        // Find the way to find the object
+        for (size_t i = 0; i < srcGroup->size(); i++) 
+        {
+            auto src = srcGroup->getSynapse(i);
+            auto pSrcPort = findPort<sc_out<double>>(src, srcPort);
+            if(! pSrcPort)
+            {
+                spdlog::warn( "Could not find {}.{}. Available: {}. Ignoring rest.", src->path()
+                        , srcPort, availablePortsCSV(src)
+                        );
+                return -1;
+            }
+
+            auto tgt = tgtGroup->getNeuron(i);
+            sc_in<double>* pTgtPort = findPort<sc_in<double> >(tgt, tgtPort);
+            if(! pTgtPort)
+            {
+                spdlog::warn( "Could not find {}.{}. Availble: {}.", tgt->path(), tgtPort
+                        , availablePortsCSV(tgt)
+                        );
+                return -1;
+            }
+
+            // Create an intermediate signal.
+            auto pSig = connectPorts<double>(pSrcPort, pTgtPort);
+            net->addSignal(std::move(pSig));
+
+            spdlog::debug("+++ Bound {} to {}", pTgtPort->name(), pSrcPort->name());
+        }
+
+        spdlog::debug("\t\t ... SUCCESS.");
+        return 0;
+
+        throw TantrikaNotImplemented();
+    }
+
+    int operator()(SynapseGroup* ptr, const string& port
+            , SynapseGroup* syns, string tgtPort, Network* net) const
+    {
+        spdlog::debug("\t\t ... SUCCESS.");
+        throw TantrikaNotImplemented();
+    }
+};
+
+
+// SpikeGenerator
 class SpikeGneneratorBaseConnectionVisitor: public boost::static_visitor<int>
 {
 public:
@@ -190,7 +251,6 @@ public:
 
             pTgtPort->bind(*pSrcPort);
             spdlog::debug("+++ Bound {} to {}", pTgtPort->name(), pSrcPort->name());
-            (*pTgtPort)(*pSrcPort);
         }
 
         spdlog::debug("\t\t ... SUCCESS.");

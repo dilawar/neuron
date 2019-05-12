@@ -8,6 +8,7 @@
 
 #include "../include/global.h"
 #include "../include/SynapseGroup.h"
+#include "../network/Connectors.hh"
 
 SynapseGroup::SynapseGroup(sc_module_name path, size_t N
         , double gbar, double tau, double Em, const string type) :
@@ -47,5 +48,9 @@ size_t SynapseGroup::size()
 
 int SynapseGroup::connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net)
 {
-    spdlog::error("Not implemented.");
+    // See Connections.hh and boost::variant static visitor.
+    return boost::apply_visitor(
+            std::bind(SynapseGroupConnectionVisitor(), this, port, std::placeholders::_1, tgtPort, net)
+            , tgt);
+
 }

@@ -58,6 +58,7 @@ void SynapseBase::monitor_spike( )
     // Time of previous spike.
     if(spike.read() == true)
         t_spikes_.push_back(t);
+
 }
 
 void SynapseBase::injectCurrent( )

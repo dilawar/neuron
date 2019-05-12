@@ -52,9 +52,6 @@ void IAF::init()
     std::random_device rd;
     gen_.seed( rd() );
 
-    SC_METHOD(record);
-    sensitive << clock.neg();
-
     SC_METHOD(decay);
     sensitive << clock.pos();
 
@@ -77,6 +74,7 @@ void IAF::init()
 void IAF::record( void )
 {
     // Nothing to record.
+    // std::cout << "record iaf " << std::endl;
 }
 
 void IAF::setNoise( double eps)
@@ -134,6 +132,7 @@ double IAF::noise()
 void IAF::decay()
 {
     t_ = sc_time_stamp().to_seconds();
+
     dt_ = t_ - prevT_;
     if(dt_ == 0.0)
         return;
@@ -173,6 +172,7 @@ void IAF::handleSynapticInjection()
 
 void IAF::handleInjection()
 {
+    cout <<"Checking for injection " <<  inject << endl;
     vm_ += (inject * dt_)/Cm_;
 }
 

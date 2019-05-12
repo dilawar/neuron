@@ -267,7 +267,7 @@ int Network::start(double runtime)
     // Turn them to US.
     sc_start(runtime, SC_SEC);
     spdlog::info("Simulation over.");
-    dumpData();
+    // dumpData();
 
 #if 0
     try
