@@ -35,6 +35,7 @@ void SynapseExp::process()
     t_ = sc_time_stamp().to_seconds();
     g_ = 0.0;
 
+
     // Any spike which occured 10*tau_ before is not worth computing.
     for (auto tSpike : boost::adaptors::reverse(t_spikes_))
     {

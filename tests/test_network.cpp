@@ -19,8 +19,8 @@ int main(int argc, const char *argv[])
     net.addSpikeGeneratorPeriodicGroup("i1", 2, 1e-3, 0.0);
 
     // Add synapses.
-    net.addSynapseGroup("s1", 2, 1e-9, 1e-3, 0.0);
-    net.addNeuronGroup("n1", 2);
+    net.addSynapseGroup("s1", 2, 10e-9, 1e-3, 0.0);
+    net.addNeuronGroup("n1", 2, 1e-12, 100e6, -65e-3);
 
     // Spike of SpikeGenerator goes into spike of SynapseGroup 
     net.connect("i1", "output", "s1", "spike");

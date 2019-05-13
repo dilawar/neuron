@@ -47,6 +47,6 @@ void SynapseAlpha::process()
         }
     }
 
-    data_.push_back(std::make_pair(t_, g_));
+    // data_.push_back(std::make_pair(t_, g_));
     SynapseBase::injectCurrent();
 }
