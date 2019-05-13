@@ -21,8 +21,6 @@ SpikeGeneratorBase::SpikeGeneratorBase(const string& path, size_t N)
         string portName = (boost::format("spike[%1%]")%i).str();
         spike_.push_back( make_unique<sc_out<bool> >(portName.c_str()) );
     }
-
-    //SC_THREAD(generateSpike);
 }
 
 int SpikeGeneratorBase::connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net)

@@ -35,7 +35,7 @@ public:
     //-----------------------------------------------------------------------------
     //  Constructors.
     //-----------------------------------------------------------------------------
-    SynapseAlpha(sc_module_name name, double gbar=1e-9, double tau=1e-3, double Esyn=0.0);
+    SynapseAlpha(sc_module_name name, double gbar, double tau, double Esyn);
 
     /*-----------------------------------------------------------------------------
      *  At each tick, these process function computes the model.

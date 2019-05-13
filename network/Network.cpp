@@ -88,11 +88,12 @@ void Network::saveData(const string& which, const string& sep)
 // Add synapse groups.
 void Network::addSynapseGroup(const string& path, size_t N
         , double gbar, double tau, double Esyn
-        , const string type)
+        , const string type
+        )
 {
     SynapseGroup* syn = new SynapseGroup(path.c_str(), N, gbar, tau, Esyn, type);
     addToMaps<SynapseGroup>("SynapseGroup",  syn);
-    spdlog::info("Created SynapseGroup: {} of size {}", path, N);
+    spdlog::info("Created SynapseGroup: {} of size {}.", path, N);
 
     // bind ports.
     string sigName;

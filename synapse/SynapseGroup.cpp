@@ -11,7 +11,8 @@
 #include "../network/NetworkConnectors.hpp"
 
 SynapseGroup::SynapseGroup(sc_module_name path, size_t N
-        , double gbar, double tau, double Em, const string type) :
+        , double gbar, double tau, double Em, const string type
+    ): 
     path_(string((const char*)path))
     , type_(type)
     , N_(N)
