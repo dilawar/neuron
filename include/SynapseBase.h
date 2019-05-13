@@ -19,10 +19,10 @@
 #include <tuple>
 #include <array>
 #include <memory>
-#include <systemc.h>
-#include "../utility/sc_ports.hpp"
+#include <systemc>
 
 using namespace std;
+using namespace sc_core;
 
 /* --------------------------------------------------------------------------*/
 /**

@@ -8,7 +8,7 @@
 
 #include "../include/SpikeGenerator.h"
 #include "../include/SynapseGroup.h"
-#include "../network/Connectors.hh"
+#include "../network/NetworkConnectors.hpp"
 
 SpikeGeneratorBase::SpikeGeneratorBase(const string& path, size_t N)
     : path_(path)
@@ -17,6 +17,7 @@ SpikeGeneratorBase::SpikeGeneratorBase(const string& path, size_t N)
 
     for (size_t i = 0; i < N_; i++) 
     {
+        // each port should be able to drive more than one 
         string portName = (boost::format("spike[%1%]")%i).str();
         spike_.push_back( make_unique<sc_out<bool> >(portName.c_str()) );
     }
@@ -55,4 +56,9 @@ void SpikeGeneratorBase::setDelay(double delay)
 double SpikeGeneratorBase::getDelay(void) const
 {
     return delay_.to_seconds();
+}
+
+void SpikeGeneratorBase::showGroupInfo() const
+{
+    throw TantrikaNotImplemented();
 }

@@ -60,8 +60,7 @@ void findPorts(sc_core::sc_object const* obj, const string& kind, vector<string>
 }
 
 
-
-    template<typename T=sc_core::sc_port_base>
+template<typename T=sc_core::sc_port_base>
 string availablePortsCSV(sc_core::sc_object const* obj, const string& kind="") 
 {
     vector<string> sports;

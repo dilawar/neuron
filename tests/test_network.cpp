@@ -14,24 +14,29 @@
 int main(int argc, const char *argv[])
 {
     Network net("A", 1e-5);
+    size_t N = 2;
 
     // Add input.
-    net.addSpikeGeneratorPeriodicGroup("i1", 2, 1e-3, 0.0);
+    net.addSpikeGeneratorPeriodicGroup("i1", N, 5e-3, 3e-3);
+    net.addNeuronGroup("n1", N, 1e-12, 100e6, -65e-3);
 
     // Add synapses.
-    net.addSynapseGroup("s1", 2, 10e-9, 1e-3, 0.0);
-    net.addNeuronGroup("n1", 2, 1e-12, 100e6, -65e-3);
+    net.addSynapseGroup("exc", N, 5e-9, 1e-3, 0.0);
+    net.addSynapseGroup("inh", N, 5e-9, 1e-3, -70e-3);
 
     // Spike of SpikeGenerator goes into spike of SynapseGroup 
-    net.connect("i1", "output", "s1", "spike");
+    net.connect("i1", "output", "exc", "spike");
+    net.connect("i1", "output", "inh", "spike");
 
     // neuron vm are connected to synapse post.
-    net.connect("n1", "vm", "s1", "post"); 
+    net.connect("n1", "vm", "exc", "post"); 
+    net.connect("n1", "vm", "inh", "post"); 
 
     // psc of SpikeGenerator goes to inject of neuron.
-    net.connect("s1", "psc", "n1", "psc");
+    net.connect("exc", "psc", "n1", "psc");
+    net.connect("inh", "psc", "n1", "psc");
 
-    net.start(10e-3);
+    net.start(30e-3);
     net.saveData();
     
     return 0;

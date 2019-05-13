@@ -61,7 +61,8 @@ public:
 
     // Port binding.
     void bindPortSpikeGeneratorBase(SpikeGeneratorBase* ptr);
-    void before_end_of_elaboration();
+
+    virtual void before_end_of_elaboration();
 
     // Monitor given target.
     int monitor(const string& tgt, const string& port);
@@ -81,6 +82,9 @@ public:
     void record();
     void gen_clock();
     void saveData(const string& which="", const string& sep=" ");
+
+    // Show group info.
+    void showGroupInfo(const string& group_name);
 
     // TODO: return error code 
     int start(double runtime);

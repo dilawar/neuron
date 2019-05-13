@@ -7,8 +7,9 @@ option(ADDRESS_SANITIZE "Use address sanitizer" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_CXX_STANDARD 14)
 
-add_definitions(-Wall -std=c++14)
+add_definitions(-Wall -std=c++${CMAKE_CXX_STANDARD})
 
 # SystemC as external project.
 include(ExternalProject)

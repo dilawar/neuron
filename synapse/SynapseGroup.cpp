@@ -8,7 +8,7 @@
 
 #include "../include/global.h"
 #include "../include/SynapseGroup.h"
-#include "../network/Connectors.hh"
+#include "../network/NetworkConnectors.hpp"
 
 SynapseGroup::SynapseGroup(sc_module_name path, size_t N
         , double gbar, double tau, double Em, const string type) :
@@ -52,5 +52,10 @@ int SynapseGroup::connect(const string& port, network_variant_t tgt, const strin
     return boost::apply_visitor(
             std::bind(SynapseGroupConnectionVisitor(), this, port, std::placeholders::_1, tgtPort, net)
             , tgt);
+
+}
+
+void SynapseGroup::showGroupInfo( ) const 
+{
 
 }

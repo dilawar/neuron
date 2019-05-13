@@ -19,6 +19,7 @@
 
 #include "IAF.h"
 #include "../utility/data_util.h"
+#include "../utility/sc_utils.hpp"
 #include "spdlog/spdlog.h"
 
 
@@ -171,13 +172,22 @@ void IAF::handleSynapticInjection()
     vm_ += (-sum_all_synapse_inject_ * dt_)/Cm_;
 }
 
-void IAF::bindSynapse(sc_signal<double>* sig)
+void IAF::bindSynapseToPSC(sc_signal<double>* sig)
 {
     // See here for details: http://forums.accellera.org/topic/1662-binding-sca_in-ports-in-a-vector/
     // Find we need to create temporary signals.
-    
-    string pName = (boost::format("%2%.psc[%1%]")%psc.size()%path_).str();
     psc_temp_.push_back( sig );
+}
+
+sc_signal<double>* IAF::bindSynapseToPSC(string inPath)
+{
+    // See here for details: http://forums.accellera.org/topic/1662-binding-sca_in-ports-in-a-vector/
+    // Find we need to create temporary signals.
+    string a = (boost::format("%1%_%2%.psc[%3%]")%inPath%path()%psc_temp_.size()).str();
+    string sigName = sanitizePath(a.c_str());
+    sc_signal<double>* sig = new sc_signal<double>(sigName.c_str());
+    psc_temp_.push_back(sig);
+    return sig;
 }
 
 void IAF::handleInjection()
@@ -190,21 +200,18 @@ void IAF::handleInjection()
 void IAF::before_end_of_elaboration()
 {
     // create the ports.
-
     for (size_t i = 0; i < psc_temp_.size(); i++) 
     {
-        string portName = (boost::format("psc[%1%]")%i).str();
+        string portName = (boost::format("%1%.psc[%2%]")%path()%i).str();
         unique_ptr<sc_in<double>> p = make_unique<sc_in<double>>(portName.c_str());
         p->bind(*psc_temp_[i]);
         psc.push_back(std::move(p));
     }
 
-    // Now clear the temporary.
+    // Now clear the temporary. 
     psc_temp_.clear();
-    spdlog::debug( "Calling before_end_of_elaboration function. Total synapses: {}"
-            , psc.size()
-            );
 
+    // spdlog::debug( "Calling before_end_of_elaboration function. Total synapses: {}", psc.size());
     // There is no base class.
 
 }
@@ -227,4 +234,9 @@ void IAF::save_data(const string& outfile)
 string IAF::path() const
 {
     return path_;
+}
+
+size_t IAF::numPSCPorts(void)
+{
+    return psc.size() + psc_temp_.size();
 }

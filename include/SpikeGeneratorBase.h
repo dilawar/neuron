@@ -41,7 +41,13 @@ public:
 
     size_t size() const;
 
+    // Helper
+    void showGroupInfo() const;
+
 public:
+    // template<typename T>
+    // using sc_out_multi_multi_p<T, N> = sc_port<sc_signal_out_if<T>, 10, SC_ZERO_OR_MORE_BOUND>;
+
     // Incoming clock.
     sc_in_clk clock{"clock"};
     std::vector<unique_ptr<sc_out<bool> > > spike_;

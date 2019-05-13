@@ -42,7 +42,14 @@ public:
         return vecNeurons_[i].get();
     }
 
+    template<typename T=IAF>
+    T* getNeuron(size_t i) const
+    {
+        return vecNeurons_[i].get();
+    }
+
     size_t size() const;
+    void showGroupInfo( ) const;
 
 private:
     /* data */

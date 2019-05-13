@@ -76,7 +76,8 @@ public:
     void model(const double &vm, double &dvdt, const double t);
 
     // Add synapse.
-    void bindSynapse(sc_signal<double>* sig);
+    void bindSynapseToPSC(sc_signal<double>* sig);
+    sc_signal<double>* bindSynapseToPSC(const string inPath);
 
     //-----------------------------------------------------------------------------
     //  Mutators.
@@ -99,6 +100,8 @@ public:
     double noise();
 
     void save_data(const string& outfile="");
+
+    size_t numPSCPorts(void);
 
 private:
     // Collect synapses.
@@ -130,6 +133,7 @@ private:
 
     // temporary signals to save the incoming psc binding (if any).
     vector<sc_signal<double>*> psc_temp_;
+
 };
 
 #endif /* end of include guard: IAF_H */

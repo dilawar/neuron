@@ -12,7 +12,8 @@
 #include "../include/NeuronGroup.h"
 #include "../utility/data_util.h"
 
-#include "Connectors.hh"
+#include "NetworkConnectors.hpp"
+#include "NetworkShowInfoVisitor.hpp"
 
 // Global 
 sc_time globalDt_;
@@ -57,8 +58,27 @@ void Network::record()
 
 void Network::before_end_of_elaboration()
 {
-    //
+    std::vector<network_variant_t> elems;
+    findElementsByType("NeuronGroup", elems);
+    for(auto& e: elems)
+    {
+        NeuronGroup* nrns = boost::get<NeuronGroup*>(e);
+        for (size_t i = 0; i < nrns->size(); i++) 
+            nrns->getNeuron(i)->before_end_of_elaboration();
+    }
+
+    bindUnboundPorts();
+
+    // And end_of_elaboration will take care of the rest.
 }
+
+
+void Network::showGroupInfo(const string& path)
+{
+    auto elem = findGroup(path);
+    boost::apply_visitor(NetworkShowInfoVisitor(), elem);
+}
+
 
 void Network::saveData(const string& which, const string& sep)
 {
@@ -206,12 +226,13 @@ int Network::connect(const string& srcPath, const string& srcPort
 /* ----------------------------------------------------------------------------*/
 int Network::start(double runtime)
 {
-    // Bind all ports which are still not bound by user. 
-    bindUnboundPorts();
+
+    auto t1 = std::chrono::high_resolution_clock::now();
 
     // Turn them to US.
     sc_start(runtime, SC_SEC);
-    spdlog::info("Simulation over.");
+    std::chrono::duration<double> timeTaken = std::chrono::high_resolution_clock::now() - t1;
+    spdlog::info("Simulation over. Took {}s to simulate {}s.", timeTaken.count(), runtime);
     // dumpData();
 
 #if 0

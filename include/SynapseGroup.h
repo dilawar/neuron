@@ -41,18 +41,24 @@ public:
     SC_HAS_PROCESS(SynapseGroup);
 
     SynapseGroup(sc_module_name path, size_t N
-                 , double gbar, double tau, double Em
+                 , double gbar
+                 , double tau
+                 , double Em
                  , const string type="alpha"
                 );
 
     // Get a particular synapse.
     SynapseBase* getSynapse(size_t i) const;
 
+    // Connector. 
     int connect(const string& port, network_variant_t tgt, const string& tgtPort, Network* net);
 
+    // Accessors.
     string path();
     string type();
     size_t size();
+    
+    void showGroupInfo() const;
 
 private:
     /* data */
