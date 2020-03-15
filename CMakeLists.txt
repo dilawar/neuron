@@ -11,9 +11,10 @@ set(LIBSYSTEMC_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/external)
 ExternalProject_Add(libsystemc
     PREFIX ${LIBSYSTEMC_ROOT}
     INSTALL_DIR ${LIBSYSTEMC_ROOT}/install
-    URL ${LIBSYSTEMC_ROOT}/systemc-2.3.3.tar.gz
+    URL ${LIBSYSTEMC_ROOT}/systemc-2.3.4.tar.gz
     CONFIGURE_COMMAND ${CMAKE_COMMAND} 
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_FLAGS=-fPIC
         -DBUILD_SHARED_LIBS=OFF 
         -DCMAKE_CXX_STANDARD=14
@@ -25,7 +26,7 @@ set(SystemC_INCLUDE_DIR ${LIBSYSTEMC_ROOT}/install/include)
 set(SystemC_LIBRARY ${LIBSYSTEMC_ROOT}/install/lib64/libsystemc.a)
 add_definitions(-Wall -std=c++14)
 
-find_package(Boost COMPONENTS log system filesystem iostreams)
+find_package(Boost COMPONENTS log system filesystem iostreams REQUIRED)
 # Configuration macros.
 add_definitions( -DBOOST_LOG_DYN_LINK)
 
@@ -49,8 +50,8 @@ set(LIBS_TO_LINKS
     )
 
 # Add main executable.
-add_library(tantrika_static STATIC src/tantrika.cpp)
-add_library(tantrika SHARED src/tantrika.cpp)
+add_library(tantrika_static STATIC base/tantrika.cpp)
+add_library(tantrika SHARED base/tantrika.cpp)
 add_dependencies(tantrika libsystemc)
 
 set_target_properties(tantrika_static PROPERTIES LIBRARY_OUTPUT_NAME tantrika)
